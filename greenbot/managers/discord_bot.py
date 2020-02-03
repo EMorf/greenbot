@@ -27,15 +27,13 @@ class CustomClient(discord.Client):
         member = self.bot.guild.get_member(message.author.id)
         if isinstance(message.author, discord.Member) and (message.guild != self.bot.guild or not message.channel in self.bot.listening_channels):
             return
-        is_admin = False
+        user_level = 50
         if member:
             for role in member.roles:
-               is_admin = role in self.bot.admin_roles
-               if is_admin:
-                   break
-        HandlerManager.trigger("discord_message", message.content, message.author, is_admin, isinstance(message.author, discord.Member))
+               user_level = max(self.bot.admin_roles.get(role, 100), user_level)
+        HandlerManager.trigger("discord_message", message.content, message.author, user_level, isinstance(message.author, discord.Member))
         log.info(message.content)
-        log.info(is_admin)
+        log.info(user_level)
         log.info(f"{message.author.name}#{message.author.discriminator}\nDiscordID:{message.author.id}")
 
 
