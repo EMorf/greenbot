@@ -16,7 +16,7 @@ class CustomClient(discord.Client):
         super().__init__()
 
     async def on_ready(self):
-        self.bot.guild = self.get_guild(int(self.settings["discord_guild"]))
+        self.bot.guild = self.get_guild(int(self.bot.settings["discord_guild"]))
         if not self.bot.guild:
             log.error("Discord Guild not found!")
             return
@@ -25,7 +25,7 @@ class CustomClient(discord.Client):
 
     async def on_message(self, message):
         member = self.guild.get_member(message.author.id)
-        if isinstance(message.author, discord.Member) and (message.guild != self.guild or not message.channel.id in self.setings["channels"]):
+        if isinstance(message.author, discord.Member) and (message.guild != self.guild or not message.channel.id in self.bot.setings["channels"]):
             return
         is_admin = False if not member else any(role in self.admin_roles for role in member.roles)
         HandlerManager.trigger("discord_message", message.content, message.author, is_admin, isinstance(message.author, discord.Member))
@@ -45,6 +45,7 @@ class DiscordBotManager:
         self.admin_roles = {}
 
         self.guild = None
+        log.info("Hi there!")
         HandlerManager.add_handler("discord_ready", self.setup_roles, priority=100)
 
     def setup_roles(self):
