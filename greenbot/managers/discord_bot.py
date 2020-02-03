@@ -136,7 +136,7 @@ class DiscordBotManager:
             pass
 
     def connect(self):
-        self.private_loop.create_task(self.connect())
+        self.private_loop.create_task(self._connect())
 
     async def _connect(self):
         try:
