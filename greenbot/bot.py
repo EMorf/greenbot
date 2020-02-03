@@ -53,7 +53,7 @@ class Bot:
             "discord_token": self.discord_token,
             "channels": self.config["discord"]["channels_to_listen_in"].split(" "),
             "command_prefix": self.config["discord"]["command_prefix"],
-            "discord_guild_id": self.config["discord"]["discord_guild_id"]
+            "discord_guild_id": self.config["discord"]["discord_guild_id"],
             "admin_roles": [{"role_id": self.config[role]["role_id"], "level": self.config[role]["level"]} for role in self.config["discord"]["admin_roles"].split(" ")]
         }
 
