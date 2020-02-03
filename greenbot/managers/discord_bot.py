@@ -61,7 +61,7 @@ class DiscordBotManager:
             role_id = role_level["role_id"]
             level = role_level["level"]
 
-            role = self.guild.get_role(role_id)
+            role = self.guild.get_role(int(role_id))
             if not role:
                 log.error(f"Cannot find role {role_id}")
                 continue
