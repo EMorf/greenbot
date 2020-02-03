@@ -57,7 +57,7 @@ class DiscordBotManager:
 
     async def _setup_roles(self):
         self.admin_roles = {}
-        for role_level in self.admin_roles:
+        for role_level in self.settings["admin_roles"]:
             role_id = role_level["role_id"]
             level = role_level["level"]
 
