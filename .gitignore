@@ -14,12 +14,7 @@ __pycache__
 logs/
 
 # Config folder
-configs/
-uwsgiconfigs/
-config.ini
-/*.ini
-!uwsgi_cache.ini
-!uwsgi_shared.ini
+configs/*
 !configs/example.ini
 
 # User created code
