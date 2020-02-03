@@ -39,10 +39,13 @@ class Bot:
         wait_for_redis_data_loaded(RedisManager.get())
 
         # SQL migrations
-        with DBManager.create_dbapi_connection_scope() as sql_conn:
-            sql_migratable = DatabaseMigratable(sql_conn)
-            sql_migration = Migration(sql_migratable, greenbot.migration_revisions.db, self)
-            sql_migration.run()
+        try:
+            with DBManager.create_dbapi_connection_scope() as sql_conn:
+                sql_migratable = DatabaseMigratable(sql_conn)
+                sql_migration = Migration(sql_migratable, greenbot.migration_revisions.db, self)
+                sql_migration.run()
+        except ValueError as error:
+            log.error(error)
 
         HandlerManager.init_handlers()
 
