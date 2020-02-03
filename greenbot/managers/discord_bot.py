@@ -24,7 +24,7 @@ class CustomClient(discord.Client):
         HandlerManager.trigger("discord_ready")
 
     async def on_message(self, message):
-        member = self.guild.get_member(message.author.id)
+        member = self.bot.guild.get_member(message.author.id)
         if isinstance(message.author, discord.Member) and (message.guild != self.bot.guild or not message.channel.id in self.bot.setings["channels"]):
             return
         is_admin = False if not member else any(role in self.admin_roles for role in member.roles)
