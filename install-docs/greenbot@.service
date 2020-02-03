@@ -1,16 +1,16 @@
 [Unit]
-Description=troybot for %i
+Description=greenbot for %i
 After=network.target
 
 [Service]
 Type=simple
 User=greenbot
 Group=greenbot
-WorkingDirectory=/opt/greenbot
+WorkingDirectory=/opt/DiscordBot
 RuntimeDirectory=greenbot/%i
 RuntimeDirectoryPreserve=yes
-ExecStart=/opt/greenbot/venv/bin/python3 main.py --config "configs/%i.ini"
-SyslogIdentifier=troybot@%I
+ExecStart=/opt/DiscordBot/venv/bin/python3 main.py --config "configs/%i.ini"
+SyslogIdentifier=greenbot@%I
 RestartSec=2
 Restart=always
 

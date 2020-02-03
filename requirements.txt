@@ -4,3 +4,4 @@ redis==3.3.8
 regex==2019.8.19 
 pytz==2019.2
 setuptools==42.0.2
+colorama==0.4.1
