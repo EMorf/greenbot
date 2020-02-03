@@ -12,7 +12,7 @@ def up(cursor, bot):
         """
     CREATE TABLE "messages" (
         message_id INT PRIMARY KEY NOT NULL,   
-        user_id INT NOT NULL REFERENCES "user"(id),
+        user_id INT NOT NULL REFERENCES "user"(discord_id),
         channel_id INT,
         content TEXT NOT NULL,
         time_sent timestamp with time zone
