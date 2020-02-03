@@ -68,7 +68,7 @@ class DiscordBotManager:
                 log.error(f"Cannot find role {role_id}")
                 continue
             self.admin_roles[role] = level
-        for channel_id in self.bot.settings["channels"]:
+        for channel_id in self.settings["channels"]:
             channel = self.guild.get_channel(int(channel_id))
             if not channel:
                 log.error(f"Cannot find channel {channel_id}")
