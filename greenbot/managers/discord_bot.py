@@ -25,7 +25,7 @@ class CustomClient(discord.Client):
 
     async def on_message(self, message):
         member = self.bot.guild.get_member(message.author.id)
-        if isinstance(message.author, discord.Member) and (message.guild != self.bot.guild or not message.channel.id in self.bot.settings["channels"]):
+        if isinstance(message.author, discord.Member) and (message.guild != self.bot.guild or not message.channel in self.bot.listening_channels):
             return
         is_admin = False
         if member:
@@ -48,15 +48,17 @@ class DiscordBotManager:
         self.private_loop = private_loop
         self.redis = redis
         self.admin_roles = {}
+        self.listening_channels = []
 
         self.guild = None
-        HandlerManager.add_handler("discord_ready", self.setup_roles, priority=100)
+        HandlerManager.add_handler("discord_ready", self.setup, priority=100)
 
-    def setup_roles(self):
-        self.private_loop.create_task(self._setup_roles())
+    def setup(self):
+        self.private_loop.create_task(self._setup())
 
-    async def _setup_roles(self):
+    async def _setup(self):
         self.admin_roles = {}
+        self.listening_channels = []
         for role_level in self.settings["admin_roles"]:
             role_id = role_level["role_id"]
             level = role_level["level"]
@@ -66,6 +68,12 @@ class DiscordBotManager:
                 log.error(f"Cannot find role {role_id}")
                 continue
             self.admin_roles[role] = level
+        for channel_id in self.bot.settings["channels"]:
+            channel = self.guild.get_channel(int(channel_id))
+            if not channel:
+                log.error(f"Cannot find channel {channel_id}")
+                continue
+            self.listening_channels.append(channel)
 
     async def private_message(self, member, message):
         message = discord.utils.escape_markdown(message)
