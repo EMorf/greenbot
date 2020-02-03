@@ -68,5 +68,5 @@ if __name__ == "__main__":
 
     args = parse_args()
 
-    init_logging("green")
+    init_logging("greenbot")
     run(args)

@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 from greenbot.managers.db import DBManager
 from greenbot.managers.handler import HandlerManager
 
-log = logging.getLogger(__name__)
+log = logging.getLogger("greenbot")
 
 class CustomClient(discord.Client):
     def __init__(self, bot):
