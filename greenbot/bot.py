@@ -7,6 +7,7 @@ from greenbot.managers.db import DBManager
 from greenbot.managers.redis import RedisManager
 from greenbot.managers.handler import HandlerManager
 from greenbot.managers.discord_bot import DiscordBotManager
+from greenbot.managers.command import CommandManager
 from greenbot.migration.db import DatabaseMigratable
 from greenbot.migration.migrate import Migration
 from greenbot.utils import wait_for_redis_data_loaded
@@ -58,7 +59,8 @@ class Bot:
         }
 
         self.discord_bot = DiscordBotManager(bot=self, settings=settings, redis=RedisManager.get(), private_loop=self.private_loop)
-        
+        self.commands = CommandManager(module_manager=None, bot=self)
+
         HandlerManager.trigger("manager_loaded")
 
     def quit_bot(self):
