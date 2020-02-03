@@ -31,8 +31,8 @@ def run(args):
         log.error("Missing required db config in the [main] section.")
         sys.exit(1)
 
-    if "discord" not in config["main"]:
-        log.error("Missing required db config in the [discord] section.")
+    if "discord" not in config:
+        log.error("Missing section [discord] in config.")
         sys.exit(1)
 
     greenbot = Bot(config, args)
