@@ -123,3 +123,11 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+configs/
+uwsgiconfigs/
+config.ini
+/*.ini
+!uwsgi_cache.ini
+!uwsgi_shared.ini
+!configs/example.ini
