@@ -5,3 +5,4 @@ regex==2019.8.19
 pytz==2019.2
 setuptools==42.0.2
 colorama==0.4.1
+psycopg2==2.8.3
