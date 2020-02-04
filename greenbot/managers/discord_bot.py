@@ -155,8 +155,8 @@ class DiscordBotManager:
     async def _connect(self):
         try:
             await self.client.start(self.settings["discord_token"])
-        except:
-            pass
+        except Exception as e:
+            log.error(e)
 
     def stop(self):
         self.private_loop.create_task(self._stop())
