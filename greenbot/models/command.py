@@ -379,6 +379,7 @@ class Command(Base):
         cur_time = greenbot.utils.now().timestamp()
         with source.spend_currency_context(self.cost):
             ret = self.action.run(bot, source, message, args)
+            log.info(ret)
             if ret is False:
                 raise FailedCommand("return currency")
 
