@@ -181,7 +181,7 @@ class MultiAction(BaseAction):
         multiaction.original_commands = copy.copy(commands)
         return multiaction
 
-    def run(self, bot, source, message, event={}, args={}):
+    def run(self, bot, source, message, args={}):
         """ If there is more text sent to the multicommand after the
         initial alias, we _ALWAYS_ assume it's trying the subaction command.
         If the extra text was not a valid command, we try to run the fallback command.
@@ -203,8 +203,8 @@ class MultiAction(BaseAction):
             extra_msg = None
 
         if cmd:
-            if source.level >= cmd.level:
-                return cmd.run(bot, source, extra_msg, event, args)
+            if args["user_level"] >= cmd.level:
+                return cmd.run(bot, source, extra_msg, args)
 
             log.info(f"User {source} tried running a sub-command he had no access to ({command}).")
 
