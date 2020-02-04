@@ -87,7 +87,7 @@ class CommandManager(UserDict):
 
         self.internal_commands = {}
 
-        self.internal_commands["quit"] = Command.pajbot_command(
+        self.internal_commands["quit"] = Command.greenbot_command(
             self.bot,
             "quit",
             level=2000,
