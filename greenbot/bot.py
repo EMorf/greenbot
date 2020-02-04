@@ -82,7 +82,7 @@ class Bot:
         sys.exit(0)
 
     def connect(self):
-        self.private_loop.run_until_complete(self.discord_bot.connect())
+        self.discord_bot.connect()
 
     def start(self):
         self.private_loop.run_forever()
