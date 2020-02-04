@@ -270,6 +270,7 @@ class Command(Base):
         self.last_run_by_user = {}
         self.extra_args = {"command": self}
         self.action = ActionParser.parse(self.action_json, command=self.command)
+        log.info(self.action)
         self.run_in_thread = False
         if self.extra_extra_args:
             try:
