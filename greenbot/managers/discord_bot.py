@@ -6,6 +6,7 @@ import json
 from datetime import datetime, timedelta
 
 from greenbot.models.user import User
+from greenbot.models.message import Message
 from greenbot.managers.db import DBManager
 from greenbot.managers.handler import HandlerManager
 
@@ -34,6 +35,7 @@ class CustomClient(discord.Client):
                user_level = max(int(self.bot.admin_roles.get(role, 100)), user_level)
         with DBManager.create_session_scope() as db_session:
             user = User._create_or_get_by_discord_id(db_session, message.author.id)
+            Message._create(db_session, message.id, message.author.id, message.channel.id if isinstance(message.author, discord.Member) else None, message.content)
             HandlerManager.trigger("discord_message", message.content, user, user_level, not isinstance(message.author, discord.Member))
 
 
