@@ -204,6 +204,7 @@ class MultiAction(BaseAction):
 
         if cmd:
             if args["user_level"] >= cmd.level:
+                log.info(type(cmd))
                 return cmd.run(bot, source, extra_msg, args)
 
             log.info(f"User {source} tried running a sub-command he had no access to ({command}).")
