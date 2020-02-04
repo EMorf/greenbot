@@ -31,7 +31,7 @@ class CustomClient(discord.Client):
         user_level = 50
         if member:
             for role in member.roles:
-               user_level = max(self.bot.admin_roles.get(role, 100), user_level)
+               user_level = max(int(self.bot.admin_roles.get(role, 100)), user_level)
         with DBManager.create_session_scope() as db_session:
             user = User._create_or_get_by_discord_id(db_session, message.author.id)
             HandlerManager.trigger("discord_message", message.content, user, user_level, not isinstance(message.author, discord.Member))
