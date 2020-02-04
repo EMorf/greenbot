@@ -2,7 +2,7 @@ def up(cursor, bot):
     cursor.execute(
         """
     CREATE TABLE "user" (
-        discord_id INT PRIMARY KEY NOT NULL,
+        discord_id TEXT PRIMARY KEY NOT NULL,
         points INT NOT NULL DEFAULT 0
     )
     """
@@ -11,9 +11,9 @@ def up(cursor, bot):
     cursor.execute(
         """
     CREATE TABLE "message" (
-        message_id INT PRIMARY KEY NOT NULL,   
-        user_id INT NOT NULL REFERENCES "user"(discord_id),
-        channel_id INT,
+        message_id TEXT PRIMARY KEY NOT NULL,   
+        user_id TEXT NOT NULL REFERENCES "user"(discord_id),
+        channel_id TEXT,
         content TEXT NOT NULL,
         time_sent timestamp with time zone
     )
@@ -43,8 +43,8 @@ def up(cursor, bot):
     CREATE TABLE command_data (
         command_id INT PRIMARY KEY NOT NULL REFERENCES "command"(id),
         num_uses INT NOT NULL,
-        added_by INT DEFAULT NULL,
-        edited_by INT DEFAULT NULL,
+        added_by TEXT DEFAULT NULL,
+        edited_by TEXT DEFAULT NULL,
         last_date_used TIMESTAMPTZ DEFAULT NULL
     )
     """

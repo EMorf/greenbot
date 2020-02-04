@@ -2,7 +2,7 @@ import logging
 
 from contextlib import contextmanager
 
-from sqlalchemy import INT, TEXT
+from sqlalchemy import TEXT
 from sqlalchemy import Column
 from sqlalchemy import ForeignKey
 from sqlalchemy import func
@@ -19,9 +19,9 @@ log = logging.getLogger(__name__)
 class Message(Base):
     __tablename__ = "message"
 
-    message_id = Column(INT, primary_key=True, autoincrement=False)
-    user_id = Column(INT, ForeignKey("user.discord_id", ondelete="CASCADE"))
-    channel_id = Column(INT, nullable=True)
+    message_id = Column(TEXT, primary_key=True, autoincrement=False)
+    user_id = Column(TEXT, ForeignKey("user.discord_id", ondelete="CASCADE"))
+    channel_id = Column(TEXT, nullable=True)
     content = Column(TEXT, nullable=False)
     time_sent = Column(UtcDateTime(), nullable=True, server_default="NULL")
     user = relationship("User")

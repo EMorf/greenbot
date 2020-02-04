@@ -78,8 +78,8 @@ class CommandData(Base):
 
     command_id = Column(INT, ForeignKey("command.id", ondelete="CASCADE"), primary_key=True, autoincrement=False)
     num_uses = Column(INT, nullable=False, default=0)
-    added_by = Column(INT, ForeignKey("user.discord_id", ondelete="SET NULL"), nullable=True)
-    edited_by = Column(INT, ForeignKey("user.discord_id", ondelete="SET NULL"), nullable=True)
+    added_by = Column(TEXT, ForeignKey("user.discord_id", ondelete="SET NULL"), nullable=True)
+    edited_by = Column(TEXT, ForeignKey("user.discord_id", ondelete="SET NULL"), nullable=True)
     _last_date_used = Column("last_date_used", UtcDateTime(), nullable=True, default=None)
 
     user = relationship(

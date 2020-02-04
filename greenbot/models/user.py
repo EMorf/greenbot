@@ -2,7 +2,7 @@ import logging
 
 from contextlib import contextmanager
 
-from sqlalchemy import INT
+from sqlalchemy import INT, TEXT
 from sqlalchemy import Column
 
 from greenbot.exc import FailedCommand
@@ -14,7 +14,7 @@ log = logging.getLogger(__name__)
 class User(Base):
     __tablename__ = "user"
 
-    discord_id = Column(INT, primary_key=True, autoincrement=False)
+    discord_id = Column(TEXT, primary_key=True, autoincrement=False)
     points = Column(INT, nullable=False, default=0)
 
     def can_afford(self, points):
