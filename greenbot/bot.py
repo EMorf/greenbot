@@ -66,7 +66,7 @@ class Bot:
         }
 
         self.discord_bot = DiscordBotManager(bot=self, settings=self.settings, redis=RedisManager.get(), private_loop=self.private_loop)
-        self.commands = CommandManager(module_manager=None, bot=self)
+        self.commands = CommandManager(module_manager=None, bot=self).load()
         HandlerManager.trigger("manager_loaded")
 
     def quit_bot(self):
