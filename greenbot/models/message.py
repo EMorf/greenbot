@@ -31,22 +31,22 @@ class Message(Base):
 
     @staticmethod
     def _create(db_session, message_id, user_id, channel_id, content):
-        user = Message(message_id=message_id, user_id=user_id, channel_id=channel_id, content=content, time_sent=greenbot.utils.now())
+        user = Message(message_id=str(message_id), user_id=str(user_id), channel_id=str(channel_id), content=content, time_sent=greenbot.utils.now())
         db_session.add(user)
         return user
 
     @staticmethod
     def _get_messages(db_session, user_id):
-        return db_session.query(Message).filter_by(user_id=user_id).all()
+        return db_session.query(Message).filter_by(user_id=str(user_id)).all()
 
     @staticmethod
     def _get_messages_since(db_session, user_id, time_since):
-        return db_session.query(Message).filter_by(user_id=user_id).filter(Message.time_sent > time_since).all()
+        return db_session.query(Message).filter_by(user_id=str(user_id)).filter(Message.time_sent > time_since).all()
 
     @staticmethod
     def _get_messages_count(db_session, user_id):
-        return db_session.query(func.count(Message.message_id)).filter(Message.user_id == user_id).scalar()
+        return db_session.query(func.count(Message.message_id)).filter(Message.user_id == str(user_id)).scalar()
 
     @staticmethod
     def _get_messages_since_count(db_session, user_id, time_since):
-        return db_session.query(func.count(Message.message_id)).filter(Message.user_id == user_id).filter(Message.time_sent > time_since).scalar()
+        return db_session.query(func.count(Message.message_id)).filter(Message.user_id == str(user_id)).filter(Message.time_sent > time_since).scalar()

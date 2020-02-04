@@ -22,13 +22,13 @@ class User(Base):
 
     @staticmethod
     def _create(db_session, discord_id, points=0):
-        user = User(discord_id=discord_id, points=points)
+        user = User(discord_id=str(discord_id), points=points)
         db_session.add(user)
         return user
 
     @staticmethod
     def _create_or_get_by_discord_id(db_session, discord_id):
-        return db_session.query(User).filter_by(discord_id=discord_id).one_or_none() or User._create(db_session, discord_id)
+        return db_session.query(User).filter_by(discord_id=str(discord_id)).one_or_none() or User._create(db_session, discord_id)
 
     @contextmanager
     def spend_currency_context(self, points):
