@@ -41,11 +41,7 @@ class CustomClient(discord.Client):
             HandlerManager.trigger("discord_message", message.content, user, user_level, not isinstance(message.author, discord.Member))
     
     async def on_error(self, event, *args, **kwargs):
-        try:
-            log.error(traceback.format_exc())
-        except Exception as e:
-            log.error(e)
-        log.error("Pepega")
+        log.error(traceback.format_exc())
 
 class DiscordBotManager:
     def __init__(self, bot, settings, redis, private_loop):
