@@ -24,6 +24,7 @@ class CustomClient(discord.Client):
             return
         log.info(f"Discord Bot has started!")
         HandlerManager.trigger("discord_ready")
+        raise Exception
 
     async def on_message(self, message):
         member = self.bot.guild.get_member(message.author.id)
