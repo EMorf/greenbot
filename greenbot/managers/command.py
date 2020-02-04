@@ -90,7 +90,7 @@ class CommandManager(UserDict):
         self.internal_commands["quit"] = Command.greenbot_command(
             self.bot,
             "quit",
-            level=2000,
+            level=500,
             command="quit",
             description="Shut down the bot, this will most definitely restart it if set up properly",
         )
