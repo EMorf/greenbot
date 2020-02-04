@@ -21,8 +21,7 @@ def custom_exception_handler(loop, context):
     loop.default_exception_handler(context)
 
     exception = context.get('exception')
-    if isinstance(exception, ZeroDivisionError):
-        log.error(context)
+    log.error(context)
 
 
 class Bot:
