@@ -38,7 +38,9 @@ class CustomClient(discord.Client):
             user = User._create_or_get_by_discord_id(db_session, message.author.id)
             Message._create(db_session, message.id, message.author.id, message.channel.id if isinstance(message.author, discord.Member) else None, message.content)
             HandlerManager.trigger("discord_message", message.content, user, user_level, not isinstance(message.author, discord.Member))
-
+    
+    async def on_error(self, event, *args, **kwargs):
+        log.error(f"discord error {event}")
 
 class DiscordBotManager:
     def __init__(self, bot, settings, redis, private_loop):
