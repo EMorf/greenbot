@@ -78,34 +78,14 @@ class DiscordBotManager:
                 continue
             self.listening_channels.append(channel)
 
-    async def private_message(self, member, message):
-        message = discord.utils.escape_markdown(message)
-        await self._private_message(member, message)
+    def private_message(self, user, message):
+        self.private_loop.create_task(self._private_message(user, message))
 
-    async def remove_role(self, member, role):
-        await self._remove_role(member, role)
+    def remove_role(self, member, role):
+        self.private_loop.create_task(self._remove_role(member, role))
 
-    async def add_role(self, member, role):
-        await self._add_role(member, role)
-
-    async def _private_message(self, member, message):
-        await member.create_dm()
-        await member.dm_channel.send(message)
-
-    async def _remove_role(self, member, role):
-        await member.remove_roles(role)
-
-    async def _add_role(self, member, role):
-        await member.add_roles(role)
-
-    async def run_periodically(self, wait_time, func, *args):
-        while True:
-            await asyncio.sleep(wait_time)
-            if not self.client.is_closed():
-                try:
-                    await func(*args)
-                except Exception as e:
-                    log.error(e)
+    def add_role(self, member, role):
+        self.private_loop.create_task(self._add_role(member, role))
 
     def ban(self, user_id, timeout_in_seconds=0, reason=None, delete_message_days=0):
         self.private_loop.create_task(self._ban(user_id=user_id, timeout_in_seconds=timeout_in_seconds, reason=reason, delete_message_days=delete_message_days))
@@ -140,6 +120,27 @@ class DiscordBotManager:
         except (discord.NotFound, discord.HTTPException):
             return
         self.guild.unban(member, reason)
+
+    async def _private_message(self, user, message):
+        member = self.client.get_user(user.discord_id)
+        message = discord.utils.escape_markdown(message)
+        await member.create_dm()
+        await member.dm_channel.send(message)
+
+    async def _remove_role(self, member, role):
+        await member.remove_roles(role)
+
+    async def _add_role(self, member, role):
+        await member.add_roles(role)
+
+    async def run_periodically(self, wait_time, func, *args):
+        while True:
+            await asyncio.sleep(wait_time)
+            if not self.client.is_closed():
+                try:
+                    await func(*args)
+                except Exception as e:
+                    log.error(e)
 
     def schedule_task_periodically(self, wait_time, func, *args):
         return self.private_loop.create_task(self.run_periodically(wait_time, func, *args))

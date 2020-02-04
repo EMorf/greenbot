@@ -90,6 +90,9 @@ class Bot:
     def unban(self, user_id, reason=None):
         self.discord_bot.unban(user_id=user_id, reason=reason)
     
+    def private_message(self, user, message):
+        self.discord_bot.private_message(user, message)
+
     def discord_message(self, message, source, user_level, whisper):
         msg_lower = message.lower()
         if msg_lower[:1] == self.settings["command_prefix"]:
