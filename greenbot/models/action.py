@@ -218,7 +218,7 @@ class FuncAction(BaseAction):
 
     def run(self, bot, user_id, message, whisper, args):
         try:
-            return self.cb(bot=bot, user_id=user_id, message=message, whisper=whisper, args)
+            return self.cb(bot=bot, user_id=user_id, message=message, whisper=whisper, args=args)
         except:
             log.exception("Uncaught exception in FuncAction")
 
