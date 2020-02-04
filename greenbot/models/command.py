@@ -270,7 +270,6 @@ class Command(Base):
         self.last_run_by_user = {}
         self.extra_args = {"command": self}
         self.action = ActionParser.parse(self.action_json, command=self.command)
-        log.info(self.action)
         self.run_in_thread = False
         if self.extra_extra_args:
             try:
@@ -357,9 +356,9 @@ class Command(Base):
             log.debug(f"Command was run {time_since_last_run:.2f} seconds ago, waiting...")
             return False
 
-        time_since_last_run_user = (cur_time - self.last_run_by_user.get(source.id, 0)) / cd_modifier
+        time_since_last_run_user = (cur_time - self.last_run_by_user.get(source.discord_id, 0)) / cd_modifier
 
-        if time_since_last_run_user < self.delay_user and source.level < Command.BYPASS_DELAY_LEVEL:
+        if time_since_last_run_user < self.delay_user and args["user_level"] < Command.BYPASS_DELAY_LEVEL:
             log.debug(f"{source} ran command {time_since_last_run_user:.2f} seconds ago, waiting...")
             return False
 
