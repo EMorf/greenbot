@@ -16,8 +16,14 @@ import greenbot.migration_revisions.db
 
 log = logging.getLogger(__name__)
 
-def handle_exceptions(exctype, value, tb):
-    log.error("Logging an uncaught exception", exc_info=(exctype, value, tb))
+def custom_exception_handler(loop, context):
+    # first, handle with default handler
+    loop.default_exception_handler(context)
+
+    exception = context.get('exception')
+    if isinstance(exception, ZeroDivisionError):
+        log.error(context)
+
 
 class Bot:
     """
@@ -28,7 +34,7 @@ class Bot:
         self.config = config
         self.args = args
         self.private_loop = asyncio.get_event_loop()
-        self.private_loop.set_exception_handler(handle_exceptions)
+        self.private_loop.set_exception_handler(custom_exception_handler)
 
         self.discord_token = self.config["main"]["discord_token"]
 
