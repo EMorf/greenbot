@@ -38,17 +38,25 @@ class Dispatch:
         options["added_by"] = user_id
 
         alias_str = message_parts[0].replace("!", "").lower()
-        type = "say"
-        if options["whisper"] is True:
-            type = "whisper"
-        elif options["reply"] is True:
-            type = "reply"
-        elif response.startswith("/me") or response.startswith(".me"):
-            type = "me"
-            response = " ".join(response.split(" ")[1:])
+        type = "channelmessage"
+        if options["privatemessage"] is True:
+            type = "privatemessage"
+        elif options["channelmessage"] is True:
+            type = "channelmessage"
         elif options["whisper"] is False or options["reply"] is False:
-            type = "say"
+            type = "channelmessage"
         action = {"type": type, "message": response}
+
+        add_role_id = options.get("addrole_name", None)
+        remove_role_id = options.get("removerole_names", None)
+
+        del options["addrole_name"]
+        del options["removerole_names"]
+
+        options["add_role_id"] = bot.get_role_id(add_role_id) if add_role_id else None
+        options["remove_role_id"] = bot.get_role_id(remove_role_id) if remove_role_id else None
+
+        options.po
 
         command, new_command, alias_matched = bot.commands.create_command(alias_str, action=action, **options)
         if new_command is True:
@@ -69,7 +77,7 @@ class Dispatch:
     def edit_command(bot, user_id, message, event, args):
         """Dispatch method for editing commands.
         Usage: !edit command ALIAS [options] RESPONSE
-        See pajbot/managers/command.py parse_command_arguments for available options
+        See greenbot/managers/command.py parse_command_arguments for available options
         """
 
         if message:
@@ -134,7 +142,7 @@ class Dispatch:
     def add_funccommand(bot, user_id, message, event, args):
         """Dispatch method for creating function commands.
         Usage: !add funccommand ALIAS [options] CALLBACK
-        See pajbot/managers/command.py parse_command_arguments for available options
+        See greenbot/managers/command.py parse_command_arguments for available options
         """
 
         if message:
@@ -171,7 +179,7 @@ class Dispatch:
     def edit_funccommand(bot, user_id, message, event, args):
         """Dispatch method for editing function commands.
         Usage: !edit funccommand ALIAS [options] CALLBACK
-        See pajbot/managers/command.py parse_command_arguments for available options
+        See greenbot/managers/command.py parse_command_arguments for available options
         """
 
         if message:

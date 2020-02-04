@@ -93,6 +93,12 @@ class DiscordBotManager:
     def unban(self, user_id, reason=None):
         self.private_loop.create_task(self._unban(user_id=user_id, reason=reason))
 
+    def role_name_to_id(self, role_name):
+        for role in self.guild.roles:
+            if role.name == role_name:
+                return role.id
+        return None
+
     async def _ban(self, user_id, timeout_in_seconds=0, reason=None, delete_message_days=0):
         delete_message_days = 7 if delete_message_days > 7 else (0 if delete_message_days < 0 else delete_message_days)
 

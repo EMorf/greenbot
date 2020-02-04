@@ -33,7 +33,9 @@ def up(cursor, bot):
         delay_user INT NOT NULL,
         enabled BOOLEAN NOT NULL,
         cost INT NOT NULL,
-        can_execute_with_whisper BOOLEAN DEFAULT NULL
+        can_execute_with_whisper BOOLEAN DEFAULT NULL,
+        add_role_id TEXT,
+        remove_role_id TEXT,
     )
     """
     )
