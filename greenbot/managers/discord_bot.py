@@ -98,7 +98,7 @@ class DiscordBotManager:
 
         if not self.guild:
             return
-        member = self.guild.get_member(user_id)
+        member = self.guild.get_member(int(user_id))
         if not member:
             return
         if timeout_in_seconds > 0:
@@ -116,13 +116,13 @@ class DiscordBotManager:
         if not self.guild:
             return
         try:
-            member = await self.client.fetch_user(user_id)
+            member = await self.client.fetch_user(int(user_id))
         except (discord.NotFound, discord.HTTPException):
             return
         self.guild.unban(member, reason)
 
     async def _private_message(self, user_id, message):
-        member = self.client.get_user(user_id)
+        member = self.client.get_user(int(user_id))
         message = discord.utils.escape_markdown(message)
         await member.create_dm()
         await member.dm_channel.send(message)
