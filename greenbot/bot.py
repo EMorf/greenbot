@@ -19,8 +19,6 @@ log = logging.getLogger(__name__)
 def custom_exception_handler(loop, context):
     # first, handle with default handler
     loop.default_exception_handler(context)
-
-    exception = context.get('exception')
     log.error(context)
 
 
