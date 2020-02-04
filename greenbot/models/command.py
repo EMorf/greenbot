@@ -13,11 +13,12 @@ from sqlalchemy_utc import UtcDateTime
 
 import greenbot.utils
 from greenbot.exc import FailedCommand
-from greenbot.managers.db import Base
+from greenbot.managers.db import DBManager, Base
 from greenbot.managers.schedule import ScheduleManager
 from greenbot.models.action import ActionParser
 from greenbot.models.action import RawFuncAction
 from greenbot.models.action import Substitution
+from greenbot.models.user import User
 
 log = logging.getLogger(__name__)
 
@@ -330,7 +331,7 @@ class Command(Base):
     def is_enabled(self):
         return self.enabled == 1 and self.action is not None
 
-    def run(self, bot, source, message, whisper, args):
+    def run(self, bot, user_id, message, whisper, args):
         if self.action is None:
             log.warning("This command is not available.")
             return False
@@ -352,44 +353,47 @@ class Command(Base):
         cur_time = greenbot.utils.now().timestamp()
         time_since_last_run = (cur_time - self.last_run) / cd_modifier
 
-        if time_since_last_run < self.delay_all and source.level < Command.BYPASS_DELAY_LEVEL:
+        if time_since_last_run < self.delay_all and args["user_level"] < Command.BYPASS_DELAY_LEVEL:
             log.debug(f"Command was run {time_since_last_run:.2f} seconds ago, waiting...")
             return False
 
-        time_since_last_run_user = (cur_time - self.last_run_by_user.get(source.discord_id, 0)) / cd_modifier
+        time_since_last_run_user = (cur_time - self.last_run_by_user.get(user_id, 0)) / cd_modifier
 
         if time_since_last_run_user < self.delay_user and args["user_level"] < Command.BYPASS_DELAY_LEVEL:
-            log.debug(f"{source} ran command {time_since_last_run_user:.2f} seconds ago, waiting...")
+            log.debug(f"{user_id} ran command {time_since_last_run_user:.2f} seconds ago, waiting...")
             return False
-
-        if self.cost > 0 and not source.can_afford(self.cost):
-            # User does not have enough points to use the command
-            return False
-    
-        args.update(self.extra_args)
-        if self.run_in_thread:
-            log.debug(f"Running {self} in a thread")
-            ScheduleManager.execute_now(self.run_action, args=[bot, source, message, whisper, args])
-        else:
-            self.run_action(bot, source, message, whisper, args)
+        with DBManager.create_session_scope() as db_session:
+            user = User._create_or_get_by_discord_id(db_session, user_id)
+            if self.cost > 0 and not user.can_afford(self.cost):
+                # User does not have enough points to use the command
+                return False
+        
+            args.update(self.extra_args)
+            if self.run_in_thread:
+                log.debug(f"Running {self} in a thread")
+                ScheduleManager.execute_now(self.run_action, args=[bot, user_id, message, whisper, args])
+            else:
+                self.run_action(bot, user_id, message, whisper, args)
 
         return True
 
-    def run_action(self, bot, source, message, whisper, args):
+    def run_action(self, bot, user_id, message, whisper, args):
         cur_time = greenbot.utils.now().timestamp()
-        with source.spend_currency_context(self.cost):
-            ret = self.action.run(bot, source, message, whisper, args)
-            if not ret:
-                raise FailedCommand("return currency")
+        with DBManager.create_session_scope() as db_session:
+            user = User._create_or_get_by_discord_id(db_session, user_id)
+            with user.spend_currency_context(self.cost):
+                ret = self.action.run(bot, user_id, message, whisper, args)
+                if not ret:
+                    raise FailedCommand("return currency")
 
-            # Only spend points, and increment num_uses if the action succeded
-            if self.data is not None:
-                self.data.num_uses += 1
-                self.data.last_date_used = greenbot.utils.now()
+                # Only spend points, and increment num_uses if the action succeded
+                if self.data is not None:
+                    self.data.num_uses += 1
+                    self.data.last_date_used = greenbot.utils.now()
 
-            # TODO: Will this be an issue?
-            self.last_run = cur_time
-            self.last_run_by_user[args["user_level"]] = cur_time
+                # TODO: Will this be an issue?
+                self.last_run = cur_time
+                self.last_run_by_user[args["user_level"]] = cur_time
 
     def autogenerate_examples(self):
         if not self.examples and self.id is not None and self.action and self.action.type == "message":

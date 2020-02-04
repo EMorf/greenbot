@@ -37,7 +37,7 @@ class CustomClient(discord.Client):
         with DBManager.create_session_scope() as db_session:
             user = User._create_or_get_by_discord_id(db_session, message.author.id)
             Message._create(db_session, message.id, message.author.id, message.channel.id if isinstance(message.author, discord.Member) else None, message.content)
-            HandlerManager.trigger("discord_message", message=message.content, source=user, user_level=user_level, whisper=not isinstance(message.author, discord.Member))
+            HandlerManager.trigger("discord_message", message=message.content, user_id=user.id, user_level=user_level, whisper=not isinstance(message.author, discord.Member))
     
     async def on_error(self, event, *args, **kwargs):
         log.error(traceback.format_exc())
@@ -78,14 +78,14 @@ class DiscordBotManager:
                 continue
             self.listening_channels.append(channel)
 
-    def private_message(self, user, message):
-        self.private_loop.create_task(self._private_message(user, message))
+    def private_message(self, user_id, message):
+        self.private_loop.create_task(self._private_message(user_id, message))
 
-    def remove_role(self, member, role):
-        self.private_loop.create_task(self._remove_role(member, role))
+    def remove_role(self, user_id, role):
+        self.private_loop.create_task(self._remove_role(user_id, role))
 
-    def add_role(self, member, role):
-        self.private_loop.create_task(self._add_role(member, role))
+    def add_role(self, user_id, role):
+        self.private_loop.create_task(self._add_role(user_id, role))
 
     def ban(self, user_id, timeout_in_seconds=0, reason=None, delete_message_days=0):
         self.private_loop.create_task(self._ban(user_id=user_id, timeout_in_seconds=timeout_in_seconds, reason=reason, delete_message_days=delete_message_days))
@@ -121,17 +121,21 @@ class DiscordBotManager:
             return
         self.guild.unban(member, reason)
 
-    async def _private_message(self, user, message):
-        member = self.client.get_user(user.discord_id)
+    async def _private_message(self, user_id, message):
+        member = self.client.get_user(user_id)
         message = discord.utils.escape_markdown(message)
         await member.create_dm()
         await member.dm_channel.send(message)
 
-    async def _remove_role(self, member, role):
-        await member.remove_roles(role)
+    async def _remove_role(self, user_id, role):
+        if not self.guild:
+            return
+        await self.guild.get_member(int(user_id)).remove_roles(role)
 
-    async def _add_role(self, member, role):
-        await member.add_roles(role)
+    async def _add_role(self, user_id, role):
+        if not self.guild:
+            return
+        await self.guild.get_member(int(user_id)).add_roles(role)
 
     async def run_periodically(self, wait_time, func, *args):
         while True:

@@ -181,7 +181,7 @@ class MultiAction(BaseAction):
         multiaction.original_commands = copy.copy(commands)
         return multiaction
 
-    def run(self, bot, source, message, whisper, args):
+    def run(self, bot, user_id, message, whisper, args):
         """ If there is more text sent to the multicommand after the
         initial alias, we _ALWAYS_ assume it's trying the subaction command.
         If the extra text was not a valid command, we try to run the fallback command.
@@ -204,8 +204,8 @@ class MultiAction(BaseAction):
 
         if cmd:
             if args["user_level"] >= cmd.level:
-                return cmd.run(bot=bot, source=source, message=extra_msg, whisper=whisper, args=args)
-            log.info(f"User {source} tried running a sub-command he had no access to ({command}).")
+                return cmd.run(bot=bot, user_id=user_id, message=extra_msg, whisper=whisper, args=args)
+            log.info(f"User {user_id} tried running a sub-command he had no access to ({command}).")
 
         return None
 
@@ -216,9 +216,9 @@ class FuncAction(BaseAction):
     def __init__(self, cb):
         self.cb = cb
 
-    def run(self, bot, source, message, event={}, args={}):
+    def run(self, bot, user_id, message, whisper, args):
         try:
-            return self.cb(bot, source, message, event, args)
+            return self.cb(bot=bot, user_id=user_id, message=message, whisper=whisper, args)
         except:
             log.exception("Uncaught exception in FuncAction")
 
@@ -229,8 +229,8 @@ class RawFuncAction(BaseAction):
     def __init__(self, cb):
         self.cb = cb
 
-    def run(self, bot, source, message, event={}, args={}):
-        return self.cb(bot=bot, source=source, message=message, event=event, args=args)
+    def run(self, bot, user_id, message, whisper, args):
+        return self.cb(bot=bot, user_id=user_id, message=message, whisper=whisper, args=args)
 
 
 def get_argument_substitutions(string):
@@ -394,10 +394,10 @@ class MessageAction(BaseAction):
         return resp
 
     @staticmethod
-    def get_extra_data(source, message, args):
-        return {"source": source, "message": message, **args}
+    def get_extra_data(user_id, message, args):
+        return {"user_id": user_id, "message": message, **args}
 
-    def run(self, bot, source, message, event={}, args={}):
+    def run(self, bot, user_id, message, whisper, args):
         raise NotImplementedError("Please implement the run method.")
 
 
@@ -430,8 +430,8 @@ def urlfetch_msg(method, message, num_urlfetch_subs, bot, extra={}, args=[], kwa
 class SayAction(MessageAction):
     subtype = "say"
 
-    def run(self, bot, source, message, event={}, args={}):
-        extra = self.get_extra_data(source, message, args)
+    def run(self, bot, user_id, message, whisper, args):
+        extra = self.get_extra_data(user_id, message, args)
         resp = self.get_response(bot, extra)
 
         if not resp:
@@ -458,8 +458,8 @@ class SayAction(MessageAction):
 class MeAction(MessageAction):
     subtype = "me"
 
-    def run(self, bot, source, message, event={}, args={}):
-        extra = self.get_extra_data(source, message, args)
+    def run(self, bot, user_id, message, whisper, args):
+        extra = self.get_extra_data(user_id, message, args)
         resp = self.get_response(bot, extra)
 
         if not resp:
@@ -486,8 +486,8 @@ class MeAction(MessageAction):
 class WhisperAction(MessageAction):
     subtype = "whisper"
 
-    def run(self, bot, source, message, event={}, args={}):
-        extra = self.get_extra_data(source, message, args)
+    def run(self, bot, user_id, message, whisper, args):
+        extra = self.get_extra_data(user_id, message, args)
         resp = self.get_response(bot, extra)
 
         if not resp:
@@ -500,7 +500,7 @@ class WhisperAction(MessageAction):
             urlfetch_msg,
             args=[],
             kwargs={
-                "args": [source],
+                "args": [user_id],
                 "kwargs": {},
                 "method": bot.whisper,
                 "bot": bot,

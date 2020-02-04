@@ -93,22 +93,20 @@ class Bot:
     def private_message(self, user, message):
         self.discord_bot.private_message(user, message)
 
-    def discord_message(self, message, source, user_level, whisper):
+    def discord_message(self, message, user_id, user_level, whisper):
         msg_lower = message.lower()
         if msg_lower[:1] == self.settings["command_prefix"]:
             msg_lower_parts = msg_lower.split(" ")
             trigger = msg_lower_parts[0][1:]
             msg_raw_parts = message.split(" ")
             remaining_message = " ".join(msg_raw_parts[1:]) if len(msg_raw_parts) > 1 else None
-            log.info(trigger)
-            log.info(self.commands)
             if trigger in self.commands:
                 command = self.commands[trigger]
                 extra_args = {
                     "trigger": trigger,
                     "user_level": user_level,
                 }
-                command.run(self, source, remaining_message, whisper=whisper, args=extra_args)
+                command.run(self, user_id, remaining_message, whisper=whisper, args=extra_args)
 
     def quit(self, message, event, **options):
         self.quit_bot()
