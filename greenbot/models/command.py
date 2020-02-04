@@ -380,7 +380,8 @@ class Command(Base):
         with source.spend_currency_context(self.cost):
             ret = self.action.run(bot, source, message, args)
             log.info(ret)
-            if ret is False:
+            log.info(self.action)
+            if not ret:
                 raise FailedCommand("return currency")
 
             # Only spend points, and increment num_uses if the action succeded
