@@ -371,14 +371,14 @@ class Command(Base):
             log.debug(f"Running {self} in a thread")
             ScheduleManager.execute_now(self.run_action, args=[bot, source, message])
         else:
-            self.run_action(bot, source, message)
+            self.run_action(bot, source, message, args)
 
         return True
 
-    def run_action(self, bot, source, message):
+    def run_action(self, bot, source, message, args):
         cur_time = greenbot.utils.now().timestamp()
         with source.spend_currency_context(self.cost):
-            ret = self.action.run(bot, source, message)
+            ret = self.action.run(bot, source, message, args)
             if ret is False:
                 raise FailedCommand("return currency")
 
@@ -389,7 +389,7 @@ class Command(Base):
 
             # TODO: Will this be an issue?
             self.last_run = cur_time
-            self.last_run_by_user[source.id] = cur_time
+            self.last_run_by_user[args["user_level"]] = cur_time
 
     def autogenerate_examples(self):
         if not self.examples and self.id is not None and self.action and self.action.type == "message":
