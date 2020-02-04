@@ -369,16 +369,16 @@ class Command(Base):
         args.update(self.extra_args)
         if self.run_in_thread:
             log.debug(f"Running {self} in a thread")
-            ScheduleManager.execute_now(self.run_action, args=[bot, source, message])
+            ScheduleManager.execute_now(self.run_action, args=[bot, source, message, whisper, args])
         else:
-            self.run_action(bot, source, message, args)
+            self.run_action(bot, source, message, whisper, args)
 
         return True
 
-    def run_action(self, bot, source, message, args):
+    def run_action(self, bot, source, message, whisper, args):
         cur_time = greenbot.utils.now().timestamp()
         with source.spend_currency_context(self.cost):
-            ret = self.action.run(bot, source, message, args)
+            ret = self.action.run(bot, source, message, whisper, args)
             if not ret:
                 raise FailedCommand("return currency")
 
