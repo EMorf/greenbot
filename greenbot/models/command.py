@@ -319,7 +319,7 @@ class Command(Base):
         return cmd
 
     @classmethod
-    def pajbot_command(cls, bot, method_name, level=1000, **options):
+    def greenbot_command(cls, bot, method_name, level=1000, **options):
         cmd = cls(**options)
         cmd.level = level
         cmd.description = options.get("description", None)
@@ -345,38 +345,24 @@ class Command(Base):
     def is_enabled(self):
         return self.enabled == 1 and self.action is not None
 
-    def run(self, bot, source, message, event={}, args={}, whisper=False):
+    def run(self, bot, source, message, args, whisper=False):
         if self.action is None:
             log.warning("This command is not available.")
             return False
 
-        if source.level < self.level:
+        if args["user_level"] < self.level:
             # User does not have a high enough power level to run this command
             return False
 
         if (
             whisper
             and self.can_execute_with_whisper is False
-            and source.level < Command.MIN_WHISPER_LEVEL
-            and source.moderator is False
+            and args["user_level"] < Command.MIN_WHISPER_LEVEL
         ):
             # This user cannot execute the command through a whisper
             return False
 
-        if (
-            self.sub_only
-            and source.subscriber is False
-            and source.level < Command.BYPASS_SUB_ONLY_LEVEL
-            and source.moderator is False
-        ):
-            # User is not a sub or a moderator, and cannot use the command.
-            return False
-
-        if self.mod_only and source.moderator is False and source.level < Command.BYPASS_MOD_ONLY_LEVEL:
-            # User is not a twitch moderator, or a bot moderator
-            return False
-
-        cd_modifier = 0.2 if source.level >= 500 or source.moderator is True else 1.0
+        cd_modifier = 0.2 if args["user_level"] >= 500 else 1.0
 
         cur_time = greenbot.utils.now().timestamp()
         time_since_last_run = (cur_time - self.last_run) / cd_modifier
@@ -392,36 +378,22 @@ class Command(Base):
             return False
 
         if self.cost > 0 and not source.can_afford(self.cost):
-            if self.notify_on_error:
-                bot.whisper(
-                    source,
-                    f"You do not have the required {self.cost} points to execute this command. (You have {source.points} points)",
-                )
             # User does not have enough points to use the command
             return False
-
-        if self.tokens_cost > 0 and not source.can_afford_with_tokens(self.tokens_cost):
-            if self.notify_on_error:
-                bot.whisper(
-                    source,
-                    f"You do not have the required {self.tokens_cost} tokens to execute this command. (You have {source.tokens} tokens)",
-                )
-            # User does not have enough tokens to use the command
-            return False
-
+    
         args.update(self.extra_args)
         if self.run_in_thread:
             log.debug(f"Running {self} in a thread")
-            ScheduleManager.execute_now(self.run_action, args=[bot, source, message, event, args])
+            ScheduleManager.execute_now(self.run_action, args=[bot, source, message])
         else:
-            self.run_action(bot, source, message, event, args)
+            self.run_action(bot, source, message)
 
         return True
 
-    def run_action(self, bot, source, message, event, args):
+    def run_action(self, bot, source, message):
         cur_time = greenbot.utils.now().timestamp()
-        with source.spend_currency_context(self.cost, self.tokens_cost):
-            ret = self.action.run(bot, source, message, event, args)
+        with source.spend_currency_context(self.cost):
+            ret = self.action.run(bot, source, message)
             if ret is False:
                 raise FailedCommand("return currency")
 

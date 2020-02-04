@@ -50,7 +50,7 @@ class Bot:
 
         HandlerManager.init_handlers()
 
-        settings = {
+        self.settings = {
             "discord_token": self.discord_token,
             "channels": self.config["discord"]["channels_to_listen_in"].split(" "),
             "command_prefix": self.config["discord"]["command_prefix"],
@@ -58,7 +58,7 @@ class Bot:
             "admin_roles": [{"role_id": self.config[role]["role_id"], "level": self.config[role]["level"]} for role in self.config["discord"]["admin_roles"].split(" ")]
         }
 
-        self.discord_bot = DiscordBotManager(bot=self, settings=settings, redis=RedisManager.get(), private_loop=self.private_loop)
+        self.discord_bot = DiscordBotManager(bot=self, settings=self.settings, redis=RedisManager.get(), private_loop=self.private_loop)
         self.commands = CommandManager(module_manager=None, bot=self)
 
         HandlerManager.trigger("manager_loaded")
@@ -84,3 +84,17 @@ class Bot:
     def unban(self, user_id, reason=None):
         self.discord_bot.unban(user_id=user_id, reason=reason)
     
+    def discord_message(self, message, source, user_level, whisper):
+        msg_lower = message.lower()
+        if msg_lower[:1] == self.settings["command_prefix"]:
+            msg_lower_parts = msg_lower.split(" ")
+            trigger = msg_lower_parts[0][1:]
+            msg_raw_parts = message.split(" ")
+            remaining_message = " ".join(msg_raw_parts[1:]) if len(msg_raw_parts) > 1 else None
+            if trigger in self.commands:
+                command = self.commands[trigger]
+                extra_args = {
+                    "trigger": trigger,
+                    "user_level": user_level,
+                }
+                command.run(self, source, remaining_message, args=extra_args, whisper=whisper)

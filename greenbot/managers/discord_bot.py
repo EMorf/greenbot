@@ -5,6 +5,7 @@ import asyncio
 import json
 from datetime import datetime, timedelta
 
+from greenbot.models.user import User
 from greenbot.managers.db import DBManager
 from greenbot.managers.handler import HandlerManager
 
@@ -31,10 +32,9 @@ class CustomClient(discord.Client):
         if member:
             for role in member.roles:
                user_level = max(self.bot.admin_roles.get(role, 100), user_level)
-        HandlerManager.trigger("discord_message", message.content, message.author, user_level, isinstance(message.author, discord.Member))
-        log.info(message.content)
-        log.info(user_level)
-        log.info(f"{message.author.name}#{message.author.discriminator}\nDiscordID:{message.author.id}")
+        with DBManager.create_session_scope() as db_session:
+            user = User._create_or_get_by_discord_id(db_session, message.author.id)
+            HandlerManager.trigger("discord_message", message.content, user, user_level, not isinstance(message.author, discord.Member))
 
 
 class DiscordBotManager:
