@@ -16,15 +16,7 @@ class ActionParser:
 
     @staticmethod
     def parse(raw_data=None, data=None, command=""):
-        try:
-            from pajbot.userdispatch import UserDispatch
-
-            Dispatch = UserDispatch
-        except ImportError:
-            from pajbot.dispatch import Dispatch
-        except:
-            log.exception("Something went wrong while attemting to import Dispatch, this should never happen")
-            sys.exit(1)
+        from greenbot.dispatch import Dispatch
 
         if not data:
             data = json.loads(raw_data)
