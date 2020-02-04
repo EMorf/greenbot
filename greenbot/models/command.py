@@ -78,14 +78,14 @@ class CommandData(Base):
 
     command_id = Column(INT, ForeignKey("command.id", ondelete="CASCADE"), primary_key=True, autoincrement=False)
     num_uses = Column(INT, nullable=False, default=0)
-    added_by = Column(INT, ForeignKey("user.id", ondelete="SET NULL"), nullable=True)
-    edited_by = Column(INT, ForeignKey("user.id", ondelete="SET NULL"), nullable=True)
+    added_by = Column(INT, ForeignKey("user.discord_id", ondelete="SET NULL"), nullable=True)
+    edited_by = Column(INT, ForeignKey("user.discord_id", ondelete="SET NULL"), nullable=True)
     _last_date_used = Column("last_date_used", UtcDateTime(), nullable=True, default=None)
 
     user = relationship(
         "User",
-        primaryjoin="User.id==CommandData.edited_by",
-        foreign_keys="User.id",
+        primaryjoin="User.discord_id==CommandData.edited_by",
+        foreign_keys="User.discord_id",
         uselist=False,
         cascade="",
         lazy="noload",
@@ -93,8 +93,8 @@ class CommandData(Base):
 
     user2 = relationship(
         "User",
-        primaryjoin="User.id==CommandData.added_by",
-        foreign_keys="User.id",
+        primaryjoin="User.discord_id==CommandData.added_by",
+        foreign_keys="User.discord_id",
         uselist=False,
         cascade="",
         lazy="noload",

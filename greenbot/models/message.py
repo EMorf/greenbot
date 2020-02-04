@@ -20,7 +20,7 @@ class Message(Base):
     __tablename__ = "message"
 
     message_id = Column(INT, primary_key=True, autoincrement=False)
-    user_id = Column(INT, ForeignKey("user.id", ondelete="CASCADE"))
+    user_id = Column(INT, ForeignKey("user.discord_id", ondelete="CASCADE"))
     channel_id = Column(INT, nullable=True)
     content = Column(TEXT, nullable=False)
     time_sent = Column(UtcDateTime(), nullable=True, server_default="NULL")
