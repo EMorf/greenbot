@@ -300,8 +300,8 @@ class CommandManager(UserDict):
     @staticmethod
     def parse_command_arguments(message):
         parser = argparse.ArgumentParser()
-        parser.add_argument("--privatemessage", dest="privatemessage", action="response")
-        parser.add_argument("--channelmessage", dest="channelmessage", action="response")
+        parser.add_argument("--privatemessage", dest="privatemessage", action="store_true")
+        parser.add_argument("--channelmessage", dest="channelmessage", action="store_true")
         parser.add_argument("--cd", type=int, dest="delay_all")
         parser.add_argument("--usercd", type=int, dest="delay_user")
         parser.add_argument("--level", type=int, dest="level")
