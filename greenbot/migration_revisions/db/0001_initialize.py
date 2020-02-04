@@ -10,7 +10,7 @@ def up(cursor, bot):
     
     cursor.execute(
         """
-    CREATE TABLE "messages" (
+    CREATE TABLE "message" (
         message_id INT PRIMARY KEY NOT NULL,   
         user_id INT NOT NULL REFERENCES "user"(discord_id),
         channel_id INT,

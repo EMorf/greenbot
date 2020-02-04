@@ -78,7 +78,6 @@ class CommandData(Base):
 
     command_id = Column(INT, ForeignKey("command.id", ondelete="CASCADE"), primary_key=True, autoincrement=False)
     num_uses = Column(INT, nullable=False, default=0)
-
     added_by = Column(INT, ForeignKey("user.id", ondelete="SET NULL"), nullable=True)
     edited_by = Column(INT, ForeignKey("user.id", ondelete="SET NULL"), nullable=True)
     _last_date_used = Column("last_date_used", UtcDateTime(), nullable=True, default=None)
@@ -195,11 +194,7 @@ class Command(Base):
     delay_user = Column(INT, nullable=False, default=15)
     enabled = Column(BOOLEAN, nullable=False, default=True)
     cost = Column(INT, nullable=False, default=0)
-    tokens_cost = Column(INT, nullable=False, default=0, server_default="0")
     can_execute_with_whisper = Column(BOOLEAN)
-    sub_only = Column(BOOLEAN, nullable=False, default=False)
-    mod_only = Column(BOOLEAN, nullable=False, default=False)
-    run_through_banphrases = Column(BOOLEAN, nullable=False, default=False, server_default="0")
     long_description = ""
 
     data = relationship("CommandData", uselist=False, cascade="", lazy="joined")
@@ -207,8 +202,6 @@ class Command(Base):
 
     MIN_WHISPER_LEVEL = 420
     BYPASS_DELAY_LEVEL = 2000
-    BYPASS_SUB_ONLY_LEVEL = 500
-    BYPASS_MOD_ONLY_LEVEL = 500
 
     DEFAULT_CD_ALL = 5
     DEFAULT_CD_USER = 15
@@ -228,10 +221,7 @@ class Command(Base):
         self.enabled = True
         self.type = "?"  # XXX: What is this?
         self.cost = 0
-        self.tokens_cost = 0
         self.can_execute_with_whisper = False
-        self.sub_only = False
-        self.mod_only = False
         self.run_through_banphrases = False
         self.command = None
 
@@ -265,12 +255,7 @@ class Command(Base):
         self.cost = options.get("cost", self.cost)
         if self.cost < 0:
             self.cost = 0
-        self.tokens_cost = options.get("tokens_cost", self.tokens_cost)
-        if self.tokens_cost < 0:
-            self.tokens_cost = 0
         self.can_execute_with_whisper = options.get("can_execute_with_whisper", self.can_execute_with_whisper)
-        self.sub_only = options.get("sub_only", self.sub_only)
-        self.mod_only = options.get("mod_only", self.mod_only)
         self.run_through_banphrases = options.get("run_through_banphrases", self.run_through_banphrases)
         self.examples = options.get("examples", self.examples)
         self.run_in_thread = options.get("run_in_thread", self.run_in_thread)
@@ -397,7 +382,7 @@ class Command(Base):
             if ret is False:
                 raise FailedCommand("return currency")
 
-            # Only spend points/tokens, and increment num_uses if the action succeded
+            # Only spend points, and increment num_uses if the action succeded
             if self.data is not None:
                 self.data.num_uses += 1
                 self.data.last_date_used = greenbot.utils.now()
@@ -447,10 +432,7 @@ class Command(Base):
             "cd_user": self.delay_user,
             "enabled": self.enabled,
             "cost": self.cost,
-            "tokens_cost": self.tokens_cost,
             "can_execute_with_whisper": self.can_execute_with_whisper,
-            "sub_only": self.sub_only,
-            "mod_only": self.mod_only,
             "resolve_string": self.resolve_string,
             "examples": [example.jsonify() for example in self.autogenerate_examples()],
         }

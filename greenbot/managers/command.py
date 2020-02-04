@@ -94,16 +94,6 @@ class CommandManager(UserDict):
             command="quit",
             description="Shut down the bot, this will most definitely restart it if set up properly",
         )
-        self.internal_commands["twitterfollow"] = Command.dispatch_command(
-            "twitter_follow",
-            level=1000,
-            description="Start listening for tweets for the given user",
-        )
-        self.internal_commands["twitterunfollow"] = Command.dispatch_command(
-            "twitter_unfollow",
-            level=1000,
-            description="Stop listening for tweets for the given user",
-        )
         self.internal_commands["add"] = Command.multiaction_command(
             level=100,
             delay_all=0,
