@@ -105,7 +105,7 @@ class Bot:
                     "trigger": trigger,
                     "user_level": user_level,
                 }
-                command.run(self, source, remaining_message, args=extra_args, whisper=whisper)
+                command.run(self, source, remaining_message, whisper=whisper, args=extra_args)
 
     def quit(self, message, event, **options):
         self.quit_bot()
