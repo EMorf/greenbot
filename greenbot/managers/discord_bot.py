@@ -1,6 +1,7 @@
 import logging
 
 import discord
+import traceback
 import asyncio
 import json
 from datetime import datetime, timedelta
@@ -40,7 +41,7 @@ class CustomClient(discord.Client):
             HandlerManager.trigger("discord_message", message.content, user, user_level, not isinstance(message.author, discord.Member))
     
     async def on_error(self, event, *args, **kwargs):
-        log.error(f"discord error {event}")
+        log.error(traceback.format_exc())
 
 class DiscordBotManager:
     def __init__(self, bot, settings, redis, private_loop):
