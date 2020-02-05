@@ -34,8 +34,6 @@ def up(cursor, bot):
         enabled BOOLEAN NOT NULL,
         cost INT NOT NULL,
         can_execute_with_whisper BOOLEAN DEFAULT NULL,
-        add_role_id TEXT,
-        remove_role_id TEXT,
     )
     """
     )

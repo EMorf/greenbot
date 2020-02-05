@@ -308,6 +308,8 @@ class CommandManager(UserDict):
         parser.add_argument("--cost", type=int, dest="cost")
         parser.add_argument("--addrole", type=str, dest="addrole_name")
         parser.add_argument("--removerole", type=str, dest="removerole_name")
+        parser.add_argument('--addrole_focus', dest="addrole_focus", type=int)
+        parser.add_argument('--removerole_focus', dest="removerole_focus", type=int)
 
         try:
             args, unknown = parser.parse_known_args(message)

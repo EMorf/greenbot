@@ -48,17 +48,32 @@ class Dispatch:
         add_role_id = options.get("addrole_name", None)
         remove_role_id = options.get("removerole_names", None)
 
+        addrole_focus = options.get("addrole_focus", None)
+        removerole_focus = options.get("removerole_focus", None)
+
+        extra_args = {
+            "add": {
+                "id": str(bot.get_role_id(add_role_id)) if add_role_id else None,
+                "arg": addrole_focus
+            },
+            "remove": {
+                "id": str(bot.get_role_id(remove_role_id)) if remove_role_id else None,
+                "arg": removerole_focus
+            }
+        }
+
         action = {"type": type, "message": response}
 
         if add_role_id:
             del options["addrole_name"]
+        if addrole_focus:
+            del options["addrole_focus"]
+        if removerole_focus:
+            del options["removerole_focus"]
         if remove_role_id:
             del options["removerole_names"]
 
-        options["add_role_id"] = bot.get_role_id(add_role_id) if add_role_id else None
-        options["remove_role_id"] = bot.get_role_id(remove_role_id) if remove_role_id else None
-
-        command, new_command, alias_matched = bot.commands.create_command(alias_str, action=action, **options)
+        command, new_command, alias_matched = bot.commands.create_command(alias_str, extra_args=extra_args, action=action, **options)
         if new_command is True:
             bot.private_message(author, f"Added your command (ID: {command.id})")
 
