@@ -100,7 +100,7 @@ class Bot:
     def say(self, channel_id, message):
         self.discord_bot.say(channel_id, message)
 
-    def discord_message(self, message, user_id, channel_id, user_level, whisper):
+    def discord_message(self, message, author, channel, user_level, whisper):
         msg_lower = message.lower()
         if msg_lower[:1] == self.settings["command_prefix"]:
             msg_lower_parts = msg_lower.split(" ")
@@ -113,7 +113,7 @@ class Bot:
                     "trigger": trigger,
                     "user_level": user_level,
                 }
-                command.run(bot=self, user_id=user_id, channel_id=channel_id, message=remaining_message, whisper=whisper, args=extra_args)
+                command.run(bot=self, author=author, channel=channel, message=remaining_message, whisper=whisper, args=extra_args)
 
     def get_role_id(self, role_name):
         return self.discord_bot.role_name_to_id(role_name)
@@ -144,6 +144,59 @@ class Bot:
         if f.name in available_filters:
             return available_filters[f.name](resp, f.arguments)
         return resp
+
+    def get_time_value(self, key, extra={}):
+        try:
+            tz = timezone(key)
+            return datetime.datetime.now(tz).strftime("%H:%M")
+        except:
+            log.exception("Unhandled exception in get_time_value")
+
+        return None
+
+    def get_strictargs_value(self, key, extra={}):
+        ret = self.get_args_value(key, extra)
+
+        if not ret:
+            return None
+
+        return ret
+
+    @staticmethod
+    def get_args_value(key, extra={}):
+        r = None
+        try:
+            msg_parts = extra["message"].split(" ")
+        except (KeyError, AttributeError):
+            msg_parts = [""]
+
+        try:
+            if "-" in key:
+                range_str = key.split("-")
+                if len(range_str) == 2:
+                    r = (int(range_str[0]), int(range_str[1]))
+
+            if r is None:
+                r = (int(key), len(msg_parts))
+        except (TypeError, ValueError):
+            r = (0, len(msg_parts))
+
+        try:
+            return " ".join(msg_parts[r[0] : r[1]])
+        except AttributeError:
+            return ""
+        except:
+            log.exception("UNHANDLED ERROR IN get_args_value")
+            return ""
+
+    @staticmethod
+    def get_command_value(key, extra={}):
+        try:
+            return getattr(extra["command"].data, key)
+        except:
+            log.exception("Caught exception in get_source_value")
+
+        return None
 
 def _filter_time_since_dt(var, args):
     try:

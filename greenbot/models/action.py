@@ -101,9 +101,9 @@ class FuncAction(BaseAction):
     def __init__(self, cb):
         self.cb = cb
 
-    def run(self, bot, user_id, channel_id, message, whisper, args):
+    def run(self, bot, author, channel, message, whisper, args):
         try:
-            return self.cb(bot=bot, user_id=user_id, channel_id=channel_id, message=message, whisper=whisper, args=args)
+            return self.cb(bot=bot, author=author, channel=channel, message=message, whisper=whisper, args=args)
         except:
             log.exception("Uncaught exception in FuncAction")
 
@@ -114,8 +114,8 @@ class RawFuncAction(BaseAction):
     def __init__(self, cb):
         self.cb = cb
 
-    def run(self, bot, user_id, channel_id, message, whisper, args):
-        return self.cb(bot=bot, user_id=user_id, channel_id=channel_id, message=message, whisper=whisper, args=args)
+    def run(self, bot, author, channel, message, whisper, args):
+        return self.cb(bot=bot, author=author, channel=channel, message=message, whisper=whisper, args=args)
 
 
 def get_argument_substitutions(string):
@@ -197,9 +197,11 @@ class MessageAction(BaseAction):
         if bot:
             self.argument_subs = get_argument_substitutions(self.response)
             self.num_urlfetch_subs = len(get_urlfetch_substitutions(self.response, all=True))
+            self.subs = get_substitutions(self.response, bot)
         else:
             self.argument_subs = []
             self.num_urlfetch_subs = 0
+            self.subs = {}
 
     @staticmethod
     def get_argument_value(message, index):
@@ -215,6 +217,8 @@ class MessageAction(BaseAction):
     def get_response(self, bot, extra):
         resp = self.response
 
+        resp = apply_substitutions(resp, self.subs, bot, extra)
+
         if resp is None:
             return None
 
@@ -227,10 +231,10 @@ class MessageAction(BaseAction):
         return resp
 
     @staticmethod
-    def get_extra_data(user_id, message, args):
-        return {"user_id": user_id, "message": message, **args}
+    def get_extra_data(author, channel, message, args):
+        return {"author": author, "channel": channel, "message": message, **args}
 
-    def run(self, bot, user_id, message, whisper, args):
+    def run(self, bot, author, channel, message, whisper, args):
         raise NotImplementedError("Please implement the run method.")
 
 
@@ -258,6 +262,95 @@ def urlfetch_msg(method, message, num_urlfetch_subs, bot, extra={}, args=[], kwa
     args.append(message)
 
     method(*args, **kwargs)
+
+class IfSubstitution:
+    def __call__(self, key, extra={}):
+        if self.sub.key is None:
+            msg = MessageAction.get_argument_value(extra.get("message", ""), self.sub.argument - 1)
+            if msg:
+                return self.get_true_response(extra)
+
+            return self.get_false_response(extra)
+
+        res = self.sub.cb(self.sub.key, extra)
+        if res:
+            return self.get_true_response(extra)
+
+        return self.get_false_response(extra)
+
+    def get_true_response(self, extra):
+        return apply_substitutions(self.true_response, self.true_subs, self.bot, extra)
+
+    def get_false_response(self, extra):
+        return apply_substitutions(self.false_response, self.false_subs, self.bot, extra)
+
+    def __init__(self, key, arguments, bot):
+        self.bot = bot
+        subs = get_substitutions(key, bot)
+        if len(subs) == 1:
+            self.sub = list(subs.values())[0]
+        else:
+            subs = get_argument_substitutions(key)
+            if len(subs) == 1:
+                self.sub = subs[0]
+            else:
+                self.sub = None
+        self.true_response = arguments[0][2:-1] if arguments else "Yes"
+        self.false_response = arguments[1][2:-1] if len(arguments) > 1 else "No"
+
+        self.true_subs = get_substitutions(self.true_response, bot)
+        self.false_subs = get_substitutions(self.false_response, bot)
+
+def get_substitutions(string, bot):
+    """
+    Returns a dictionary of `Substitution` objects thare are found in the passed `string`.
+    Will not return multiple `Substitution` objects for the same string.
+    This means "You have $(source:points) points xD $(source:points)" only returns one Substitution.
+    """
+
+    substitutions = collections.OrderedDict()
+
+    for sub_key in Substitution.substitution_regex.finditer(string):
+        sub_string, path, argument, key, filters, if_arguments = get_substitution_arguments(sub_key)
+
+        if sub_string in substitutions:
+            # We already matched this variable
+            continue
+
+        try:
+            if path == "if":
+                if if_arguments:
+                    if_substitution = IfSubstitution(key, if_arguments, bot)
+                    if if_substitution.sub is None:
+                        continue
+                    sub = Substitution(if_substitution, needle=sub_string, key=key, argument=argument, filters=filters)
+                    substitutions[sub_string] = sub
+        except:
+            log.exception("BabyRage")
+
+    method_mapping = {}
+    try:
+        method_mapping["author"] = bot.get_author_value
+        method_mapping["channel"] = bot.get_channel_value
+        method_mapping["time"] = bot.get_time_value
+        method_mapping["args"] = bot.get_args_value
+        method_mapping["strictargs"] = bot.get_strictargs_value
+        method_mapping["command"] = bot.get_command_value
+    except AttributeError:
+        pass
+
+    for sub_key in Substitution.substitution_regex.finditer(string):
+        sub_string, path, argument, key, filters, if_arguments = get_substitution_arguments(sub_key)
+
+        if sub_string in substitutions:
+            # We already matched this variable
+            continue
+
+        if path in method_mapping:
+            sub = Substitution(method_mapping[path], needle=sub_string, key=key, argument=argument, filters=filters)
+            substitutions[sub_string] = sub
+
+    return substitutions
 
 class MultiAction(BaseAction):
     type = "multi"
@@ -304,7 +397,7 @@ class MultiAction(BaseAction):
         multiaction.original_commands = copy.copy(commands)
         return multiaction
 
-    def run(self, bot, user_id, channel_id, message, whisper, args):
+    def run(self, bot, author, channel, message, whisper, args):
         """ If there is more text sent to the multicommand after the
         initial alias, we _ALWAYS_ assume it's trying the subaction command.
         If the extra text was not a valid command, we try to run the fallback command.
@@ -327,8 +420,8 @@ class MultiAction(BaseAction):
 
         if cmd:
             if args["user_level"] >= cmd.level:
-                return cmd.run(bot=bot, user_id=user_id, channel_id=channel_id, message=extra_msg, whisper=whisper, args=args)
-            log.info(f"User {user_id} tried running a sub-command he had no access to ({command}).")
+                return cmd.run(bot=bot, author=author, channel=channel, message=extra_msg, whisper=whisper, args=args)
+            log.info(f"User {author.name}#{author.discriminator} tried running a sub-command he had no access to ({command}).")
 
         return None
 
@@ -336,24 +429,21 @@ class MultiAction(BaseAction):
 class SayAction(MessageAction):
     subtype = "say"
 
-    def run(self, bot, user_id, channel_id, message, whisper, args):
-        extra = self.get_extra_data(user_id, message, args)
+    def run(self, bot, author, channel, message, whisper, args):
+        extra = self.get_extra_data(author, channel, message, args)
         resp = self.get_response(bot, extra)
-
-        log.info(self.response)
-        log.info(self.argument_subs)
 
         if not resp:
             return False
 
         if self.num_urlfetch_subs == 0:
-            return bot.say(channel_id, resp)
+            return bot.say(channel, resp)
 
         return ScheduleManager.execute_now(
             urlfetch_msg,
             args=[],
             kwargs={
-                "args": [channel_id],
+                "args": [channel],
                 "kwargs": {},
                 "method": bot.say,
                 "bot": bot,
@@ -367,21 +457,21 @@ class SayAction(MessageAction):
 class WhisperAction(MessageAction):
     subtype = "whisper"
 
-    def run(self, bot, user_id, channel_id, message, whisper, args):
-        extra = self.get_extra_data(user_id, message, args)
+    def run(self, bot, author, channel, message, whisper, args):
+        extra = self.get_extra_data(author, channel, message, args)
         resp = self.get_response(bot, extra)
 
         if not resp:
             return False
 
         if self.num_urlfetch_subs == 0:
-            return bot.private_message(user_id, resp)
+            return bot.private_message(author, resp)
 
         return ScheduleManager.execute_now(
             urlfetch_msg,
             args=[],
             kwargs={
-                "args": [user_id],
+                "args": [author],
                 "kwargs": {},
                 "method": bot.private_message,
                 "bot": bot,

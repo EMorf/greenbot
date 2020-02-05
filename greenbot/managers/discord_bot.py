@@ -35,10 +35,10 @@ class CustomClient(discord.Client):
             for role in member.roles:
                user_level = max(int(self.bot.admin_roles.get(role, 100)), user_level)
         with DBManager.create_session_scope() as db_session:
-            user = User._create_or_get_by_discord_id(db_session, message.author.id)
+            User._create_or_get_by_discord_id(db_session, message.author.id)
             Message._create(db_session, message.id, message.author.id, message.channel.id if isinstance(message.author, discord.Member) else None, message.content)
-            HandlerManager.trigger("discord_message", message=message.content, user_id=user.discord_id, user_level=user_level, channel_id=message.channel.id if isinstance(message.author, discord.Member) else None, whisper=not isinstance(message.author, discord.Member))
-    
+            HandlerManager.trigger("discord_message", message=message.content, author=message.author, user_level=user_level, channel=message.channel if isinstance(message.author, discord.Member) else None, whisper=not isinstance(message.author, discord.Member))
+
     async def on_error(self, event, *args, **kwargs):
         log.error(traceback.format_exc())
 
