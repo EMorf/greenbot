@@ -26,9 +26,6 @@ class Message(Base):
     time_sent = Column(UtcDateTime(), nullable=True, server_default="NULL")
     user = relationship("User")
 
-    def can_afford(self, points):
-        return not self.points < points
-
     @staticmethod
     def _create(db_session, message_id, user_id, channel_id, content):
         user = Message(message_id=str(message_id), user_id=str(user_id), channel_id=str(channel_id), content=content, time_sent=greenbot.utils.now())
