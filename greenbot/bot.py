@@ -1,6 +1,8 @@
 import logging
 import asyncio
 import sys
+from pytz import timezone
+import urllib
 
 from greenbot.managers.schedule import ScheduleManager
 from greenbot.managers.db import DBManager
@@ -10,7 +12,7 @@ from greenbot.managers.discord_bot import DiscordBotManager
 from greenbot.managers.command import CommandManager
 from greenbot.migration.db import DatabaseMigratable
 from greenbot.migration.migrate import Migration
-import greenbot.utils
+import greenbot.utils as utils
 
 import greenbot.migration_revisions.db
 
