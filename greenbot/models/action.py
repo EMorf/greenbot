@@ -139,7 +139,6 @@ def get_argument_substitutions(string):
                 break
         if found:
             continue
-
         argument_substitutions.append(Substitution(None, needle=needle, argument=argument_num))
 
     return argument_substitutions
@@ -227,7 +226,6 @@ class MessageAction(BaseAction):
             value = str(MessageAction.get_argument_value(extra["message"], sub.argument - 1))
             resp = resp.replace(needle, value)
             log.debug(f"Replacing {needle} with {value}")
-
         return resp
 
     @staticmethod
@@ -336,6 +334,7 @@ def get_substitutions(string, bot):
         method_mapping["args"] = bot.get_args_value
         method_mapping["strictargs"] = bot.get_strictargs_value
         method_mapping["command"] = bot.get_command_value
+        method_mapping["member"] = bot.get_parse_member
     except AttributeError:
         pass
 
