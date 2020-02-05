@@ -432,7 +432,7 @@ class SayAction(MessageAction):
 
     def run(self, bot, author, channel, message, whisper, args):
         extra = self.get_extra_data(author, channel, message, args)
-        extra.pop("role_management")
+        # extra.pop("role_management")
         arg_num = 1
         value = str(MessageAction.get_argument_value(extra["message"], 0))
         log.info(value)
