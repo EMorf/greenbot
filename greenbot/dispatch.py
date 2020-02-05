@@ -48,8 +48,10 @@ class Dispatch:
         add_role_id = options.get("addrole_name", None)
         remove_role_id = options.get("removerole_names", None)
 
-        del options["addrole_name"]
-        del options["removerole_names"]
+        if add_role_id:
+            del options["addrole_name"]
+        if remove_role_id:
+            del options["removerole_names"]
 
         options["add_role_id"] = bot.get_role_id(add_role_id) if add_role_id else None
         options["remove_role_id"] = bot.get_role_id(remove_role_id) if remove_role_id else None
