@@ -1,6 +1,7 @@
 import logging
 import asyncio
 import sys
+import discord
 from pytz import timezone
 import urllib
 
@@ -94,13 +95,13 @@ class Bot:
     def unban(self, user, reason=None):
         self.discord_bot.unban(user=user, reason=reason)
     
-    def private_message(self, user, message):
-        self.discord_bot.private_message(user, message)
+    def private_message(self, user, message, embed=None):
+        self.discord_bot.private_message(user, message, embed)
 
-    def say(self, channel, message):
-        self.discord_bot.say(channel, message)
+    def say(self, channel, message, embed=None):
+        self.discord_bot.say(channel, message, embed)
 
-    def discord_message(self, message, author, channel, user_level, whisper):
+    def discord_message(self, message_raw, message, author, channel, user_level, whisper):
         msg_lower = message.lower()
         if msg_lower[:1] == self.settings["command_prefix"]:
             msg_lower_parts = msg_lower.split(" ")
@@ -111,6 +112,7 @@ class Bot:
                 command = self.commands[trigger]
                 extra_args = {
                     "trigger": trigger,
+                    "message_raw": message_raw,
                     "user_level": user_level,
                 }
                 command.run(bot=self, author=author, channel=channel, message=remaining_message, whisper=whisper, args=extra_args)
@@ -135,6 +137,12 @@ class Bot:
             return getattr(extra["author"], key)
         member = self.get_member(extra["argument"][3:][:-1])
         return_val = getattr(member, key) if member else None
+        return return_val
+
+    def get_role_value(self, key, extra={}):
+        if len(extra["argument"]) != 18: return None
+        role = self.get_role(extra["argument"])
+        return_val = getattr(role, key) if role else None
         return return_val
 
     def quit(self, message, event, **options):
@@ -180,6 +188,100 @@ class Bot:
             return None
 
         return ret
+
+    def get_user_info(self, key, extra={}):
+        user = self.get_member(extra["argument"])
+        message = extra["message_raw"]
+        if not user:
+            user = extra["author"]
+
+        roles = user.roles[-1:0:-1]
+
+        joined_at = user.joined_at
+        since_created = (message.created_at - user.created_at).days
+        if joined_at is not None:
+            since_joined = (message.created_at - joined_at).days
+            user_joined = joined_at.strftime("%d %b %Y %H:%M")
+        else:
+            since_joined = "?"
+            user_joined = ("Unknown")
+        user_created = user.created_at.strftime("%d %b %Y %H:%M")
+        voice_state = user.voice
+
+        created_on = ("{}\n({} days ago)").format(user_created, since_created)
+        joined_on = ("{}\n({} days ago)").format(user_joined, since_joined)
+
+        activity = ("Chilling in {} status").format(user.status)
+        if user.activity is None:  # Default status
+            pass
+        elif user.activity.type == discord.ActivityType.playing:
+            activity = ("Playing {}").format(user.activity.name)
+        elif user.activity.type == discord.ActivityType.streaming:
+            activity = ("Streaming [{}]({})").format(user.activity.name, user.activity.url)
+        elif user.activity.type == discord.ActivityType.listening:
+            activity = ("Listening to {}").format(user.activity.name)
+        elif user.activity.type == discord.ActivityType.watching:
+            activity = ("Watching {}").format(user.activity.name)
+
+        if roles:
+
+            role_str = ", ".join([x.mention for x in roles])
+            # 400 BAD REQUEST (error code: 50035): Invalid Form Body
+            # In embed.fields.2.value: Must be 1024 or fewer in length.
+            if len(role_str) > 1024:
+                # Alternative string building time.
+                # This is not the most optimal, but if you're hitting this, you are losing more time
+                # to every single check running on users than the occasional user info invoke
+                # We don't start by building this way, since the number of times we hit this should be
+                # infintesimally small compared to when we don't across all uses of Red.
+                continuation_string = (
+                    "and {numeric_number} more roles not displayed due to embed limits."
+                )
+                available_length = 1024 - len(continuation_string)  # do not attempt to tweak, i18n
+
+                role_chunks = []
+                remaining_roles = 0
+
+                for r in roles:
+                    chunk = f"{r.mention}, "
+                    chunk_size = len(chunk)
+
+                    if chunk_size < available_length:
+                        available_length -= chunk_size
+                        role_chunks.append(chunk)
+                    else:
+                        remaining_roles += 1
+
+                role_chunks.append(continuation_string.format(numeric_number=remaining_roles))
+
+                role_str = "".join(role_chunks)
+
+        else:
+            role_str = None
+
+        data = discord.Embed(description=activity, colour=user.colour)
+        data.add_field(name=("Joined Discord on"), value=created_on)
+        data.add_field(name=("Joined this server on"), value=joined_on)
+        if role_str is not None:
+            data.add_field(name=("Roles"), value=role_str, inline=False)
+        if voice_state and voice_state.channel:
+            data.add_field(
+                name=("Current voice channel"),
+                value="{0.mention} ID: {0.id}".format(voice_state.channel),
+                inline=False,
+            )
+        data.set_footer(text=(f"User ID: {user.id}"))
+
+        name = str(user)
+        name = " ~ ".join((name, user.nick)) if user.nick else name
+        if user.avatar:
+            avatar = user.avatar_url_as(static_format="png")
+            data.set_author(name=name, url=avatar)
+            data.set_thumbnail(url=avatar)
+        else:
+            data.set_author(name=name)
+
+        return data
 
     @staticmethod
     def get_args_value(key, extra={}):

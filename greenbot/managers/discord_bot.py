@@ -37,7 +37,7 @@ class CustomClient(discord.Client):
         with DBManager.create_session_scope() as db_session:
             User._create_or_get_by_discord_id(db_session, message.author.id)
             Message._create(db_session, message.id, message.author.id, message.channel.id if isinstance(message.author, discord.Member) else None, message.content)
-            HandlerManager.trigger("discord_message", message=message.content, author=message.author, user_level=user_level, channel=message.channel if isinstance(message.author, discord.Member) else None, whisper=not isinstance(message.author, discord.Member))
+            HandlerManager.trigger("discord_message", message_raw=message, message=message.content, author=message.author, user_level=user_level, channel=message.channel if isinstance(message.author, discord.Member) else None, whisper=not isinstance(message.author, discord.Member))
 
     async def on_error(self, event, *args, **kwargs):
         log.error(traceback.format_exc())
@@ -78,8 +78,8 @@ class DiscordBotManager:
                 continue
             self.listening_channels.append(channel)
 
-    def private_message(self, user, message):
-        self.private_loop.create_task(self._private_message(user, message))
+    def private_message(self, user, message, embed=None):
+        self.private_loop.create_task(self._private_message(user, message, embed))
 
     def remove_role(self, user, role):
         self.private_loop.create_task(self._remove_role(user, role))
@@ -111,13 +111,13 @@ class DiscordBotManager:
         except ValueError:
             return None
 
-    def say(self, channel, message):
-        self.private_loop.create_task(self._say(channel=channel, message=message))
+    def say(self, channel, message, embed=None):
+        self.private_loop.create_task(self._say(channel=channel, message=message, embed=embed))
     
-    async def _say(self, channel, message):
+    async def _say(self, channel, message, embed=None):
         message = discord.utils.escape_markdown(message)
         if channel:
-            await channel.send(message)
+            await channel.send(conten=message, embed=embed)
 
     async def _ban(self, user, timeout_in_seconds=0, reason=None, delete_message_days=0):
         delete_message_days = 7 if delete_message_days > 7 else (0 if delete_message_days < 0 else delete_message_days)
@@ -142,10 +142,10 @@ class DiscordBotManager:
             return
         self.guild.unban(user, reason)
 
-    async def _private_message(self, user, message):
+    async def _private_message(self, user, message, embed=None):
         message = discord.utils.escape_markdown(message)
         await user.create_dm()
-        await user.dm_channel.send(message)
+        await user.dm_channel.send(content=message, embed=embed)
 
     async def _remove_role(self, user, role):
         if not self.guild:

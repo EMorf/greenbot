@@ -5,6 +5,7 @@ import sys
 
 import regex as re
 import requests
+import discord
 
 from greenbot.managers.schedule import ScheduleManager
 
@@ -38,6 +39,7 @@ class ActionParser:
 
 
 def apply_substitutions(text, substitutions, bot, extra):
+    embed = None
     for needle, sub in substitutions.items():
         if sub.key and sub.argument:
             param = sub.key
@@ -50,6 +52,10 @@ def apply_substitutions(text, substitutions, bot, extra):
             log.error("Unknown param for response.")
             continue
         value = sub.cb(param, extra)
+        if isinstance(value, discord.Embed):
+            text = text.replace(needle, "")
+            embed = value
+            continue
         if value is None:
             return None
         try:
@@ -61,7 +67,7 @@ def apply_substitutions(text, substitutions, bot, extra):
             return None
         text = text.replace(needle, str(value))
 
-    return text 
+    return text, embed
 
 
 class Substitution:
@@ -216,7 +222,7 @@ class MessageAction(BaseAction):
     def get_response(self, bot, extra):
         resp = self.response
 
-        resp = apply_substitutions(resp, self.subs, bot, extra)
+        resp, embed = apply_substitutions(resp, self.subs, bot, extra)
 
         if resp is None:
             return None
@@ -226,7 +232,7 @@ class MessageAction(BaseAction):
             value = str(MessageAction.get_argument_value(extra["message"], sub.argument - 1))
             resp = resp.replace(needle, value)
             log.debug(f"Replacing {needle} with {value}")
-        return resp
+        return resp, embed
 
     @staticmethod
     def get_extra_data(author, channel, message, args):
@@ -335,6 +341,8 @@ def get_substitutions(string, bot):
         method_mapping["strictargs"] = bot.get_strictargs_value
         method_mapping["command"] = bot.get_command_value
         method_mapping["member"] = bot.get_member_value
+        method_mapping["role"] = bot.get_role_value
+        method_mapping["userinfo"] = bot.get_role_value
     except AttributeError:
         pass
 
@@ -452,13 +460,13 @@ class SayAction(MessageAction):
                     bot.remove_role(member, role)
                 else:
                     log.error(f"cannot find role: {role} or member: {member}")
-        resp = self.get_response(bot, extra)
+        resp, embed = self.get_response(bot, extra)
 
         if not resp:
             return False
 
         if self.num_urlfetch_subs == 0:
-            return bot.say(channel, resp)
+            return bot.say(channel, resp, embed)
 
         return ScheduleManager.execute_now(
             urlfetch_msg,
@@ -470,6 +478,7 @@ class SayAction(MessageAction):
                 "bot": bot,
                 "extra": extra,
                 "message": resp,
+                "embed": embed,
                 "num_urlfetch_subs": self.num_urlfetch_subs,
             },
         )
@@ -480,7 +489,7 @@ class WhisperAction(MessageAction):
 
     def run(self, bot, author, channel, message, whisper, args):
         extra = self.get_extra_data(author, channel, message, args)
-        resp = self.get_response(bot, extra)
+        resp, embed= self.get_response(bot, extra)
         if "role_management" in args:
             extra.pop("role_management")
             arg_num = 1
@@ -506,7 +515,7 @@ class WhisperAction(MessageAction):
             return False
 
         if self.num_urlfetch_subs == 0:
-            return bot.private_message(author, resp)
+            return bot.private_message(author, resp, embed)
 
         return ScheduleManager.execute_now(
             urlfetch_msg,
@@ -518,6 +527,7 @@ class WhisperAction(MessageAction):
                 "bot": bot,
                 "extra": extra,
                 "message": resp,
+                "embed": embed, 
                 "num_urlfetch_subs": self.num_urlfetch_subs,
             },
         )

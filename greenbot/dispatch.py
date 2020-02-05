@@ -45,8 +45,8 @@ class Dispatch:
             type = "channelmessage"
         
 
-        add_role_id = options.get("addrole_name", None)
-        remove_role_id = options.get("removerole_names", None)
+        add_role_id = options.get("addrole_id", None)
+        remove_role_id = options.get("removerole_id", None)
 
         addrole_focus = options.get("addrole_focus", None)
         removerole_focus = options.get("removerole_focus", None)
@@ -54,11 +54,11 @@ class Dispatch:
         extra_args = {
             "role_management": {
                 "add": {
-                    "id": str(bot.get_role_id(add_role_id)) if add_role_id else None,
+                    "id": add_role_id,
                     "arg": addrole_focus
                 },
                 "remove": {
-                    "id": str(bot.get_role_id(remove_role_id)) if remove_role_id else None,
+                    "id": remove_role_id,
                     "arg": removerole_focus
                 }
             }
@@ -67,9 +67,9 @@ class Dispatch:
         action = {"type": type, "message": response}
 
         if add_role_id:
-            del options["addrole_name"]
+            del options["addrole_id"]
         if addrole_focus:
-            del options["addrole_focus"]
+            del options["removerole_id"]
         if removerole_focus:
             del options["removerole_focus"]
         if remove_role_id:
