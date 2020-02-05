@@ -196,13 +196,14 @@ class MessageAction(BaseAction):
         self.response = response
         if bot:
             self.argument_subs = get_argument_substitutions(self.response)
-            log.info(self.response)
-            log.info(self.argument_subs)
             self.num_urlfetch_subs = len(get_urlfetch_substitutions(self.response, all=True))
         else:
             self.argument_subs = []
             self.subs = {}
             self.num_urlfetch_subs = 0
+
+        log.info(self.response)
+        log.info(self.argument_subs)
 
     @staticmethod
     def get_argument_value(message, index):
@@ -344,6 +345,9 @@ class SayAction(MessageAction):
     def run(self, bot, user_id, channel_id, message, whisper, args):
         extra = self.get_extra_data(user_id, message, args)
         resp = self.get_response(bot, extra)
+
+        log.info(self.response)
+        log.info(self.argument_subs)
 
         if not resp:
             return False
