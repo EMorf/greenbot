@@ -131,11 +131,9 @@ class Bot:
         return self.discord_bot.get_member(member_id)
 
     def get_member_value(self, key, extra={}):
-        
-        if extra["argument"] != 22: return
+        if len(extra["argument"]) != 22: return
         member = self.get_member(extra["argument"][3:][:-1])
         return_val = getattr(member, key) if member else None
-        log.info(return_val)
         return return_val
 
     def quit(self, message, event, **options):
