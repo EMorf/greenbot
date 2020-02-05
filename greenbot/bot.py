@@ -280,7 +280,8 @@ class Bot:
             data.set_thumbnail(url=avatar)
         else:
             data.set_author(name=name)
-
+        log.info(data)
+        log.info(type(data))
         return data
 
     @staticmethod
