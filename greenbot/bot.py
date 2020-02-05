@@ -88,17 +88,17 @@ class Bot:
     def start(self):
         self.private_loop.run_forever()
 
-    def ban(self, user_id, timeout_in_seconds=0, reason=None, delete_message_days=0):
-        self.discord_bot.ban(user_id=user_id, timeout_in_seconds=timeout_in_seconds, reason=reason, delete_message_days=delete_message_days)
+    def ban(self, user, timeout_in_seconds=0, reason=None, delete_message_days=0):
+        self.discord_bot.ban(user=user, timeout_in_seconds=timeout_in_seconds, reason=reason, delete_message_days=delete_message_days)
 
-    def unban(self, user_id, reason=None):
-        self.discord_bot.unban(user_id=user_id, reason=reason)
+    def unban(self, user, reason=None):
+        self.discord_bot.unban(user=user, reason=reason)
     
-    def private_message(self, user_id, message):
-        self.discord_bot.private_message(user_id, message)
+    def private_message(self, user, message):
+        self.discord_bot.private_message(user, message)
 
-    def say(self, channel_id, message):
-        self.discord_bot.say(channel_id, message)
+    def say(self, channel, message):
+        self.discord_bot.say(channel, message)
 
     def discord_message(self, message, author, channel, user_level, whisper):
         msg_lower = message.lower()

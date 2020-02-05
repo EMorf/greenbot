@@ -78,20 +78,20 @@ class DiscordBotManager:
                 continue
             self.listening_channels.append(channel)
 
-    def private_message(self, user_id, message):
+    def private_message(self, user, message):
         self.private_loop.create_task(self._private_message(user_id, message))
 
-    def remove_role(self, user_id, role):
+    def remove_role(self, user, role):
         self.private_loop.create_task(self._remove_role(user_id, role))
 
-    def add_role(self, user_id, role):
+    def add_role(self, user, role):
         self.private_loop.create_task(self._add_role(user_id, role))
 
-    def ban(self, user_id, timeout_in_seconds=0, reason=None, delete_message_days=0):
+    def ban(self, user, timeout_in_seconds=0, reason=None, delete_message_days=0):
         self.private_loop.create_task(self._ban(user_id=user_id, timeout_in_seconds=timeout_in_seconds, reason=reason, delete_message_days=delete_message_days))
 
-    def unban(self, user_id, reason=None):
-        self.private_loop.create_task(self._unban(user_id=user_id, reason=reason))
+    def unban(self, user, reason=None):
+        self.private_loop.create_task(self._unban(user=user, reason=reason))
 
     def role_name_to_id(self, role_name):
         for role in self.guild.roles:
@@ -99,16 +99,15 @@ class DiscordBotManager:
                 return role.id
         return None
 
-    def say(self, channel_id, message):
-        self.private_loop.create_task(self._say(channel_id=channel_id, message=message))
+    def say(self, channel, message):
+        self.private_loop.create_task(self._say(channel=channel, message=message))
     
-    async def _say(self, channel_id, message):
+    async def _say(self, channel, message):
         message = discord.utils.escape_markdown(message)
-        channel = self.guild.get_channel(int(channel_id))
         if channel:
             await channel.send(message)
 
-    async def _ban(self, user_id, timeout_in_seconds=0, reason=None, delete_message_days=0):
+    async def _ban(self, user, timeout_in_seconds=0, reason=None, delete_message_days=0):
         delete_message_days = 7 if delete_message_days > 7 else (0 if delete_message_days < 0 else delete_message_days)
 
         if not self.guild:
@@ -127,7 +126,7 @@ class DiscordBotManager:
             timeouts[member.id] = timeout_in_seconds
         self.guild.ban(member, reason=reason, delete_message_days=delete_message_days)
 
-    async def _unban(self, user_id, reason=None):
+    async def _unban(self, user, reason=None):
         if not self.guild:
             return
         try:
@@ -136,11 +135,10 @@ class DiscordBotManager:
             return
         self.guild.unban(member, reason)
 
-    async def _private_message(self, user_id, message):
-        member = self.client.get_user(int(user_id))
+    async def _private_message(self, user, message):
         message = discord.utils.escape_markdown(message)
-        await member.create_dm()
-        await member.dm_channel.send(message)
+        await user.create_dm()
+        await user.dm_channel.send(message)
 
     async def _remove_role(self, user_id, role):
         if not self.guild:
