@@ -316,6 +316,14 @@ class Command(Base):
             pass
         return cmd
 
+    @classmethod
+    def multiaction_command(cls, default=None, fallback=None, **options):
+        from greenbot.models.action import MultiAction
+
+        cmd = cls(**options)
+        cmd.action = MultiAction.ready_built(options.get("commands"), default=default, fallback=fallback)
+        return cmd
+
     def load_args(self, level, action):
         self.level = level
         self.action = action
