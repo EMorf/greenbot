@@ -53,10 +53,10 @@ def apply_substitutions(text, substitutions, bot, extra):
             continue
         value = sub.cb(param, extra)
         log.info(value)
+        log.info(type(value))
         if isinstance(value, discord.embeds.Embed):
             text = text.replace(needle, "")
             embed = value
-            log.info(embed)
             continue
         if value is None:
             return None
