@@ -377,7 +377,7 @@ class Command(Base):
 
         return True
 
-    def run_action(self, bot, user_id, message, whisper, args):
+    def run_action(self, bot, user_id, channel_id, message, whisper, args):
         cur_time = greenbot.utils.now().timestamp()
         with DBManager.create_session_scope() as db_session:
             user = User._create_or_get_by_discord_id(db_session, user_id)

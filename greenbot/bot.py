@@ -109,7 +109,7 @@ class Bot:
                     "trigger": trigger,
                     "user_level": user_level,
                 }
-                command.run(self, user_id, remaining_message, channel_id=channel_id, whisper=whisper, args=extra_args)
+                command.run(bot=self, user_id=user_id, channel_id=channel_id, message=remaining_message, whisper=whisper, args=extra_args)
 
     def get_role_id(self, role_name):
         return self.discord_bot.role_name_to_id(role_name)
