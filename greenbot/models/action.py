@@ -52,7 +52,7 @@ def apply_substitutions(text, substitutions, bot, extra):
             log.error("Unknown param for response.")
             continue
         value = sub.cb(param, extra)
-        if isinstance(value, discord.Embed):
+        if isinstance(value, discord.embeds.Embed):
             text = text.replace(needle, "")
             embed = value
             continue
