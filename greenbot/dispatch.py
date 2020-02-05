@@ -341,7 +341,7 @@ class Dispatch:
                 bot.private_message(user_id, "That command is an internal command, it cannot be removed.")
                 return False
 
-            if user_id.level < 2000:
+            if args["user_level"] < 2000:
                 if command.action is not None and not command.action.type == "message":
                     bot.private_message(user_id, "That command is not a normal command, it cannot be removed by you.")
                     return False
