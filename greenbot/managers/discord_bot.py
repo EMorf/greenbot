@@ -119,7 +119,7 @@ class DiscordBotManager:
         if channel:
             if embed:
                 message = None
-            await channel.send(conten=message, embed=embed)
+            await channel.send(content=message, embed=embed)
 
     async def _ban(self, user, timeout_in_seconds=0, reason=None, delete_message_days=0):
         delete_message_days = 7 if delete_message_days > 7 else (0 if delete_message_days < 0 else delete_message_days)
