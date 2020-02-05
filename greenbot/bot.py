@@ -191,7 +191,7 @@ class Bot:
         return ret
 
     def get_user_info(self, key, extra={}):
-        user = self.get_member(extra["argument"]) if "argument" in extra else None
+        user = self.get_member(key) if key else None
         message = extra["message_raw"]
         if not user:
             user = extra["author"]
