@@ -55,6 +55,7 @@ def apply_substitutions(text, substitutions, bot, extra):
         if isinstance(value, discord.embeds.Embed):
             text = text.replace(needle, "")
             embed = value
+            log.info("valid embed")
             continue
         if value is None:
             return None
@@ -232,6 +233,7 @@ class MessageAction(BaseAction):
             value = str(MessageAction.get_argument_value(extra["message"], sub.argument - 1))
             resp = resp.replace(needle, value)
             log.debug(f"Replacing {needle} with {value}")
+        log.info(f"is embed valid? {embed}")
         return resp, embed
 
     @staticmethod
@@ -459,6 +461,7 @@ class SayAction(MessageAction):
                 else:
                     log.error(f"cannot find role: {role} or member: {member}")
         resp, embed = self.get_response(bot, extra)
+        log.info(f"embed status {embed}")
         if not resp:
             return False
 
