@@ -52,8 +52,6 @@ def apply_substitutions(text, substitutions, bot, extra):
             log.error("Unknown param for response.")
             continue
         value = sub.cb(param, extra)
-        log.info(value)
-        log.info(type(value))
         if isinstance(value, discord.embeds.Embed):
             text = text.replace(needle, "")
             embed = value
@@ -349,7 +347,6 @@ def get_substitutions(string, bot):
         pass
 
     for sub_key in Substitution.substitution_regex.finditer(string):
-        log.info(sub_key)
         sub_string, path, argument, key, filters, if_arguments = get_substitution_arguments(sub_key)
 
         if sub_string in substitutions:
@@ -447,7 +444,6 @@ class SayAction(MessageAction):
             if args["role_management"]["add"]["id"]:
                 arg = args["role_management"]["add"]["arg"] or arg_num
                 member = bot.get_member(str(MessageAction.get_argument_value(extra["message"], arg-1))[3:][:-1])
-                log.info(str(MessageAction.get_argument_value(extra["message"], arg-1))[3:][:-1])
                 role = bot.get_role(args["role_management"]["add"]["id"])
                 if member and role:
                     bot.add_role(member, role)
@@ -463,7 +459,6 @@ class SayAction(MessageAction):
                 else:
                     log.error(f"cannot find role: {role} or member: {member}")
         resp, embed = self.get_response(bot, extra)
-        log.info(embed)
         if not resp:
             return False
 
@@ -498,7 +493,6 @@ class WhisperAction(MessageAction):
             if args["role_management"]["add"]["id"]:
                 arg = args["role_management"]["add"]["arg"] or arg_num
                 member = bot.get_member(str(MessageAction.get_argument_value(extra["message"], arg-1))[3:][:-1])
-                log.info(str(MessageAction.get_argument_value(extra["message"], arg-1))[3:][:-1])
                 role = bot.get_role(args["role_management"]["add"]["id"])
                 if member and role:
                     bot.add_role(member, role)

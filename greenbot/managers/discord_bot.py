@@ -117,6 +117,8 @@ class DiscordBotManager:
     async def _say(self, channel, message, embed=None):
         message = discord.utils.escape_markdown(message)
         if channel:
+            if embed:
+                message = None
             await channel.send(conten=message, embed=embed)
 
     async def _ban(self, user, timeout_in_seconds=0, reason=None, delete_message_days=0):
@@ -145,6 +147,8 @@ class DiscordBotManager:
     async def _private_message(self, user, message, embed=None):
         message = discord.utils.escape_markdown(message)
         await user.create_dm()
+        if embed:
+            message = None
         await user.dm_channel.send(content=message, embed=embed)
 
     async def _remove_role(self, user, role):

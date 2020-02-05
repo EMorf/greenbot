@@ -99,6 +99,7 @@ class Bot:
         self.discord_bot.private_message(user, message, embed)
 
     def say(self, channel, message, embed=None):
+        log.info(f"embed: {embed}")
         self.discord_bot.say(channel, message, embed)
 
     def discord_message(self, message_raw, message, author, channel, user_level, whisper):
@@ -280,8 +281,6 @@ class Bot:
             data.set_thumbnail(url=avatar)
         else:
             data.set_author(name=name)
-        log.info(data)
-        log.info(type(data))
         return data
 
     @staticmethod
