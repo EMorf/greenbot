@@ -131,7 +131,8 @@ class Bot:
         return self.discord_bot.get_member(member_id)
 
     def get_member_value(self, key, extra={}):
-        if len(extra["argument"]) != 22: return
+        if len(extra["argument"]) != 22:
+            return getattr(extra["author"], key)
         member = self.get_member(extra["argument"][3:][:-1])
         return_val = getattr(member, key) if member else None
         return return_val
