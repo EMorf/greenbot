@@ -24,7 +24,7 @@ class ActionParser:
         if data["type"] == "channelmessage":
             action = SayAction(data["message"], ActionParser.bot)
         elif data["type"] == "privatemessage":
-            action = MeAction(data["message"], ActionParser.bot)
+            action = WhisperAction(data["message"], ActionParser.bot)
         elif data["type"] == "func":
             try:
                 action = FuncAction(getattr(Dispatch, data["cb"]))
