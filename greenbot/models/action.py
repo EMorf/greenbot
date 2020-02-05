@@ -199,10 +199,7 @@ class MessageAction(BaseAction):
             self.num_urlfetch_subs = len(get_urlfetch_substitutions(self.response, all=True))
         else:
             self.argument_subs = []
-            self.subs = {}
             self.num_urlfetch_subs = 0
-
-        log.info(bot)
 
     @staticmethod
     def get_argument_value(message, index):
@@ -217,8 +214,6 @@ class MessageAction(BaseAction):
 
     def get_response(self, bot, extra):
         resp = self.response
-
-        resp = apply_substitutions(resp, self.subs, bot, extra)
 
         if resp is None:
             return None
