@@ -31,8 +31,6 @@ class ActionParser:
             except AttributeError as e:
                 log.error(f'AttributeError caught when parsing action for action "{command}": {e}')
                 return None
-        elif data["type"] == "multi":
-            action = MultiAction(data["args"], data["default"])
         else:
             raise Exception(f"Unknown action type: {data['type']}")
 
@@ -63,46 +61,7 @@ def apply_substitutions(text, substitutions, bot, extra):
             return None
         text = text.replace(needle, str(value))
 
-    return text
-
-
-class IfSubstitution:
-    def __call__(self, key, extra={}):
-        if self.sub.key is None:
-            msg = MessageAction.get_argument_value(extra.get("message", ""), self.sub.argument - 1)
-            if msg:
-                return self.get_true_response(extra)
-
-            return self.get_false_response(extra)
-
-        res = self.sub.cb(self.sub.key, extra)
-        if res:
-            return self.get_true_response(extra)
-
-        return self.get_false_response(extra)
-
-    def get_true_response(self, extra):
-        return apply_substitutions(self.true_response, self.true_subs, self.bot, extra)
-
-    def get_false_response(self, extra):
-        return apply_substitutions(self.false_response, self.false_subs, self.bot, extra)
-
-    def __init__(self, key, arguments, bot):
-        self.bot = bot
-        subs = get_substitutions(key, bot)
-        if len(subs) == 1:
-            self.sub = list(subs.values())[0]
-        else:
-            subs = get_argument_substitutions(key)
-            if len(subs) == 1:
-                self.sub = subs[0]
-            else:
-                self.sub = None
-        self.true_response = arguments[0][2:-1] if arguments else "Yes"
-        self.false_response = arguments[1][2:-1] if len(arguments) > 1 else "No"
-
-        self.true_subs = get_substitutions(self.true_response, bot)
-        self.false_subs = get_substitutions(self.false_response, bot)
+    return text 
 
 
 class Substitution:
@@ -134,80 +93,6 @@ class BaseAction:
 
     def reset(self):
         pass
-
-
-class MultiAction(BaseAction):
-    type = "multi"
-
-    def __init__(self, args, default=None, fallback=None):
-        from greenbot.models.command import Command
-
-        self.commands = {}
-        self.default = default
-        self.fallback = fallback
-
-        for command in args:
-            cmd = Command.from_json(command)
-            for alias in command["command"].split("|"):
-                if alias not in self.commands:
-                    self.commands[alias] = cmd
-                else:
-                    log.error(f"Alias {alias} for this multiaction is already in use.")
-
-        import copy
-
-        self.original_commands = copy.copy(self.commands)
-
-    def reset(self):
-        import copy
-
-        self.commands = copy.copy(self.original_commands)
-
-    def __iadd__(self, other):
-        if other is not None and other.type == "multi":
-            self.commands.update(other.commands)
-        return self
-
-    @classmethod
-    def ready_built(cls, commands, default=None, fallback=None):
-        """ Useful if you already have a dictionary
-        with commands pre-built.
-        """
-
-        multiaction = cls(args=[], default=default, fallback=fallback)
-        multiaction.commands = commands
-        import copy
-
-        multiaction.original_commands = copy.copy(commands)
-        return multiaction
-
-    def run(self, bot, user_id, channel_id, message, whisper, args):
-        """ If there is more text sent to the multicommand after the
-        initial alias, we _ALWAYS_ assume it's trying the subaction command.
-        If the extra text was not a valid command, we try to run the fallback command.
-        In case there's no extra text sent, we will try to run the default command.
-        """
-
-        cmd = None
-        if message:
-            msg_lower_parts = message.lower().split(" ")
-            command = msg_lower_parts[0]
-            cmd = self.commands.get(command, None)
-            extra_msg = " ".join(message.split(" ")[1:])
-            if cmd is None and self.fallback:
-                cmd = self.commands.get(self.fallback, None)
-                extra_msg = message
-        elif self.default:
-            command = self.default
-            cmd = self.commands.get(command, None)
-            extra_msg = None
-
-        if cmd:
-            if args["user_level"] >= cmd.level:
-                return cmd.run(bot=bot, user_id=user_id, channel_id=channel_id, message=extra_msg, whisper=whisper, args=args)
-            log.info(f"User {user_id} tried running a sub-command he had no access to ({command}).")
-
-        return None
 
 
 class FuncAction(BaseAction):
@@ -290,54 +175,6 @@ def get_substitution_arguments(sub_key):
     return sub_string, path, argument, key, filters, if_arguments
 
 
-def get_substitutions(string, bot):
-    """
-    Returns a dictionary of `Substitution` objects thare are found in the passed `string`.
-    Will not return multiple `Substitution` objects for the same string.
-    This means "You have $(source:points) points xD $(source:points)" only returns one Substitution.
-    """
-
-    substitutions = collections.OrderedDict()
-
-    for sub_key in Substitution.substitution_regex.finditer(string):
-        sub_string, path, argument, key, filters, if_arguments = get_substitution_arguments(sub_key)
-
-        if sub_string in substitutions:
-            # We already matched this variable
-            continue
-
-        try:
-            if path == "if":
-                if if_arguments:
-                    if_substitution = IfSubstitution(key, if_arguments, bot)
-                    if if_substitution.sub is None:
-                        continue
-                    sub = Substitution(if_substitution, needle=sub_string, key=key, argument=argument, filters=filters)
-                    substitutions[sub_string] = sub
-        except:
-            log.exception("BabyRage")
-
-    method_mapping = {}
-    try:
-        # method_mapping["kvi"] = bot.get_kvi_value
-        pass
-    except AttributeError:
-        pass
-
-    for sub_key in Substitution.substitution_regex.finditer(string):
-        sub_string, path, argument, key, filters, if_arguments = get_substitution_arguments(sub_key)
-
-        if sub_string in substitutions:
-            # We already matched this variable
-            continue
-
-        if path in method_mapping:
-            sub = Substitution(method_mapping[path], needle=sub_string, key=key, argument=argument, filters=filters)
-            substitutions[sub_string] = sub
-
-    return substitutions
-
-
 def get_urlfetch_substitutions(string, all=False):
     substitutions = {}
 
@@ -359,7 +196,8 @@ class MessageAction(BaseAction):
         self.response = response
         if bot:
             self.argument_subs = get_argument_substitutions(self.response)
-            self.subs = get_substitutions(self.response, bot)
+            log.info(self.response)
+            log.info(self.argument_subs)
             self.num_urlfetch_subs = len(get_urlfetch_substitutions(self.response, all=True))
         else:
             self.argument_subs = []

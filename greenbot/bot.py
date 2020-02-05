@@ -10,7 +10,7 @@ from greenbot.managers.discord_bot import DiscordBotManager
 from greenbot.managers.command import CommandManager
 from greenbot.migration.db import DatabaseMigratable
 from greenbot.migration.migrate import Migration
-from greenbot.utils import wait_for_redis_data_loaded
+import greenbot.utils
 
 import greenbot.migration_revisions.db
 
@@ -116,3 +116,83 @@ class Bot:
 
     def quit(self, message, event, **options):
         self.quit_bot()
+
+    def apply_filter(self, resp, f):
+        available_filters = {
+            "strftime": _filter_strftime,
+            "timezone": _filter_timezone,
+            "lower": lambda var, args: var.lower(),
+            "upper": lambda var, args: var.upper(),
+            "title": lambda var, args: var.title(),
+            "capitalize": lambda var, args: var.capitalize(),
+            "swapcase": lambda var, args: var.swapcase(),
+            "time_since_minutes": lambda var, args: "no time"
+            if var == 0
+            else utils.time_since(var * 60, 0, time_format="long"),
+            "time_since": lambda var, args: "no time" if var == 0 else utils.time_since(var, 0, time_format="long"),
+            "time_since_dt": _filter_time_since_dt,
+            "urlencode": _filter_urlencode,
+            "join": _filter_join,
+            "number_format": _filter_number_format,
+            "add": _filter_add,
+            "or_else": _filter_or_else,
+        }
+        if f.name in available_filters:
+            return available_filters[f.name](resp, f.arguments)
+        return resp
+
+def _filter_time_since_dt(var, args):
+    try:
+        ts = utils.time_since(utils.now().timestamp(), var.timestamp())
+        if ts:
+            return ts
+
+        return "0 seconds"
+    except:
+        return "never FeelsBadMan ?"
+
+
+def _filter_join(var, args):
+    try:
+        separator = args[0]
+    except IndexError:
+        separator = ", "
+
+    return separator.join(var.split(" "))
+
+
+def _filter_number_format(var, args):
+    try:
+        return f"{int(var):,d}"
+    except:
+        log.exception("asdasd")
+    return var
+
+def _filter_strftime(var, args):
+    return var.strftime(args[0])
+
+
+def _filter_timezone(var, args):
+    return var.astimezone(timezone(args[0]))
+
+
+def _filter_urlencode(var, args):
+    return urllib.parse.urlencode({"x": var})[2:]
+
+
+def lowercase_first_letter(s):
+    return s[:1].lower() + s[1:] if s else ""
+
+
+def _filter_add(var, args):
+    try:
+        return str(int(var) + int(args[0]))
+    except:
+        return ""
+
+
+def _filter_or_else(var, args):
+    if var is None or len(var) <= 0:
+        return args[0]
+    else:
+        return var

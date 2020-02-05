@@ -43,10 +43,12 @@ class Dispatch:
             type = "privatemessage"
         elif options["channelmessage"] is True:
             type = "channelmessage"
-        action = {"type": type, "message": response}
+        
 
         add_role_id = options.get("addrole_name", None)
         remove_role_id = options.get("removerole_names", None)
+
+        action = {"type": type, "message": response}
 
         if add_role_id:
             del options["addrole_name"]
