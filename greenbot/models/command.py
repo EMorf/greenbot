@@ -331,7 +331,7 @@ class Command(Base):
     def is_enabled(self):
         return self.enabled == 1 and self.action is not None
 
-    def run(self, bot, user_id, channel_id, message, whisper, args):
+    def run(self, bot, author, channel, message, whisper, args):
         if self.action is None:
             log.warning("This command is not available.")
             return False
@@ -357,13 +357,13 @@ class Command(Base):
             log.debug(f"Command was run {time_since_last_run:.2f} seconds ago, waiting...")
             return False
 
-        time_since_last_run_user = (cur_time - self.last_run_by_user.get(user_id, 0)) / cd_modifier
+        time_since_last_run_user = (cur_time - self.last_run_by_user.get(str(author.id), 0)) / cd_modifier
 
         if time_since_last_run_user < self.delay_user and args["user_level"] < Command.BYPASS_DELAY_LEVEL:
-            log.debug(f"{user_id} ran command {time_since_last_run_user:.2f} seconds ago, waiting...")
+            log.debug(f"{author.name}#{author.discriminator} ran command {time_since_last_run_user:.2f} seconds ago, waiting...")
             return False
         with DBManager.create_session_scope() as db_session:
-            user = User._create_or_get_by_discord_id(db_session, user_id)
+            user = User._create_or_get_by_discord_id(db_session, str(author.id))
             if self.cost > 0 and not user.can_afford(self.cost):
                 # User does not have enough points to use the command
                 return False
@@ -371,18 +371,18 @@ class Command(Base):
             args.update(self.extra_args)
             if self.run_in_thread:
                 log.debug(f"Running {self} in a thread")
-                ScheduleManager.execute_now(self.run_action, args=[bot, user_id, message, whisper, args])
+                ScheduleManager.execute_now(self.run_action, args=[bot, author, channel, message, whisper, args])
             else:
-                self.run_action(bot, user_id, channel_id, message, whisper, args)
+                self.run_action(bot, author, channel, message, whisper, args)
 
         return True
 
-    def run_action(self, bot, user_id, channel_id, message, whisper, args):
+    def run_action(self, bot, author, channel, message, whisper, args):
         cur_time = greenbot.utils.now().timestamp()
         with DBManager.create_session_scope() as db_session:
-            user = User._create_or_get_by_discord_id(db_session, user_id)
+            user = User._create_or_get_by_discord_id(db_session, str(author.id))
             with user.spend_currency_context(self.cost):
-                ret = self.action.run(bot, user_id, channel_id, message, whisper, args)
+                ret = self.action.run(bot, author, channel, message, whisper, args)
                 if not ret:
                     raise FailedCommand("return currency")
 
