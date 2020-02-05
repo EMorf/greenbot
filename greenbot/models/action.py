@@ -202,8 +202,7 @@ class MessageAction(BaseAction):
             self.subs = {}
             self.num_urlfetch_subs = 0
 
-        log.info(self.response)
-        log.info(self.argument_subs)
+        log.info(bot)
 
     @staticmethod
     def get_argument_value(message, index):

@@ -4,6 +4,7 @@ import sys
 from pytz import timezone
 import urllib
 
+from greenbot.models.action import ActionParser
 from greenbot.managers.schedule import ScheduleManager
 from greenbot.managers.db import DBManager
 from greenbot.managers.redis import RedisManager
@@ -12,9 +13,8 @@ from greenbot.managers.discord_bot import DiscordBotManager
 from greenbot.managers.command import CommandManager
 from greenbot.migration.db import DatabaseMigratable
 from greenbot.migration.migrate import Migration
-import greenbot.utils as utils
-
 import greenbot.migration_revisions.db
+import greenbot.utils as utils
 
 log = logging.getLogger(__name__)
 
@@ -39,6 +39,8 @@ class Bot:
 
         ScheduleManager.init()
         DBManager.init(self.config["main"]["db"])
+        
+        ActionParser.bot = self
 
         # redis
         redis_options = {}
