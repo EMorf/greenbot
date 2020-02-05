@@ -100,7 +100,16 @@ class DiscordBotManager:
         return None
 
     def get_role(self, role_id):
-        return self.guild.get_role(int(role_id))
+        try:
+            return self.guild.get_role(int(role_id))
+        except ValueError:
+            return None
+
+    def get_member(self, member_id):
+        try:
+            return self.guild.get_member(int(member_id))
+        except ValueError:
+            return None
 
     def say(self, channel, message):
         self.private_loop.create_task(self._say(channel=channel, message=message))

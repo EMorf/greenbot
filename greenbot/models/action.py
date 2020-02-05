@@ -432,19 +432,26 @@ class SayAction(MessageAction):
 
     def run(self, bot, author, channel, message, whisper, args):
         extra = self.get_extra_data(author, channel, message, args)
-        # extra.pop("role_management")
-        arg_num = 1
-        value = str(MessageAction.get_argument_value(extra["message"], 0))
-        log.info(value)
-        value = str(MessageAction.get_argument_value(extra["message"], 1))
-        log.info(value)
-        value = str(MessageAction.get_argument_value(extra["message"], 2))
-        log.info(value)
-        if args["role_management"]["add"]["id"]:
-            arg = args["role_management"]["add"]["arg"] or arg_num
-            # value = str(MessageAction.get_argument_value(extra["message"], arg))
-            
-            # bot.add_role()
+        if "role_management" in args:
+            extra.pop("role_management")
+            arg_num = 1
+            if args["role_management"]["add"]["id"]:
+                arg = args["role_management"]["add"]["arg"] or arg_num
+                member = bot.get_member(str(MessageAction.get_argument_value(extra["message"], arg))[3:][:-1])
+                role = bot.get_role(args["role_management"]["add"]["id"])
+                if member and role:
+                    bot.add_role(member, role)
+                else:
+                    log.error(f"cannot find role: {role} or member: {member}")
+                arg_num+=1
+            if args["role_management"]["remove"]["id"]:
+                arg = args["role_management"]["remove"]["arg"] or arg_num
+                member = bot.get_member(str(MessageAction.get_argument_value(extra["message"], arg))[3:][:-1])
+                role = bot.get_role(args["role_management"]["remove"]["id"])
+                if member and role:
+                    bot.remove_role(member, role)
+                else:
+                    log.error(f"cannot find role: {role} or member: {member}")
         resp = self.get_response(bot, extra)
 
         if not resp:

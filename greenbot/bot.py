@@ -127,6 +127,9 @@ class Bot:
     def remove_role(self, user, role):
         return self.discord_bot.remove_role(user, role)
 
+    def get_member(self, member_id):
+        return self.discord_bot.get_member(member_id)
+
     def quit(self, message, event, **options):
         self.quit_bot()
 
