@@ -462,7 +462,7 @@ class SayAction(MessageAction):
                     log.error(f"cannot find role: {role} or member: {member}")
         resp, embed = self.get_response(bot, extra)
         log.info(f"embed status {embed}")
-        if not resp:
+        if not resp and not embed:
             return False
 
         if self.num_urlfetch_subs == 0:
@@ -510,7 +510,7 @@ class WhisperAction(MessageAction):
                     bot.remove_role(member, role)
                 else:
                     log.error(f"cannot find role: {role} or member: {member}")
-        if not resp:
+        if not resp and embed:
             return False
 
         if self.num_urlfetch_subs == 0:
