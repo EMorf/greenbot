@@ -79,16 +79,16 @@ class DiscordBotManager:
             self.listening_channels.append(channel)
 
     def private_message(self, user, message):
-        self.private_loop.create_task(self._private_message(user_id, message))
+        self.private_loop.create_task(self._private_message(user, message))
 
     def remove_role(self, user, role):
-        self.private_loop.create_task(self._remove_role(user_id, role))
+        self.private_loop.create_task(self._remove_role(user, role))
 
     def add_role(self, user, role):
-        self.private_loop.create_task(self._add_role(user_id, role))
+        self.private_loop.create_task(self._add_role(user, role))
 
     def ban(self, user, timeout_in_seconds=0, reason=None, delete_message_days=0):
-        self.private_loop.create_task(self._ban(user_id=user_id, timeout_in_seconds=timeout_in_seconds, reason=reason, delete_message_days=delete_message_days))
+        self.private_loop.create_task(self._ban(user=user, timeout_in_seconds=timeout_in_seconds, reason=reason, delete_message_days=delete_message_days))
 
     def unban(self, user, reason=None):
         self.private_loop.create_task(self._unban(user=user, reason=reason))
