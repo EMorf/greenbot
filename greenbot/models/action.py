@@ -181,7 +181,7 @@ class MultiAction(BaseAction):
         multiaction.original_commands = copy.copy(commands)
         return multiaction
 
-    def run(self, bot, user_id, message, whisper, args):
+    def run(self, bot, user_id, channel_id, message, whisper, args):
         """ If there is more text sent to the multicommand after the
         initial alias, we _ALWAYS_ assume it's trying the subaction command.
         If the extra text was not a valid command, we try to run the fallback command.
@@ -204,7 +204,7 @@ class MultiAction(BaseAction):
 
         if cmd:
             if args["user_level"] >= cmd.level:
-                return cmd.run(bot=bot, user_id=user_id, message=extra_msg, whisper=whisper, args=args)
+                return cmd.run(bot=bot, user_id=user_id, channel_id=channel_id, message=extra_msg, whisper=whisper, args=args)
             log.info(f"User {user_id} tried running a sub-command he had no access to ({command}).")
 
         return None
@@ -216,7 +216,7 @@ class FuncAction(BaseAction):
     def __init__(self, cb):
         self.cb = cb
 
-    def run(self, bot, user_id, message, whisper, args):
+    def run(self, bot, user_id, channel_id, message, whisper, args):
         try:
             return self.cb(bot=bot, user_id=user_id, message=message, whisper=whisper, args=args)
         except:
@@ -229,7 +229,7 @@ class RawFuncAction(BaseAction):
     def __init__(self, cb):
         self.cb = cb
 
-    def run(self, bot, user_id, message, whisper, args):
+    def run(self, bot, user_id, channel_id, message, whisper, args):
         return self.cb(bot=bot, user_id=user_id, message=message, whisper=whisper, args=args)
 
 
@@ -430,7 +430,7 @@ def urlfetch_msg(method, message, num_urlfetch_subs, bot, extra={}, args=[], kwa
 class SayAction(MessageAction):
     subtype = "say"
 
-    def run(self, bot, user_id, message, whisper, args):
+    def run(self, bot, user_id, channel_id, message, whisper, args):
         extra = self.get_extra_data(user_id, message, args)
         resp = self.get_response(bot, extra)
 
@@ -438,43 +438,15 @@ class SayAction(MessageAction):
             return False
 
         if self.num_urlfetch_subs == 0:
-            return bot.say(resp)
+            return bot.say(channel_id, resp)
 
         return ScheduleManager.execute_now(
             urlfetch_msg,
             args=[],
             kwargs={
-                "args": [],
+                "args": [channel_id],
                 "kwargs": {},
                 "method": bot.say,
-                "bot": bot,
-                "extra": extra,
-                "message": resp,
-                "num_urlfetch_subs": self.num_urlfetch_subs,
-            },
-        )
-
-
-class MeAction(MessageAction):
-    subtype = "me"
-
-    def run(self, bot, user_id, message, whisper, args):
-        extra = self.get_extra_data(user_id, message, args)
-        resp = self.get_response(bot, extra)
-
-        if not resp:
-            return False
-
-        if self.num_urlfetch_subs == 0:
-            return bot.me(resp)
-
-        return ScheduleManager.execute_now(
-            urlfetch_msg,
-            args=[],
-            kwargs={
-                "args": [],
-                "kwargs": {},
-                "method": bot.me,
                 "bot": bot,
                 "extra": extra,
                 "message": resp,
@@ -486,7 +458,7 @@ class MeAction(MessageAction):
 class WhisperAction(MessageAction):
     subtype = "whisper"
 
-    def run(self, bot, user_id, message, whisper, args):
+    def run(self, bot, user_id, channel_id, message, whisper, args):
         extra = self.get_extra_data(user_id, message, args)
         resp = self.get_response(bot, extra)
 
@@ -494,7 +466,7 @@ class WhisperAction(MessageAction):
             return False
 
         if self.num_urlfetch_subs == 0:
-            return bot.whisper(source, resp)
+            return bot.private_message(user_id, resp)
 
         return ScheduleManager.execute_now(
             urlfetch_msg,
@@ -502,56 +474,10 @@ class WhisperAction(MessageAction):
             kwargs={
                 "args": [user_id],
                 "kwargs": {},
-                "method": bot.whisper,
+                "method": bot.private_message,
                 "bot": bot,
                 "extra": extra,
                 "message": resp,
                 "num_urlfetch_subs": self.num_urlfetch_subs,
             },
         )
-
-
-# class ReplyAction(MessageAction):
-#     subtype = "reply"
-
-#     def run(self, bot, source, message, event={}, args={}):
-#         extra = self.get_extra_data(source, message, args)
-#         resp = self.get_response(bot, extra)
-
-#         if not resp:
-#             return False
-
-#         if irc.client.is_channel(event.target):
-#             if self.num_urlfetch_subs == 0:
-#                 return bot.say(resp, channel=event.target)
-
-#             return ScheduleManager.execute_now(
-#                 urlfetch_msg,
-#                 args=[],
-#                 kwargs={
-#                     "args": [],
-#                     "kwargs": {"channel": event.target},
-#                     "method": bot.say,
-#                     "bot": bot,
-#                     "extra": extra,
-#                     "message": resp,
-#                     "num_urlfetch_subs": self.num_urlfetch_subs,
-#                 },
-#             )
-
-#         if self.num_urlfetch_subs == 0:
-#             return bot.whisper(source, resp)
-
-#         return ScheduleManager.execute_now(
-#             urlfetch_msg,
-#             args=[],
-#             kwargs={
-#                 "args": [source],
-#                 "kwargs": {},
-#                 "method": bot.whisper,
-#                 "bot": bot,
-#                 "extra": extra,
-#                 "message": resp,
-#                 "num_urlfetch_subs": self.num_urlfetch_subs,
-#             },
-#         )

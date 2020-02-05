@@ -331,7 +331,7 @@ class Command(Base):
     def is_enabled(self):
         return self.enabled == 1 and self.action is not None
 
-    def run(self, bot, user_id, message, whisper, args):
+    def run(self, bot, user_id, channel_id, message, whisper, args):
         if self.action is None:
             log.warning("This command is not available.")
             return False
@@ -373,7 +373,7 @@ class Command(Base):
                 log.debug(f"Running {self} in a thread")
                 ScheduleManager.execute_now(self.run_action, args=[bot, user_id, message, whisper, args])
             else:
-                self.run_action(bot, user_id, message, whisper, args)
+                self.run_action(bot, user_id, channel_id, message, whisper, args)
 
         return True
 

@@ -37,7 +37,7 @@ class CustomClient(discord.Client):
         with DBManager.create_session_scope() as db_session:
             user = User._create_or_get_by_discord_id(db_session, message.author.id)
             Message._create(db_session, message.id, message.author.id, message.channel.id if isinstance(message.author, discord.Member) else None, message.content)
-            HandlerManager.trigger("discord_message", message=message.content, user_id=user.discord_id, user_level=user_level, whisper=not isinstance(message.author, discord.Member))
+            HandlerManager.trigger("discord_message", message=message.content, user_id=user.discord_id, user_level=user_level, channel_id=message.channel.id if isinstance(message.author, discord.Member) else None, whisper=not isinstance(message.author, discord.Member))
     
     async def on_error(self, event, *args, **kwargs):
         log.error(traceback.format_exc())
@@ -98,6 +98,15 @@ class DiscordBotManager:
             if role.name == role_name:
                 return role.id
         return None
+
+    def say(self, channel_id, message):
+        self.private_loop.create_task(self._say(channel_id=channel_id, message=message))
+    
+    async def _say(self, channel_id, message):
+        message = discord.utils.escape_markdown(message)
+        channel = self.guild.get_channel(int(channel_id))
+        if channel:
+            await channel.send(message)
 
     async def _ban(self, user_id, timeout_in_seconds=0, reason=None, delete_message_days=0):
         delete_message_days = 7 if delete_message_days > 7 else (0 if delete_message_days < 0 else delete_message_days)
