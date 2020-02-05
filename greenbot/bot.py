@@ -186,7 +186,7 @@ class Bot:
         except AttributeError:
             return ""
         except:
-            log.exception("UNHANDLED ERROR IN get_args_value")
+            log.exception("Caught exception in get_args_value")
             return ""
 
     @staticmethod
@@ -194,7 +194,25 @@ class Bot:
         try:
             return getattr(extra["command"].data, key)
         except:
-            log.exception("Caught exception in get_source_value")
+            log.exception("Caught exception in get_command_value")
+
+        return None
+
+    @staticmethod
+    def get_author_value(key, extra={}):
+        try:
+            return getattr(extra["author"], key)
+        except:
+            log.exception("Caught exception in get_author_value")
+
+        return None
+
+    @staticmethod
+    def get_channel_value(key, extra={}):
+        try:
+            return getattr(extra["channel"], key)
+        except:
+            log.exception("Caught exception in get_channel_value")
 
         return None
 
