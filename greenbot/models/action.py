@@ -463,7 +463,7 @@ class SayAction(MessageAction):
                 else:
                     log.error(f"cannot find role: {role} or member: {member}")
         resp, embed = self.get_response(bot, extra)
-
+        log.info(embed)
         if not resp:
             return False
 
@@ -491,7 +491,7 @@ class WhisperAction(MessageAction):
 
     def run(self, bot, author, channel, message, whisper, args):
         extra = self.get_extra_data(author, channel, message, args)
-        resp, embed= self.get_response(bot, extra)
+        resp, embed = self.get_response(bot, extra)
         if "role_management" in args:
             extra.pop("role_management")
             arg_num = 1
