@@ -340,6 +340,7 @@ def get_substitutions(string, bot):
         pass
 
     for sub_key in Substitution.substitution_regex.finditer(string):
+        log.info(sub_key)
         sub_string, path, argument, key, filters, if_arguments = get_substitution_arguments(sub_key)
 
         if sub_string in substitutions:
