@@ -43,7 +43,7 @@ class Bot:
         if "redis" in config:
             redis_options = dict(config.items("redis"))
         RedisManager.init(**redis_options)
-        wait_for_redis_data_loaded(RedisManager.get())
+        utils.wait_for_redis_data_loaded(RedisManager.get())
 
         # SQL migrations
         try:
