@@ -43,8 +43,6 @@ class Dispatch:
             type = "privatemessage"
         elif options["channelmessage"] is True:
             type = "channelmessage"
-        elif options["whisper"] is False or options["reply"] is False:
-            type = "channelmessage"
         action = {"type": type, "message": response}
 
         add_role_id = options.get("addrole_name", None)
@@ -55,8 +53,6 @@ class Dispatch:
 
         options["add_role_id"] = bot.get_role_id(add_role_id) if add_role_id else None
         options["remove_role_id"] = bot.get_role_id(remove_role_id) if remove_role_id else None
-
-        options.po
 
         command, new_command, alias_matched = bot.commands.create_command(alias_str, action=action, **options)
         if new_command is True:
