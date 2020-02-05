@@ -130,7 +130,7 @@ class Bot:
     def get_member(self, member_id):
         return self.discord_bot.get_member(member_id)
 
-    def get_parse_member(self, member_att):
+    def get_parse_member(self, member_att, extra={}):
         if member_att != 22: return
         return self.discord_bot.get_member(member_att[3:][:-1])
 
