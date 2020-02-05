@@ -218,7 +218,7 @@ class FuncAction(BaseAction):
 
     def run(self, bot, user_id, channel_id, message, whisper, args):
         try:
-            return self.cb(bot=bot, user_id=user_id, message=message, whisper=whisper, args=args)
+            return self.cb(bot=bot, user_id=user_id, channel_id=channel_id, message=message, whisper=whisper, args=args)
         except:
             log.exception("Uncaught exception in FuncAction")
 
@@ -230,7 +230,7 @@ class RawFuncAction(BaseAction):
         self.cb = cb
 
     def run(self, bot, user_id, channel_id, message, whisper, args):
-        return self.cb(bot=bot, user_id=user_id, message=message, whisper=whisper, args=args)
+        return self.cb(bot=bot, user_id=user_id, channel_id=channel_id, message=message, whisper=whisper, args=args)
 
 
 def get_argument_substitutions(string):
