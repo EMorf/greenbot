@@ -382,7 +382,7 @@ class Command(Base):
         with DBManager.create_session_scope() as db_session:
             user = User._create_or_get_by_discord_id(db_session, user_id)
             with user.spend_currency_context(self.cost):
-                ret = self.action.run(bot, user_id, message, whisper, args)
+                ret = self.action.run(bot, user_id, channel_id, message, whisper, args)
                 if not ret:
                     raise FailedCommand("return currency")
 
