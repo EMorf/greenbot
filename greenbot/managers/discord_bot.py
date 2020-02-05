@@ -93,11 +93,14 @@ class DiscordBotManager:
     def unban(self, user, reason=None):
         self.private_loop.create_task(self._unban(user=user, reason=reason))
 
-    def role_name_to_id(self, role_name):
+    def get_role_id(self, role_name):
         for role in self.guild.roles:
             if role.name == role_name:
-                return role.id
+                return str(role.id)
         return None
+
+    def get_role(self, role_id):
+        return self.guild.get_role(int(role_id))
 
     def say(self, channel, message):
         self.private_loop.create_task(self._say(channel=channel, message=message))

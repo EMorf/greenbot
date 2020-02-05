@@ -116,7 +116,16 @@ class Bot:
                 command.run(bot=self, author=author, channel=channel, message=remaining_message, whisper=whisper, args=extra_args)
 
     def get_role_id(self, role_name):
-        return self.discord_bot.role_name_to_id(role_name)
+        return self.discord_bot.get_role_id(role_name)
+
+    def get_role(self, role_id):
+        return self.discord_bot.get_role(role_id)
+
+    def add_role(self, user, role):
+        return self.discord_bot.add_role(user, role)
+
+    def remove_role(self, user, role):
+        return self.discord_bot.remove_role(user, role)
 
     def quit(self, message, event, **options):
         self.quit_bot()

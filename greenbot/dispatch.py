@@ -52,13 +52,15 @@ class Dispatch:
         removerole_focus = options.get("removerole_focus", None)
 
         extra_args = {
-            "add": {
-                "id": str(bot.get_role_id(add_role_id)) if add_role_id else None,
-                "arg": addrole_focus
-            },
-            "remove": {
-                "id": str(bot.get_role_id(remove_role_id)) if remove_role_id else None,
-                "arg": removerole_focus
+            "role_management": {
+                "add": {
+                    "id": str(bot.get_role_id(add_role_id)) if add_role_id else None,
+                    "arg": addrole_focus
+                },
+                "remove": {
+                    "id": str(bot.get_role_id(remove_role_id)) if remove_role_id else None,
+                    "arg": removerole_focus
+                }
             }
         }
 

@@ -432,6 +432,19 @@ class SayAction(MessageAction):
 
     def run(self, bot, author, channel, message, whisper, args):
         extra = self.get_extra_data(author, channel, message, args)
+        extra.pop("role_management")
+        arg_num = 1
+        value = str(MessageAction.get_argument_value(extra["message"], 0))
+        log.info(value)
+        value = str(MessageAction.get_argument_value(extra["message"], 1))
+        log.info(value)
+        value = str(MessageAction.get_argument_value(extra["message"], 2))
+        log.info(value)
+        if args["role_management"]["add"]["id"]:
+            arg = args["role_management"]["add"]["arg"] or arg_num
+            # value = str(MessageAction.get_argument_value(extra["message"], arg))
+            
+            # bot.add_role()
         resp = self.get_response(bot, extra)
 
         if not resp:
