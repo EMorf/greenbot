@@ -131,6 +131,7 @@ class Bot:
         return self.discord_bot.get_member(member_id)
 
     def get_parse_member(self, member_att, extra={}):
+        log.info(member_att)
         if member_att != 22: return
         return self.discord_bot.get_member(member_att[3:][:-1])
 
