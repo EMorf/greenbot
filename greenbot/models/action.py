@@ -264,6 +264,79 @@ def urlfetch_msg(method, message, num_urlfetch_subs, bot, extra={}, args=[], kwa
 
     method(*args, **kwargs)
 
+class MultiAction(BaseAction):
+    type = "multi"
+
+    def __init__(self, args, default=None, fallback=None):
+        from greenbot.models.command import Command
+
+        self.commands = {}
+        self.default = default
+        self.fallback = fallback
+
+        for command in args:
+            cmd = Command.from_json(command)
+            for alias in command["command"].split("|"):
+                if alias not in self.commands:
+                    self.commands[alias] = cmd
+                else:
+                    log.error(f"Alias {alias} for this multiaction is already in use.")
+
+        import copy
+
+        self.original_commands = copy.copy(self.commands)
+
+    def reset(self):
+        import copy
+
+        self.commands = copy.copy(self.original_commands)
+
+    def __iadd__(self, other):
+        if other is not None and other.type == "multi":
+            self.commands.update(other.commands)
+        return self
+
+    @classmethod
+    def ready_built(cls, commands, default=None, fallback=None):
+        """ Useful if you already have a dictionary
+        with commands pre-built.
+        """
+
+        multiaction = cls(args=[], default=default, fallback=fallback)
+        multiaction.commands = commands
+        import copy
+
+        multiaction.original_commands = copy.copy(commands)
+        return multiaction
+
+    def run(self, bot, user_id, channel_id, message, whisper, args):
+        """ If there is more text sent to the multicommand after the
+        initial alias, we _ALWAYS_ assume it's trying the subaction command.
+        If the extra text was not a valid command, we try to run the fallback command.
+        In case there's no extra text sent, we will try to run the default command.
+        """
+
+        cmd = None
+        if message:
+            msg_lower_parts = message.lower().split(" ")
+            command = msg_lower_parts[0]
+            cmd = self.commands.get(command, None)
+            extra_msg = " ".join(message.split(" ")[1:])
+            if cmd is None and self.fallback:
+                cmd = self.commands.get(self.fallback, None)
+                extra_msg = message
+        elif self.default:
+            command = self.default
+            cmd = self.commands.get(command, None)
+            extra_msg = None
+
+        if cmd:
+            if args["user_level"] >= cmd.level:
+                return cmd.run(bot=bot, user_id=user_id, channel_id=channel_id, message=extra_msg, whisper=whisper, args=args)
+            log.info(f"User {user_id} tried running a sub-command he had no access to ({command}).")
+
+        return None
+
 
 class SayAction(MessageAction):
     subtype = "say"
