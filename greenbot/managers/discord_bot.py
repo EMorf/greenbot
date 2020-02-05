@@ -124,8 +124,7 @@ class DiscordBotManager:
 
         if not self.guild:
             return
-        member = self.guild.get_member(int(user_id))
-        if not member:
+        if not user:
             return
         if timeout_in_seconds > 0:
             reason = f"{reason}\nBanned for {timeout_in_seconds} seconds"
@@ -135,32 +134,28 @@ class DiscordBotManager:
                 discord_id: timeout_in_seconds,
             }
             """
-            timeouts[member.id] = timeout_in_seconds
-        self.guild.ban(member, reason=reason, delete_message_days=delete_message_days)
+            timeouts[str(user.id)] = timeout_in_seconds
+        self.guild.ban(user, reason=reason, delete_message_days=delete_message_days)
 
     async def _unban(self, user, reason=None):
         if not self.guild:
             return
-        try:
-            member = await self.client.fetch_user(int(user_id))
-        except (discord.NotFound, discord.HTTPException):
-            return
-        self.guild.unban(member, reason)
+        self.guild.unban(user, reason)
 
     async def _private_message(self, user, message):
         message = discord.utils.escape_markdown(message)
         await user.create_dm()
         await user.dm_channel.send(message)
 
-    async def _remove_role(self, user_id, role):
+    async def _remove_role(self, user, role):
         if not self.guild:
             return
-        await self.guild.get_member(int(user_id)).remove_roles(role)
+        await user.remove_roles(role)
 
-    async def _add_role(self, user_id, role):
+    async def _add_role(self, user, role):
         if not self.guild:
             return
-        await self.guild.get_member(int(user_id)).add_roles(role)
+        await user.add_roles(role)
 
     async def run_periodically(self, wait_time, func, *args):
         while True:
