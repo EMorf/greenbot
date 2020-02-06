@@ -288,9 +288,10 @@ class Bot:
 
     def get_role_info(self, key, extra={}):
         role_name = extra["message"]
-        role = self.get_role(self.get_role_id(role_name))
-        if not role:
+        role_id = self.get_role_id(role_name)
+        if not role_id:
             return f"Role {role_name} not found"
+        role = self.get_role(role_id)
         data = discord.Embed(colour=role.colour)
         data.add_field(name=("Role Name"), value=role.name)
         data.add_field(name=("Created"), value=f"{(datetime.datetime.now() - role.created_at).days}d ago")
@@ -306,8 +307,8 @@ class Bot:
                 continue
             invalid_permissions.append(perm)
 
-        data.add_field(name=("Valid Permissions"), value=valid_permissions)
-        data.add_field(name=("Invalid Permissions"), value=invalid_permissions)
+        data.add_field(name=("Valid Permissions"), value="\n".join([str(x) for x in valid_permissions]))
+        data.add_field(name=("Invalid Permissions"), value="\n".join([str(x) for x in invalid_permissions]))
         avatar = extra["message_raw"].guild.icon_url
         data.set_thumbnail(url=avatar)
         return data
