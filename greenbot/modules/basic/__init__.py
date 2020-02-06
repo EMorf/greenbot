@@ -1,7 +1,7 @@
 import logging
 
-from pajbot.modules import BaseModule
-from pajbot.modules.base import ModuleType
+from greenbot.modules import BaseModule
+from greenbot.modules.base import ModuleType
 
 log = logging.getLogger(__name__)
 
