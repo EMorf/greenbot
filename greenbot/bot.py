@@ -4,6 +4,7 @@ import sys
 import discord
 from pytz import timezone
 import urllib
+import datetime
 
 from greenbot.models.action import ActionParser
 from greenbot.managers.schedule import ScheduleManager
@@ -141,8 +142,10 @@ class Bot:
         return return_val
 
     def get_role_value(self, key, extra={}):
-        if len(extra["argument"]) != 18: return None
-        role = self.get_role(extra["argument"])
+        role_name = extra["message"]
+        role = self.get_role(self.get_role_id(role_name))
+        if not role:
+            return f"Role {role_name} not found"
         return_val = getattr(role, key) if role else None
         return return_val
 
@@ -284,8 +287,30 @@ class Bot:
         return data
 
     def get_role_info(self, key, extra={}):
-        log.info(key)
-        log.info(extra)
+        role_name = extra["message"]
+        role = self.get_role(self.get_role_id(role_name))
+        if not role:
+            return f"Role {role_name} not found"
+        data = discord.Embed(colour=role.colour)
+        data.add_field(name=("Role Name"), value=role.name)
+        data.add_field(name=("Created"), value=f"{(datetime.datetime.now() - role.created_at).days}d ago")
+        data.add_field(name=("Users in Role"), value=len(role.members))
+        data.add_field(name=("ID"), value=role.id)
+        data.add_field(name=("Color"), value=str(role.color))
+        data.add_field(name=("Position"), value=role.position)
+        valid_permissions = []
+        invalid_permissions = []
+        for (perm, value) in role.permissions:
+            if value:
+                valid_permissions.append(perm)
+                continue
+            invalid_permissions.append(perm)
+
+        data.add_field(name=("Valid Permissions"), value=valid_permissions)
+        data.add_field(name=("Invalid Permissions"), value=invalid_permissions)
+        avatar = extra["message_raw"].guild.avatar_url_as(static_format="png")
+        data.set_thumbnail(url=avatar)
+        return data
 
     @staticmethod
     def get_args_value(key, extra={}):
