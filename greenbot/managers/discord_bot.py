@@ -140,7 +140,7 @@ class DiscordBotManager:
             }
             """
             timeouts[str(user.id)] = timeout_in_seconds
-        self.guild.ban(user=user, reason=reason, delete_message_days=delete_message_days)
+        await self.guild.ban(user=user, reason=reason, delete_message_days=delete_message_days)
 
     async def _unban(self, user, reason=None):
         if not self.guild:
