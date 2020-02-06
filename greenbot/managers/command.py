@@ -98,6 +98,7 @@ class CommandManager(UserDict):
             level=500,
             command="quit",
             description="Shut down the bot, this will most definitely restart it if set up properly",
+            can_execute_with_whisper=True,
         )
         self.internal_commands["add"] = Command.multiaction_command(
             level=100,
@@ -117,6 +118,7 @@ class CommandManager(UserDict):
                     description="Adds an alias to an already existing command",
                 ),
             },
+            can_execute_with_whisper=True,
         )
         self.internal_commands["edit"] = Command.multiaction_command(
             level=100,
@@ -134,6 +136,7 @@ class CommandManager(UserDict):
                     "edit_funccommand", level=2000, description="Add a command that uses a command"
                 ),
             },
+            can_execute_with_whisper=True,
         )
         self.internal_commands["remove"] = Command.multiaction_command(
             level=100,
@@ -153,6 +156,7 @@ class CommandManager(UserDict):
                     description="Removes an alias to an already existing command",
                 ),
             },
+            can_execute_with_whisper=True,
         )
         self.internal_commands["rem"] = self.internal_commands["remove"]
         self.internal_commands["del"] = self.internal_commands["remove"]
