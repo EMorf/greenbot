@@ -345,6 +345,7 @@ def get_substitutions(string, bot):
         method_mapping["member"] = bot.get_member_value
         method_mapping["role"] = bot.get_role_value
         method_mapping["userinfo"] = bot.get_user_info
+        method_mapping["roleinfo"] = bot.get_role_info
     except AttributeError:
         pass
 
@@ -510,7 +511,7 @@ class WhisperAction(MessageAction):
                     bot.remove_role(member, role)
                 else:
                     log.error(f"cannot find role: {role} or member: {member}")
-        if not resp and embed:
+        if not resp and embed+:
             return False
 
         if self.num_urlfetch_subs == 0:

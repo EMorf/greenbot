@@ -283,6 +283,10 @@ class Bot:
             data.set_author(name=name)
         return data
 
+    def get_role_info(self, key, extra={}):
+        log.info(key)
+        log.info(extra)
+
     @staticmethod
     def get_args_value(key, extra={}):
         r = None
