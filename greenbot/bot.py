@@ -168,8 +168,6 @@ class Bot:
         return return_val
 
     def quit(self, bot, author, channel, message, whisper, args):
-        self.private_message(author, "Quitting bot!")
-        time.sleep(2)
         self.quit_bot()
 
     def apply_filter(self, resp, f):
