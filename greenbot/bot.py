@@ -109,8 +109,8 @@ class Bot:
     def start(self):
         self.private_loop.run_forever()
 
-    def ban(self, user, timeout_in_seconds=0, reason=None, delete_message_days=0):
-        self.discord_bot.ban(user=user, timeout_in_seconds=timeout_in_seconds, reason=reason, delete_message_days=delete_message_days)
+    def ban(self, user, timeout_in_seconds=0, delete_message_days=0, reason=None):
+        self.discord_bot.ban(user=user, timeout_in_seconds=timeout_in_seconds, delete_message_days=delete_message_days, reason=reason)
 
     def unban(self, user, reason=None):
         self.discord_bot.unban(user=user, reason=reason)
@@ -170,6 +170,39 @@ class Bot:
         reason = args[1:]
         message = f"Member {member} has been kicked!"
         self.kick(member, " ".join(reason) if len(reason) > 0 else None)
+        return message
+
+    def ban_member(self, key, extra={}):
+        args = extra["message"].split(" ")
+        member = self.get_member(args[0][3:][:-1])
+        if not member:
+            return "Member not found"
+        reason = None
+        timeout_in_seconds = 0
+        delete_message_days = 0
+        try:
+            timeout_in_seconds = int(args[0])
+        except:
+            reason = args[1:]
+        if not reason:
+            try:
+                delete_message_days = int(args[1])
+            except:
+                reason = args[2:]
+        if not reason:
+            reason = args[3:]
+        
+        message = f"Member {member} has been banned!"
+        self.ban(user=member, timeout_in_seconds=timeout_in_seconds, delete_message_days=delete_message_days, reason=" ".join(reason) if len(reason) > 0 else None)
+        return message
+
+    def unban_member(self, key, extra={}):
+        args = extra["message"].split(" ")
+        member = self.get_member(args[0][3:][:-1])
+        reason = args[1:]
+
+        message = f"Member {member} has been unbanned!"
+        self.unban(user=member, reason=" ".join(reason) if len(reason) > 0 else None)
         return message
 
     def get_role_value(self, key, extra={}):

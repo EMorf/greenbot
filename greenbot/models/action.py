@@ -351,6 +351,8 @@ def get_substitutions(string, bot):
         method_mapping["kick"] = bot.kick_member
         method_mapping["setpoints"] = bot.set_balance
         method_mapping["adjpoints"] = bot.adj_balance
+        method_mapping["banmember"] = bot.ban_member
+        method_mapping["unbanmember"] = bot.unban_member
     except AttributeError:
         pass
 
