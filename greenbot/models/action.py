@@ -511,7 +511,7 @@ class WhisperAction(MessageAction):
                     bot.remove_role(member, role)
                 else:
                     log.error(f"cannot find role: {role} or member: {member}")
-        if not resp and embed+:
+        if not resp and embed:
             return False
 
         if self.num_urlfetch_subs == 0:
