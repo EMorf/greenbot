@@ -334,7 +334,10 @@ class Bot:
         if command.data:
             data.add_field(name=("Number of uses"), value=command.data.num_uses)
             data.set_footer(text=(f"Made by: {command.data.added_by} | Edited by {command.data.edited_by}"))
-        data.add_field(name=("Description"), value=command.action.response)
+        try:
+            data.add_field(name=("Description"), value=command.action.response)
+        except:
+            pass
         data.set_thumbnail(url=extra["message_raw"].guild.icon_url)
 
         return data
