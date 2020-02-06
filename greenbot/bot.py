@@ -112,8 +112,8 @@ class Bot:
     def ban(self, user, timeout_in_seconds=0, delete_message_days=0, reason=None):
         self.discord_bot.ban(user=user, timeout_in_seconds=timeout_in_seconds, delete_message_days=delete_message_days, reason=reason)
 
-    def unban(self, user, reason=None):
-        self.discord_bot.unban(user=user, reason=reason)
+    def unban(self, user_id, reason=None):
+        self.discord_bot.unban(user_id=user_id, reason=reason)
     
     def kick(self, user, reason=None):
         self.discord_bot.kick(user=user, reason=reason)
@@ -192,17 +192,17 @@ class Bot:
         if not reason:
             reason = args[3:]
         
-        message = f"Member {member} has been banned!"
+        message = f"Member <@!{member.id}> has been banned!"
         self.ban(user=member, timeout_in_seconds=timeout_in_seconds, delete_message_days=delete_message_days, reason=" ".join(reason) if len(reason) > 0 else None)
         return message
 
     def unban_member(self, key, extra={}):
         args = extra["message"].split(" ")
-        member = self.get_member(args[0][3:][:-1])
+        member_id = args[0][3:][:-1]
         reason = args[1:]
 
-        message = f"Member {member} has been unbanned!"
-        self.unban(user=member, reason=" ".join(reason) if len(reason) > 0 else None)
+        message = f"Member <@!{member_id}> has been unbanned!"
+        self.unban(user_id=member_id, reason=" ".join(reason) if len(reason) > 0 else None)
         return message
 
     def get_role_value(self, key, extra={}):

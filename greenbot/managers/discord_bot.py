@@ -90,8 +90,8 @@ class DiscordBotManager:
     def ban(self, user, timeout_in_seconds=0, reason=None, delete_message_days=0):
         self.private_loop.create_task(self._ban(user=user, timeout_in_seconds=timeout_in_seconds, reason=reason, delete_message_days=delete_message_days))
 
-    def unban(self, user, reason=None):
-        self.private_loop.create_task(self._unban(user=user, reason=reason))
+    def unban(self, user_id, reason=None):
+        self.private_loop.create_task(self._unban(user_id=user_id, reason=reason))
 
     def kick(self, user, reason=None):
         self.private_loop.create_task(self._kick(user=user, reason=reason))
@@ -142,9 +142,10 @@ class DiscordBotManager:
             timeouts[str(user.id)] = timeout_in_seconds
         await self.guild.ban(user=user, reason=reason, delete_message_days=delete_message_days)
 
-    async def _unban(self, user, reason=None):
+    async def _unban(self, user_id, reason=None):
         if not self.guild:
             return
+        user = await self.client.fetch_user(user_id)
         await self.guild.unban(user=user, reason=reason)
 
     async def _kick(self, user, reason=None):
