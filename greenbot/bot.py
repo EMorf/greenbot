@@ -330,7 +330,8 @@ class Bot:
         data.add_field(name=("Delay All"), value=command.delay_all)
         data.add_field(name=("Delay User"), value=command.delay_user)
         data.add_field(name=("Enabled"), value="Yes" if command.enabled else "No")
-        data.add_field(name=("Cost"), value=f"{command.cost} points") # edit currency name
+        currency = self._get_currency().get("name")
+        data.add_field(name=("Cost"), value=f"{command.cost} {currency}")
         data.add_field(name=("Whispers"), value="Yes" if command.can_execute_with_whisper else "No")
         if command.data:
             data.add_field(name=("Number of uses"), value=command.data.num_uses)
@@ -343,6 +344,12 @@ class Bot:
 
         return data
 
+    def _get_currency(self):
+        return {"name": "points"}
+
+    def get_currency(self, key, extra={}):
+        return self._get_currency().get(key) if key else None
+
     def get_user(self, key, extra={}):
         user = self.get_member(extra["argument"][3:][:-1]) if extra["argument"] else None
         if not user:
@@ -350,6 +357,7 @@ class Bot:
         with DBManager.create_session_scope() as db_session:
             db_user = User._create_or_get_by_discord_id(db_session, user.id)
             return getattr(db_user, key) if db_user else None
+    
     @staticmethod
     def get_args_value(key, extra={}):
         r = None
