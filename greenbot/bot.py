@@ -7,6 +7,7 @@ import urllib
 import datetime
 
 from greenbot.models.action import ActionParser
+from greenbot.models.user import User
 from greenbot.managers.schedule import ScheduleManager
 from greenbot.managers.db import DBManager
 from greenbot.managers.redis import RedisManager
@@ -342,6 +343,13 @@ class Bot:
 
         return data
 
+    def get_user(self, key, extra={}):
+        user = self.get_member(extra["argument"][3:][:-1]) if extra["argument"] else None
+        if not user:
+            user = extra["author"]
+        with DBManager.create_scoped_session() as db_session:
+            db_user = User._create_or_get_by_discord_id(db_session, user.id)
+            return getattr(db_user, key) if db_user else None
     @staticmethod
     def get_args_value(key, extra={}):
         r = None
