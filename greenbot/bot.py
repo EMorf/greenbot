@@ -163,10 +163,16 @@ class Bot:
         return return_val
 
     def kick_member(self, key, extra={}):
+        author = extra["author"]
         args = extra["message"].split(" ")
         member = self.get_member(args[0][3:][:-1])
         if not member:
             return "Member not found"
+        with DBManager.create_session_scope() as db_session:
+            author_user = User._create_or_get_by_discord_id(db_session, str(author.id))
+            member_user = User._create_or_get_by_discord_id(db_session, str(member.id))
+            if author_user.level <= member_user.level:
+                return "You cannot kick someone who has the same level as you :)"
         reason = args[1:]
         message = f"Member {member} has been kicked!"
         self.kick(member, " ".join(reason) if len(reason) > 0 else None)
@@ -175,8 +181,14 @@ class Bot:
     def ban_member(self, key, extra={}):
         args = extra["message"].split(" ")
         member = self.get_member(args[0][3:][:-1])
+        author = extra["author"]
         if not member:
             return "Member not found"
+        with DBManager.create_session_scope() as db_session:
+            author_user = User._create_or_get_by_discord_id(db_session, str(author.id))
+            member_user = User._create_or_get_by_discord_id(db_session, str(member.id))
+            if author_user.level <= member_user.level:
+                return "You cannot ban someone who has the same level as you :)"
         reason = None
         timeout_in_seconds = 0
         delete_message_days = 0
