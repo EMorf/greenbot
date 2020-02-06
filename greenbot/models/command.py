@@ -343,7 +343,6 @@ class Command(Base):
         if (
             whisper
             and self.can_execute_with_whisper is False
-            and args["user_level"] < Command.MIN_WHISPER_LEVEL
         ):
             # This user cannot execute the command through a whisper
             return False
