@@ -140,17 +140,17 @@ class DiscordBotManager:
             }
             """
             timeouts[str(user.id)] = timeout_in_seconds
-        self.guild.ban(user, reason=reason, delete_message_days=delete_message_days)
+        self.guild.ban(user=user, reason=reason, delete_message_days=delete_message_days)
 
     async def _unban(self, user, reason=None):
         if not self.guild:
             return
-        self.guild.unban(user, reason)
+        self.guild.unban(user=user, reason=reason)
 
     async def _kick(self, user, reason=None):
         if not self.guild:
             return
-        await self.guild.kick(user, reason)
+        await self.guild.kick(user=user, reason=reason)
 
     async def _private_message(self, user, message, embed=None):
         message = discord.utils.escape_markdown(message)
