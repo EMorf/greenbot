@@ -10,3 +10,4 @@ from .time_since import time_since
 from .time_limit import time_limit
 from .time_method import time_method
 from .get_class_that_defined_method import get_class_that_defined_method
+from .split_into_chunks_with_prefix import split_into_chunks_with_prefix

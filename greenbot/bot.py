@@ -8,6 +8,8 @@ import datetime
 
 from greenbot.models.action import ActionParser
 from greenbot.models.user import User
+from greenbot.models.module import ModuleManager
+from greenbot.managers.sock import SocketManager
 from greenbot.managers.schedule import ScheduleManager
 from greenbot.managers.db import DBManager
 from greenbot.managers.redis import RedisManager
@@ -63,18 +65,32 @@ class Bot:
 
         HandlerManager.init_handlers()
         HandlerManager.add_handler("discord_message", self.discord_message)
-
+        self.bot_name = self.config["main"]["bot_name"]
+        self.command_prefix = self.config["discord"]["command_prefix"]
         self.settings = {
             "discord_token": self.discord_token,
+            "bot_name": self.bot_name,
             "channels": self.config["discord"]["channels_to_listen_in"].split(" "),
-            "command_prefix": self.config["discord"]["command_prefix"],
+            "command_prefix": self.command_prefix,
             "discord_guild_id": self.config["discord"]["discord_guild_id"],
             "admin_roles": [{"role_id": self.config[role]["role_id"], "level": self.config[role]["level"]} for role in self.config["discord"]["admin_roles"].split(" ")]
         }
 
         self.discord_bot = DiscordBotManager(bot=self, settings=self.settings, redis=RedisManager.get(), private_loop=self.private_loop)
-        self.commands = CommandManager(module_manager=None, bot=self).load()
+        self.socket_manager = SocketManager(self.bot_name, self.execute_now)
+        self.module_manager = ModuleManager(self.socket_manager, bot=self).load()
+
+        self.commands = CommandManager(socket_manager=self.socket_manager, module_manager=self.module_manager, bot=self).load()
         HandlerManager.trigger("manager_loaded")
+
+    def execute_now(self, function, *args, **kwargs):
+        self.execute_delayed(0, function, *args, **kwargs)
+
+    def execute_delayed(self, delay, function, *args, **kwargs):
+        ScheduleManager.execute_delayed(delay, lambda: function(*args, **kwargs))
+
+    def execute_every(self, period, function, *args, **kwargs):
+        ScheduleManager.execute_every(period, lambda: function(*args, **kwargs))
 
     def quit_bot(self):
         HandlerManager.trigger("on_quit")
@@ -84,6 +100,7 @@ class Bot:
         except:
             log.exception("Error while shutting down the apscheduler")
         self.private_loop.call_soon_threadsafe(self.private_loop.stop)
+        self.socket_manager.quit()
 
     def connect(self):
         self.discord_bot.connect()

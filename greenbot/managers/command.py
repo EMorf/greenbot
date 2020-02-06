@@ -22,7 +22,7 @@ class CommandManager(UserDict):
 
     """
 
-    def __init__(self, module_manager=None, bot=None):
+    def __init__(self, socket_manager=None, module_manager=None, bot=None):
         UserDict.__init__(self)
         self.db_session = DBManager.create_session()
 
@@ -33,6 +33,11 @@ class CommandManager(UserDict):
 
         self.bot = bot
         self.module_manager = module_manager
+
+        if socket_manager:
+            socket_manager.add_handler("module.update", self.on_module_reload)
+            socket_manager.add_handler("command.update", self.on_command_update)
+            socket_manager.add_handler("command.remove", self.on_command_remove)
 
     def on_module_reload(self, _data):
         log.debug("Rebuilding commands...")
