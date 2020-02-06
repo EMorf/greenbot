@@ -45,7 +45,10 @@ class AdminCommandsModule(BaseModule):
             )
 
             for message in messages:
-                bot.say(message)
+                if whisper:
+                    bot.private_message(author, message)
+                    continue
+                bot.say(channel, message)
         elif sub_command == "disable":
             if len(msg_args) < 2:
                 return
@@ -53,15 +56,24 @@ class AdminCommandsModule(BaseModule):
 
             module = module_manager.get_module(module_id)
             if not module:
-                bot.say(f"No module with the id {module_id} found")
+                if whisper:
+                    bot.private_message(author, f"No module with the id {module_id} found")
+                    return
+                bot.say(channel, f"No module with the id {module_id} found")
                 return
 
             if module.MODULE_TYPE > ModuleType.TYPE_NORMAL:
-                bot.say(f"Unable to disable module {module_id}")
+                if whisper:
+                    bot.private_message(author, f"Unable to disable module {module_id}")
+                    return
+                bot.say(channel, f"Unable to disable module {module_id}")
                 return
 
             if not module_manager.disable_module(module_id):
-                bot.say(f"Unable to disable module {module_id}, maybe it's not enabled?")
+                if whisper:
+                    bot.private_message(author, f"Unable to disable module {module_id}, maybe it's not enabled?")
+                    return
+                bot.say(channel, f"Unable to disable module {module_id}, maybe it's not enabled?")
                 return
 
             # Rebuild command cache
@@ -72,8 +84,11 @@ class AdminCommandsModule(BaseModule):
                 db_module.enabled = False
 
             # AdminLogManager.post("Module toggled", source, "Disabled", module_id)
+            if whisper:
+                bot.private_message(author, f"Disabled module {module_id}")
+                return
 
-            bot.say(f"Disabled module {module_id}")
+            bot.say(channel, f"Disabled module {module_id}")
 
         elif sub_command == "enable":
             if len(msg_args) < 2:
@@ -82,15 +97,24 @@ class AdminCommandsModule(BaseModule):
 
             module = module_manager.get_module(module_id)
             if not module:
-                bot.say(f"No module with the id {module_id} found")
+                if whisper:
+                    bot.private_message(author, f"No module with the id {module_id} found")
+                    return
+                bot.say(channel, f"No module with the id {module_id} found")
                 return
 
             if module.MODULE_TYPE > ModuleType.TYPE_NORMAL:
-                bot.say(f"Unable to enable module {module_id}")
+                if whisper:
+                    bot.private_message(author, f"Unable to enable module {module_id}")
+                    return
+                bot.say(channel, f"Unable to enable module {module_id}")
                 return
 
             if not module_manager.enable_module(module_id):
-                bot.say(f"Unable to enable module {module_id}, maybe it's already enabled?")
+                if whisper:
+                    bot.private_message(author, f"Unable to enable module {module_id}, maybe it's already enabled?")
+                    return
+                bot.say(channel, f"Unable to enable module {module_id}, maybe it's already enabled?")
                 return
 
             # Rebuild command cache
@@ -102,7 +126,10 @@ class AdminCommandsModule(BaseModule):
 
             # AdminLogManager.post("Module toggled", source, "Enabled", module_id)
 
-            bot.say(f"Enabled module {module_id}")
+            if whisper:
+                bot.private_message(author, "Enabled module {module_id}")
+                return
+            bot.say(channel, "Enabled module {module_id}")
 
     def load_commands(self, **options):
         self.commands["module"] = Command.raw_command(

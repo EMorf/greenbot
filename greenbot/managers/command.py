@@ -271,7 +271,6 @@ class CommandManager(UserDict):
         merge_commands(self.internal_commands, self.data)
         merge_commands(db_commands, self.data)
         if self.module_manager is not None:
-            log.info(self.module_manager.modules)
             for enabled_module in self.module_manager.modules:
                 merge_commands(enabled_module.commands, self.data)
 
