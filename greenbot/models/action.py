@@ -348,6 +348,9 @@ def get_substitutions(string, bot):
         method_mapping["commandinfo"] = bot.get_command_info
         method_mapping["user"] = bot.get_user
         method_mapping["currency"] = bot.get_currency
+        method_mapping["kick"] = bot.kick_member
+        method_mapping["setpoints"] = bot.set_balance
+        method_mapping["adjpoints"] = bot.adj_balance
     except AttributeError:
         pass
 

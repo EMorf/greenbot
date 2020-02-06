@@ -30,6 +30,10 @@ class User(Base):
     def _create_or_get_by_discord_id(db_session, discord_id):
         return db_session.query(User).filter_by(discord_id=str(discord_id)).one_or_none() or User._create(db_session, discord_id)
 
+    @staticmethod
+    def _get_users_with_points(db_session, points):
+        return db_session.query(User).filter(User.points >= points).all()
+
     @contextmanager
     def spend_currency_context(self, points):
         try:

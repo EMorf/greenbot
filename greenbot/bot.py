@@ -115,6 +115,9 @@ class Bot:
     def unban(self, user, reason=None):
         self.discord_bot.unban(user=user, reason=reason)
     
+    def kick(self, user, reason=None):
+        self.discord_bot.kick(user=user, reason=reason)
+
     def private_message(self, user, message, embed=None):
         self.discord_bot.private_message(user, message, embed)
 
@@ -159,6 +162,16 @@ class Bot:
         return_val = getattr(member, key) if member else None
         return return_val
 
+    def kick_member(self, key, extra={}):
+        args = extra["message"].split(" ")
+        member = self.get_member(args[0][3:][:-1])
+        if not member:
+            return "Member not found"
+        reason = args[1:]
+        message = f"Member {member} has been kicked!"
+        self.kick(member, " ".join(reason) if len(reason) > 0 else None)
+        return message
+
     def get_role_value(self, key, extra={}):
         role_name = extra["message"]
         role = self.get_role(self.get_role_id(role_name))
@@ -166,6 +179,33 @@ class Bot:
             return f"Role {role_name} not found"
         return_val = getattr(role, key) if role else None
         return return_val
+
+    def set_balance(self, key, extra={}):
+        args = extra["message"].split(" ")
+        user_id = args[0][3:][:-1]
+        try:
+            amount = int(args[1])
+        except:
+            return f"Invalid points amount, {args[1]}"
+        with DBManager.create_session_scope() as db_session:
+            user = User._create_or_get_by_discord_id(db_session, int(user_id))
+            user.points = amount
+        currency = self._get_currency().get("name").capitalize()
+        return f"{currency} balance for <@!{user_id}> set to {amount}"
+
+    def adj_balance(self, key, extra={}):
+        args = extra["message"].split(" ")
+        user_id = args[0][3:][:-1]
+        try:
+            amount = int(args[1])
+        except:
+            return f"Invalid points amount, {args[1]}"
+        with DBManager.create_session_scope() as db_session:
+            user = User._create_or_get_by_discord_id(db_session, int(user_id))
+            user.points += amount
+        action = "added to" if amount > 0 else "removed from"
+        currency = self._get_currency().get("name")
+        return f"{amount} {currency}s {action} <@!{user_id}> "
 
     def quit(self, bot, author, channel, message, whisper, args):
         self.quit_bot()
@@ -440,7 +480,6 @@ def _filter_time_since_dt(var, args):
     except:
         return "never FeelsBadMan ?"
 
-
 def _filter_join(var, args):
     try:
         separator = args[0]
@@ -448,7 +487,6 @@ def _filter_join(var, args):
         separator = ", "
 
     return separator.join(var.split(" "))
-
 
 def _filter_number_format(var, args):
     try:
@@ -460,25 +498,20 @@ def _filter_number_format(var, args):
 def _filter_strftime(var, args):
     return var.strftime(args[0])
 
-
 def _filter_timezone(var, args):
     return var.astimezone(timezone(args[0]))
-
 
 def _filter_urlencode(var, args):
     return urllib.parse.urlencode({"x": var})[2:]
 
-
 def lowercase_first_letter(s):
     return s[:1].lower() + s[1:] if s else ""
-
 
 def _filter_add(var, args):
     try:
         return str(int(var) + int(args[0]))
     except:
         return ""
-
 
 def _filter_or_else(var, args):
     if var is None or len(var) <= 0:

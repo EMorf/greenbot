@@ -93,6 +93,9 @@ class DiscordBotManager:
     def unban(self, user, reason=None):
         self.private_loop.create_task(self._unban(user=user, reason=reason))
 
+    def kick(self, user, reason=None):
+        self.private_loop.create_task(self._kick(user=user, reason=reason))
+
     def get_role_id(self, role_name):
         for role in self.guild.roles:
             if role.name == role_name:
@@ -143,6 +146,11 @@ class DiscordBotManager:
         if not self.guild:
             return
         self.guild.unban(user, reason)
+
+    async def _kick(self, user, reason=None):
+        if not self.guild:
+            return
+        await self.guild.kick(user, reason)
 
     async def _private_message(self, user, message, embed=None):
         message = discord.utils.escape_markdown(message)
