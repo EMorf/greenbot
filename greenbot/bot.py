@@ -332,9 +332,13 @@ class Bot:
         data.add_field(name=("Enabled"), value="Yes" if command.enabled else "No")
         data.add_field(name=("Cost"), value=f"{command.cost} points") # edit currency name
         data.add_field(name=("Whispers"), value="Yes" if command.can_execute_with_whisper else "No")
-        data.add_field(name=("Number of uses"), value=command.data.num_uses)
-        data.add_field(name=("Description"), value=command.description)
-        data.set_footer(text=(f"Made by: {command.data.added_by} | Edited by {command.data.edited_by}"))
+        if command.data:
+            data.add_field(name=("Number of uses"), value=command.data.num_uses)
+            data.set_footer(text=(f"Made by: {command.data.added_by} | Edited by {command.data.edited_by}"))
+        try:
+            data.add_field(name=("Description"), value=json.loads(command.action_json).repsonse)
+        except:
+            pass
         data.set_thumbnail(url=extra["message_raw"].guild.icon_url)
 
         return data
