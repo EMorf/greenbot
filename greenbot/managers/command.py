@@ -270,9 +270,9 @@ class CommandManager(UserDict):
 
         merge_commands(self.internal_commands, self.data)
         merge_commands(db_commands, self.data)
-        log.info(self.module_manager)
         if self.module_manager is not None:
-            for enabled_module in self.module_manager.modules:
+            log.info(self.module_manager.modules)
+            for enabled_module in :
                 merge_commands(enabled_module.commands, self.data)
 
     def load(self, **options):
