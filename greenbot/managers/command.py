@@ -302,6 +302,7 @@ class CommandManager(UserDict):
         parser = argparse.ArgumentParser()
         parser.add_argument("--privatemessage", dest="privatemessage", action="store_true")
         parser.add_argument("--channelmessage", dest="channelmessage", action="store_true")
+        parser.add_argument("--allow_whisper", dest="can_execute_with_whisper", action="store_true")
         parser.add_argument("--cd", type=int, dest="delay_all")
         parser.add_argument("--usercd", type=int, dest="delay_user")
         parser.add_argument("--level", type=int, dest="level")
