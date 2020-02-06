@@ -145,7 +145,7 @@ class DiscordBotManager:
     async def _unban(self, user, reason=None):
         if not self.guild:
             return
-        self.guild.unban(user=user, reason=reason)
+        await self.guild.unban(user=user, reason=reason)
 
     async def _kick(self, user, reason=None):
         if not self.guild:
