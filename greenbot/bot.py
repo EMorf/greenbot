@@ -308,7 +308,7 @@ class Bot:
 
         data.add_field(name=("Valid Permissions"), value=valid_permissions)
         data.add_field(name=("Invalid Permissions"), value=invalid_permissions)
-        avatar = extra["message_raw"].icon_url
+        avatar = extra["message_raw"].guild.icon_url
         data.set_thumbnail(url=avatar)
         return data
 
