@@ -337,7 +337,8 @@ class Bot:
             data.set_footer(text=(f"Made by: {command.data.added_by} | Edited by {command.data.edited_by}"))
         try:
             data.add_field(name=("Description"), value=json.loads(command.action_json).repsonse)
-        except:
+        except Exception as e:
+            log.error(e)
             pass
         data.set_thumbnail(url=extra["message_raw"].guild.icon_url)
 
