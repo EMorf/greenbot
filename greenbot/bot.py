@@ -315,8 +315,8 @@ class Bot:
     def get_commands(self, key, extra={}):
         data = discord.Embed(description=("All Commands"), colour=discord.Colour.dark_gold())
         commands = list(self.commands.keys())
-        data.add_field(name=(" "), value="\n".join([str(x) for x in commands[:len(commands)//2]]))
-        data.add_field(name=(" "), value="\n".join([str(x) for x in commands[len(commands)//2:]]))
+        data.add_field(name=("All Commands"), value="\n".join([str(x) for x in commands[:len(commands)//2]]))
+        data.add_field(name=("All Commands"), value="\n".join([str(x) for x in commands[len(commands)//2:]]))
         data.set_thumbnail(url=extra["message_raw"].guild.icon_url)
         return data
 
