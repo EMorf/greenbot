@@ -166,7 +166,7 @@ class Bot:
         return_val = getattr(role, key) if role else None
         return return_val
 
-    def quit(bot, author, channel, message, whisper, args):
+    def quit(self, bot, author, channel, message, whisper, args):
         self.private_message(author, "Quitting bot!")
         self.quit_bot()
 
