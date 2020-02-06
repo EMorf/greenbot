@@ -133,5 +133,5 @@ class AdminCommandsModule(BaseModule):
 
     def load_commands(self, **options):
         self.commands["module"] = Command.raw_command(
-            self.cmd_module, level=500, description="Modify module", delay_all=0, delay_user=0
+            self.cmd_module, level=500, description="Modify module", delay_all=0, delay_user=0, can_execute_with_whisper=True
         )
