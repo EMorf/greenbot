@@ -346,6 +346,8 @@ def get_substitutions(string, bot):
         method_mapping["role"] = bot.get_role_value
         method_mapping["userinfo"] = bot.get_user_info
         method_mapping["roleinfo"] = bot.get_role_info
+        method_mapping["commands"] = bot.get_commands
+        method_mapping["commandsinfo"] = bot.get_command_info
     except AttributeError:
         pass
 

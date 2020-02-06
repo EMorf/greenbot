@@ -309,8 +309,34 @@ class Bot:
 
         data.add_field(name=("Valid Permissions"), value="\n".join([str(x) for x in valid_permissions]))
         data.add_field(name=("Invalid Permissions"), value="\n".join([str(x) for x in invalid_permissions]))
-        avatar = extra["message_raw"].guild.icon_url
-        data.set_thumbnail(url=avatar)
+        data.set_thumbnail(url=extra["message_raw"].guild.icon_url)
+        return data
+
+    def get_commands(self, key, extra={}):
+        data = discord.Embed(description=("All Commands"), colour=discord.Colour.dark_gold())
+        commands = list(self.commands.keys())
+        data.add_field(value="\n".join([str(x) for x in commands[:len(commands)//2]]))
+        data.add_field(value="\n".join([str(x) for x in commands[len(commands)//2:]]))
+        data.set_thumbnail(url=extra["message_raw"].guild.icon_url)
+        return data
+
+    def get_command_info(self, key, extra={}):
+        if key not in self.commands:
+            return f"Cannot find command {key}"
+        command = self.commands[key]
+        data = discord.Embed(description=(command.command), colour=discord.Colour.dark_gold())
+        data.add_field(name=("ID"), value=command.id)
+        data.add_field(name=("Level"), value=command.level)
+        data.add_field(name=("Delay All"), value=command.delay_all)
+        data.add_field(name=("Delay User"), value=command.delay_user)
+        data.add_field(name=("Enabled"), value="Yes" if command.enabled else "No")
+        data.add_field(name=("Cost"), value=f"{command.cost} points") # edit currency name
+        data.add_field(name=("Whispers"), value="Yes" if command.can_execute_with_whisper else "No")
+        data.add_field(name=("Number of uses"), value=command.data.num_uses)
+        data.add_field(name=("Description"), value=command.description)
+        data.set_footer(text=(f"Made by: {command.data.added_by} | Edited by {command.data.edited_by}"))
+        data.set_thumbnail(url=extra["message_raw"].guild.icon_url)
+
         return data
 
     @staticmethod
