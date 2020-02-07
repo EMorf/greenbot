@@ -86,9 +86,9 @@ class APICommandUpdate(Resource):
         self.post_parser.add_argument("data_action_type", required=False)
         self.post_parser.add_argument("data_action_message", required=False)
 
-    @pajbot.web.utils.requires_level(500)
+    @greenbot.web.utils.requires_level(500)
     def post(self, command_id, **extra_args):
-        args = pajbot.utils.remove_none_values(self.post_parser.parse_args())
+        args = greenbot.utils.remove_none_values(self.post_parser.parse_args())
         if len(args) == 0:
             return {"error": "Missing parameter to edit."}, 400
 
