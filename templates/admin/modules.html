@@ -1,0 +1,52 @@
+{% extends "admin/layout.html" %}
+{% set active_page = 'admin_modules' %}
+{% block title %}Modules{% endblock %}
+{% block body %}
+<h2>Modules</h2>
+<div id="modules">
+    <table class="ui sortable very basic table collapsing">
+        <thead>
+            <tr>
+                <th class="sorted ascending collapsing">Module</th>
+                <th class="collapsing">Category</th>
+                <th>Description</th>
+                <th class="no-sort collapsing">Enabled</th>
+                <th class="no-sort collapsing">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+{% for row in modules if row.PARENT_MODULE is none and not row.HIDDEN %}
+            <tr data-id="{{row.ID}}" data-enabled="{{1 if row.db_module.enabled else 0}}">
+                <td class="collapsing">{{ row.NAME }}</td>
+                <td class="collapsing">{{ row.CATEGORY }}</td>
+                <td>{{ row.DESCRIPTION }}</td>
+                <td class="right aligned collapsing">
+                    {% if row.MODULE_TYPE != 2 %}
+                        <div class="ui toggle checkbox">
+                            <input type="checkbox" name="public" class="toggle-row" {{ 'checked="checked"' if row.db_module.enabled else '' }}>
+                            <label></label>
+                        </div>
+                    {% endif %}
+                </td>
+                <td class="right aligned collapsing">
+                <button class="ui compact button edit-row" {{- 'disabled' if session.user.level < row.CONFIGURE_LEVEL else '' -}}><i class="icon setting"></i>Configure</button></td>
+            </tr>
+{% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+{% block footer %}
+{% assets 'admin_create_row' %}
+<script type="text/javascript" src="{{ ASSET_URL }}"></script>
+{% endassets %}
+<script async type="text/javascript" src="/static/scripts/tablesort.js"></script>
+<script type="text/javascript">
+$(document).ready(function() {
+    enable_edit_row('modules');
+    enable_toggle_row_cb('toggle_module');
+
+    $('table').tablesort();
+});
+</script>
+{% endblock %}

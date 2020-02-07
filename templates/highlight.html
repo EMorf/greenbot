@@ -1,0 +1,49 @@
+{% extends "layout.html" %}
+{% set active_page = 'highlights' %}
+{% block title %}Highlight - {{ highlight.id }}{% endblock %}
+{% block body %}
+<h2>{{ stream.title }}</h2>
+<div class="ui image video_thumbnail">
+    {%- include 'helper/highlight_thumbnail_img.html' -%}
+</div>
+<table class="ui very basic table">
+{% set user = highlight.created_by_user %}
+    <tbody>
+        <tr>
+            <th>Created at</th>
+            <td><span class="date">{{ highlight.created_at|time_ago }} ago | {{ highlight.created_at|date_format }}</span></td>
+        </tr>
+        {% if highlight.description %}
+        <tr>
+            <th>Description</th>
+            <td>{{ highlight.description }}</td>
+        </tr>
+        {% endif %}
+        {% if user %}
+        <tr>
+            <th>Created by</th>
+            <td>{% include 'user/username_link_nobadge.html' %}</td>
+        </tr>
+        {% endif %}
+        {% set user = highlight.last_edited_by_user %}
+        {% if user %}
+        <tr>
+            <th>Last edited by</th>
+            <td>{% include 'user/username_link_nobadge.html' %}</td>
+        </tr>
+        {% endif %}
+        <tr>
+            <th>Link</th>
+            <td><a href="{{ highlight.video_url }}">{{ highlight.video_url }}</a></td>
+        </tr>
+        <tr>
+            <th>ID</th>
+            <td>{{ highlight.id }}</td>
+        </tr>
+        <tr>
+            <th>Offset</th>
+            <td>{{ highlight.highlight_offset }} seconds</td>
+        </tr>
+    </tbody>
+</table>
+{% endblock %}

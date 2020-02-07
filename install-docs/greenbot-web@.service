@@ -1,0 +1,18 @@
+[Unit]
+Description=greenbot-web for %i
+After=network.target
+
+[Service]
+Type=simple
+User=greenbot
+Group=greenbot
+WorkingDirectory=/opt/DiscordBot
+RuntimeDirectory=greenbot/%i
+RuntimeDirectoryPreserve=yes
+ExecStart=/opt/DiscordBot/venv/bin/uwsgi --ini uwsgi_shared.ini --socket /var/run/greenbot/%i/web.sock --pyargv "--config configs/%i.ini" --virtualenv venv
+SyslogIdentifier=greenbot-web@%I
+RestartSec=2
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

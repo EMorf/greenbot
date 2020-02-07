@@ -1,0 +1,60 @@
+{% extends "admin/layout.html" %}
+{% set active_page = 'admin_commands' %}
+{% block title %}Create Command{% endblock %}
+{% block body %}
+<h2>Create Command</h2>
+<form class="ui form" method="POST">
+    <div class="fields">
+        <div class="required field field-alias four wide">
+            <label>Aliases</label>
+            <input class="alias" type="text" placeholder="New alias..." />
+            <div class="alias-button-bar">
+                <div class="aliases"></div>
+            </div>
+            <input type="hidden" name="aliases" />
+        </div>
+    </div>
+    <div class="fields">
+        <div class="required field four wide">
+            <label>Level</label>
+            <input type="number" name="level" placeholder="Level" value="100" />
+        </div>
+        <div class="required field four wide">
+            <label>Global cooldown (seconds)</label>
+            <input type="number" name="cd" placeholder="Cooldown" value="5" />
+        </div>
+        <div class="required field four wide">
+            <label>Per-user cooldown (seconds)</label>
+            <input type="number" name="usercd" placeholder="Cooldown" value="15" />
+        </div>
+        <div class="required field four wide">
+            <label>Point cost</label>
+            <input type="number" name="cost" placeholder="Cost" value="0" />
+        </div>
+    </div>
+    <div class="fields">
+        <div class="required field four wide">
+            <label>Reply type</label>
+            <select class="ui dropdown" name="reply">
+                <option value="say">Say</option>
+                <option value="me">Me</option>
+                <option value="whisper">Whisper</option>
+                <option value="reply">Context-dependant reply</option>
+            </select>
+        </div>
+        <div class="required field twelve wide">
+            <label>Response</label>
+            <input type="text" name="response" placeholder="Response" />
+        </div>
+    </div>
+    <div class="ui message warning" style="padding: 0.4em;"></div>
+    <div class="ui message error" style="padding: 0.4em;"></div>
+    <div class="ui submit button green">Create</div>
+</div>
+</form>
+{% endblock %}
+{% block footer %}
+{% assets 'admin_create_command' %}
+<script type="text/javascript" src="{{ ASSET_URL }}"></script>
+{% endassets %}
+{% endblock %}

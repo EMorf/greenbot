@@ -23,55 +23,55 @@ from greenbot.models.user import User
 log = logging.getLogger(__name__)
 
 
-# def parse_command_for_web(alias, command, list):
-#     import markdown
-#     from flask import Markup
+def parse_command_for_web(alias, command, list):
+    import markdown
+    from flask import Markup
 
-#     if command in list:
-#         return
+    if command in list:
+        return
 
-#     command.json_description = None
-#     command.parsed_description = ""
+    command.json_description = None
+    command.parsed_description = ""
 
-#     try:
-#         if command.description is not None:
-#             command.json_description = json.loads(command.description)
-#             if "description" in command.json_description:
-#                 command.parsed_description = Markup(markdown.markdown(command.json_description["description"]))
-#             if command.json_description.get("hidden", False) is True:
-#                 return
-#     except ValueError:
-#         # Invalid JSON
-#         pass
-#     except:
-#         log.warning(command.json_description)
-#         log.exception("Unhandled exception BabyRage")
-#         return
+    try:
+        if command.description is not None:
+            command.json_description = json.loads(command.description)
+            if "description" in command.json_description:
+                command.parsed_description = Markup(markdown.markdown(command.json_description["description"]))
+            if command.json_description.get("hidden", False) is True:
+                return
+    except ValueError:
+        # Invalid JSON
+        pass
+    except:
+        log.warning(command.json_description)
+        log.exception("Unhandled exception BabyRage")
+        return
 
-#     if command.command is None:
-#         command.command = alias
+    if command.command is None:
+        command.command = alias
 
-#     if command.action is not None and command.action.type == "multi":
-#         if command.command is not None:
-#             command.main_alias = command.command.split("|")[0]
-#         for inner_alias, inner_command in command.action.commands.items():
-#             parse_command_for_web(
-#                 alias if command.command is None else command.main_alias + " " + inner_alias, inner_command, list
-#             )
-#     else:
-#         test = re.compile(r"[^\w]")
-#         first_alias = command.command.split("|")[0]
-#         command.resolve_string = test.sub("", first_alias.replace(" ", "_"))
-#         command.main_alias = "!" + first_alias
-#         if not command.parsed_description:
-#             if command.action is not None:
-#                 if command.action.type == "message":
-#                     command.parsed_description = command.action.response
-#                     if not command.action.response:
-#                         return
-#             if command.description is not None:
-#                 command.parsed_description = command.description
-#         list.append(command)
+    if command.action is not None and command.action.type == "multi":
+        if command.command is not None:
+            command.main_alias = command.command.split("|")[0]
+        for inner_alias, inner_command in command.action.commands.items():
+            parse_command_for_web(
+                alias if command.command is None else command.main_alias + " " + inner_alias, inner_command, list
+            )
+    else:
+        test = re.compile(r"[^\w]")
+        first_alias = command.command.split("|")[0]
+        command.resolve_string = test.sub("", first_alias.replace(" ", "_"))
+        command.main_alias = "!" + first_alias
+        if not command.parsed_description:
+            if command.action is not None:
+                if command.action.type == "message":
+                    command.parsed_description = command.action.response
+                    if not command.action.response:
+                        return
+            if command.description is not None:
+                command.parsed_description = command.description
+        list.append(command)
 
 
 class CommandData(Base):

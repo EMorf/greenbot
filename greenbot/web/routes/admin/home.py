@@ -1,0 +1,21 @@
+from flask import render_template
+from sqlalchemy.orm import joinedload
+
+from greenbot.managers.adminlog import AdminLogEntry
+from greenbot.managers.db import DBManager
+from greenbot.web.utils import requires_level
+
+
+def init(page):
+    @page.route("/")
+    @requires_level(500)
+    def home(**options):
+        with DBManager.create_session_scope() as db_session:
+            latest_logs = (
+                db_session.query(AdminLogEntry)
+                .options(joinedload("user"))
+                .order_by(AdminLogEntry.created_at.desc())
+                .limit(50)
+                .all()
+            )
+            return render_template("admin/home.html", latest_logs=latest_logs)

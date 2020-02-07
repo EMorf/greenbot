@@ -1,0 +1,37 @@
+<div class="item">
+    <div class="ui image video_thumbnail">
+        {%- include 'helper/highlight_thumbnail_img.html' -%}
+    </div>
+    <div class="content">
+<div class="header">
+    <a href="/highlights/{{ highlight.created_at|strftime('%Y-%m-%d') }}/{{ highlight.id }}" style="color: #0e407f;">
+        {%- if highlight.description %}
+        {{ highlight.description }} 
+        {% else %}
+            {% if highlight.stream_chunk.stream.title|length > 80 %}
+                {{ highlight.stream_chunk.stream.title[:80] }}...
+            {% else %}
+                {{ highlight.stream_chunk.stream.title }}
+            {% endif %}
+        {% endif -%}
+        </a>
+    </div>
+        <div class="meta">
+            <span class="date">{{ highlight.created_at|time_ago }} ago | {{ highlight.created_at|date_format }}</span>
+        </div>
+        <div class="description">
+            <div>Link: <a href="{{ highlight.video_url }}">{{ highlight.video_url }}</a></div>
+            {% set user = highlight.created_by_user %}
+            {% if user %}
+            Highlight created by {% include 'user/username_link_nobadge.html' %}<br />
+            {% endif %}
+            {% set user = highlight.last_edited_by_user %}
+            {% if user %}
+            Highlight last edited by {% include 'user/username_link_nobadge.html' %}<br />
+            {% endif %}
+            {% if highlight.description %}
+            <p>{{ highlight.stream_chunk.stream.title }}</p>
+            {% endif %}
+        </div>
+    </div>
+</div>

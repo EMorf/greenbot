@@ -1,0 +1,14 @@
+{% extends "layout.html" %}
+{% set active_page = 'contact' %}
+{% block title %}Contact{% endblock %}
+{% block body %}
+<div class="ui segment">
+<h2>Contact</h2>
+{% if maintainer is not none %}
+<p>Hi, I'm {{ maintainer.name }}! I'm the host and maintainer of {{ bot.name }}.</p>
+<p>{{ maintainer.contact_string|safe }}</p>
+{% endif %}
+<p>{{ bot.name }} is running on the <a href="https://github.com/pajbot/pajbot"><strong>pajbot</strong></a> source, which is written in Python.</p>
+<p>Got any questions or comments about the bot or the website? <a href="https://discord.gg/qbRE8WR">You can join pajlada's Discord for support!</a></p>
+</div>
+{% endblock %}

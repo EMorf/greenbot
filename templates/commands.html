@@ -1,0 +1,94 @@
+{% extends "layout.html" %}
+{% set active_page = 'commands' %}
+{% block title %}Commands{% endblock %}
+{% block body %}
+<h2>Commands</h2>
+<div id="commands">
+<div class="ui top attached tabular menu collapsing collapsed">
+    <a class="item custom active" data-tab="custom">Regular Commands</a>
+    {% if point_commands|length > 0 %}
+        <a class="item point" data-tab="point">Point Commands</a>
+    {% endif %}
+    {% if moderator_commands|length > 0 %}
+        <a class="item moderator" data-tab="moderator">Moderator Commands</a>
+    {% endif %}
+</div>
+<div class="ui bottom attached tab segment active collapsed" data-tab="custom">
+    <div class="ui equal width grid">
+        <div class="column four wide">
+            {% set base_key = 'c1' %}
+            <div class="commandlist-container {{ base_key }}">
+            <table class="ui table collapsed collapsing commandlist {{ base_key }}" data-key="{{ base_key }}">
+                <thead>
+                    <tr>
+                        <th>Command trigger</th>
+                    </tr>
+                </thead>
+                <tbody>
+            {% for command in custom_commands %}
+            <tr>
+                <td class="collapsing selectable" style="font-family: monospace;">{% include 'helper/command_usage.html' %}</td>
+            </tr>
+            {% endfor %}
+                </tbody>
+            </table>
+            </div>
+        </div>
+        {% include 'helper/commands_page.html' %}
+    </div>
+</div>
+<div class="ui bottom attached tab segment" data-tab="point">
+    <div class="ui equal width grid">
+        <div class="column four wide">
+            {% set base_key = 'c2' %}
+            <div class="commandlist-container {{ base_key }}">
+            <table class="ui table collapsed collapsing commandlist {{ base_key }}" data-key="{{ base_key }}">
+                <thead>
+                    <tr>
+                        <th>Command trigger</th>
+                    </tr>
+                </thead>
+                <tbody>
+            {% for command in point_commands %}
+            <tr>
+                <td class="collapsing selectable" style="font-family: monospace;">{% include 'helper/command_usage.html' %}</td>
+            </tr>
+            {% endfor %}
+                </tbody>
+            </table>
+            </div>
+        </div>
+        {% include 'helper/commands_page.html' %}
+    </div>
+</div>
+<div class="ui bottom attached tab segment" data-tab="moderator">
+    <div class="ui equal width grid">
+        <div class="column four wide">
+            {% set base_key = 'c3' %}
+            <div class="commandlist-container {{ base_key }}">
+            <table class="ui table collapsed collapsing commandlist {{ base_key }}" data-key="{{ base_key }}">
+                <thead>
+                    <tr>
+                        <th>Command trigger</th>
+                    </tr>
+                </thead>
+                <tbody>
+            {% for command in moderator_commands %}
+            <tr>
+                <td class="collapsing selectable" style="font-family: monospace;">{% include 'helper/command_usage.html' %}</td>
+            </tr>
+            {% endfor %}
+                </tbody>
+            </table>
+            </div>
+        </div>
+        {% include 'helper/commands_page.html' %}
+    </div>
+</div>
+</div>
+{% endblock %}
+{% block footer %}
+{% assets 'commands_js' %}
+<script type="text/javascript" src="{{ ASSET_URL }}"></script>
+{% endassets %}
+{% endblock %}

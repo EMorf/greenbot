@@ -8,6 +8,7 @@ from greenbot.managers.db import DBManager
 from greenbot.models.command import Command
 from greenbot.models.command import CommandData
 from greenbot.utils import find
+from greenbot.models.command import parse_command_for_web
 
 log = logging.getLogger(__name__)
 
@@ -19,7 +20,6 @@ class CommandManager(UserDict):
      - internal_commands = Commands that are added in source
      - db_commands = Commands that are loaded from the database
      - module_commands = Commands that are loaded from enabled modules
-
     """
 
     def __init__(self, socket_manager=None, module_manager=None, bot=None):
@@ -297,13 +297,13 @@ class CommandManager(UserDict):
                 command.data = CommandData(command.id)
             self.db_session.add(command.data)
 
-    # def parse_for_web(self):
-    #     commands = []
+    def parse_for_web(self):
+        commands = []
 
-    #     for alias, command in self.data.items():
-    #         parse_command_for_web(alias, command, commands)
+        for alias, command in self.data.items():
+            parse_command_for_web(alias, command, commands)
 
-    #     return commands
+        return commands
 
     @staticmethod
     def parse_command_arguments(message):
