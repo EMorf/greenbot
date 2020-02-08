@@ -101,6 +101,8 @@ class ActivityTracker(BaseModule):
             messages = Message._get_last_hour(db_session)
             channels_to_listen_in = self.settings["channels_to_listen_in"].split(" ")
             for message in messages:
+                log.info(message.channel_id not in channels_to_listen_in and len(channels_to_listen_in) != 0)
+                log.info(message.content)
                 if message.channel_id not in channels_to_listen_in and len(channels_to_listen_in) != 0:
                     return
                 count = Message._get_last_day_count_user(db_session, message.user_id)
