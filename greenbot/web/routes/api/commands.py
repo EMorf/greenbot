@@ -105,7 +105,7 @@ class APICommandUpdate(Resource):
             )
             if command is None:
                 return {"error": "Invalid command ID"}, 404
-
+            log.info(extra_args["user"])
             if command.level > extra_args["user"].level:
                 return {"error": "Unauthorized"}, 403
             parsed_action = json.loads(command.action_json)
