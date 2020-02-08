@@ -105,9 +105,7 @@ class DiscordBotManager:
     
     async def _say(self, channel, message, embed=None):
         message = discord.utils.escape_markdown(message)
-        if channel:
-            if embed:
-                message = None
+        if channel and (message or embed):
             await channel.send(content=message, embed=embed)
 
     async def _ban(self, user, timeout_in_seconds=0, reason=None, delete_message_days=0):
@@ -144,6 +142,8 @@ class DiscordBotManager:
         await user.create_dm()
         if embed:
             message = None
+        if not message and not embed:
+            return
         await user.dm_channel.send(content=message, embed=embed)
 
     async def _remove_role(self, user, role):
