@@ -238,7 +238,7 @@ class Command(Base):
     def set(self, **options):
         self.level = options.get("level", self.level)
         if "action" in options:
-            options["action"] = "privatemessage" if options["action"]["type"] == "Private Message" else "reply"
+            options["action"]["type"] = "privatemessage" if options["action"]["type"] == "Private Message" else "reply"
             self.action_json = json.dumps(options["action"])
             self.action = ActionParser.parse(self.action_json, command=self.command)
         log.info(self.action_json)
