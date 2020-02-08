@@ -16,6 +16,7 @@ class User(Base):
 
     discord_id = Column(TEXT, primary_key=True, autoincrement=False)
     points = Column(INT, nullable=False, default=0)
+    level = Column(INT, nullable=False, default=100)
 
     def can_afford(self, points):
         return not self.points < points
