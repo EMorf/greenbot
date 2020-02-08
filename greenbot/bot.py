@@ -89,7 +89,7 @@ class Bot:
             log.warning("No admin user specified. See the [main] section in the example config for its usage.")
         else:
             with DBManager.create_session_scope() as db_session:
-                owner = User._create_or_get_by_discord_id(db_session, owner)
+                owner = User._create_or_get_by_discord_id(db_session, str(owner))
                 if owner is None:
                     log.warning(
                         "The login name you entered for the admin user does not exist on twitch. "
