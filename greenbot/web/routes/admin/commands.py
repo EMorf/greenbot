@@ -12,6 +12,7 @@ from greenbot.managers.adminlog import AdminLogManager
 from greenbot.managers.db import DBManager
 from greenbot.models.command import Command
 from greenbot.models.command import CommandData
+from greenbot.models.user import User
 from greenbot.models.module import ModuleManager
 from greenbot.models.sock import SocketClientManager
 from greenbot.web.utils import requires_level
@@ -70,7 +71,10 @@ def init(page):
                 .filter_by(id=command_id)
                 .one_or_none()
             )
-
+            with DBManager.create_session_scope() as db_session:
+                user = db_session.query(User).filter_by(discord_id=session["user"]["discord_id"]).one_or_none()
+                if command.action.functions and user.level < 1500:
+                    abort(403)
             if command is None:
                 return render_template("admin/command_404.html"), 404
             return render_template("admin/edit_command.html", command=command, user=options.get("user", None))
