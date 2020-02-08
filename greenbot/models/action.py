@@ -525,8 +525,7 @@ def get_substitutions_array(array, bot, extra):
         elif argument:
             param = MessageAction.get_argument_value(extra["message"], argument - 1)
         else:
-            log.error("Unknown param for response.")
-            continue
+            param = None
         value = path(param, extra)
         try:
             for f in filters:
