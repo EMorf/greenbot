@@ -73,8 +73,7 @@ class Bot:
             "bot_name": self.bot_name,
             "channels": self.config["discord"]["channels_to_listen_in"].split(" "),
             "command_prefix": self.command_prefix,
-            "discord_guild_id": self.config["discord"]["discord_guild_id"],
-            "admin_roles": [{"role_id": self.config[role]["role_id"], "level": self.config[role]["level"]} for role in self.config["discord"]["admin_roles"].split(" ")]
+            "discord_guild_id": self.config["discord"]["discord_guild_id"]
         }
 
         self.discord_bot = DiscordBotManager(bot=self, settings=self.settings, redis=RedisManager.get(), private_loop=self.private_loop)
