@@ -39,7 +39,7 @@ class ActivityTracker(BaseModule):
         ),
         ModuleSetting(
             key="channels_to_listen_in",
-            label="Channel IDs to listen in seperated by a ';'",
+            label="Channel IDs to listen in seperated by a ' '",
             type="text",
             placeholder="",
             default="",
@@ -99,10 +99,9 @@ class ActivityTracker(BaseModule):
                     self.bot.remove_role(member, regular_role)
             db_session.commit()
             messages = Message._get_last_hour(db_session)
+            channels_to_listen_in = self.settings["channels_to_listen_in"].split(" ")
             for message in messages:
-                if message.channel_id not in self.settings[
-                    "channels_to_listen_in"
-                ].split(";"):
+                if message.channel_id not in channels_to_listen_in and len(channels_to_listen_in) != 0:
                     return
                 count = Message._get_last_day_count_user(db_session, message.user_id)
                 if count < self.settings["daily_max_msgs"] - 1:
