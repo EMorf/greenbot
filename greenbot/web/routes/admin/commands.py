@@ -127,10 +127,10 @@ def init(page):
             abort(403)
 
         response = request.form.get("response", "")
-        if not response:
-            abort(403)
 
-        action = {"type": action_type, "message": response}
+        functions = request.form.get("functions").split(" ")
+
+        action = {"type": action_type, "message": response, "functions": functions}
         options["action"] = action
 
         command_manager = greenbot.managers.command.CommandManager(
