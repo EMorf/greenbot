@@ -1,7 +1,7 @@
 import logging
 import re
 
-# from greenbot.managers.adminlog import AdminLogManager
+from greenbot.managers.adminlog import AdminLogManager
 from greenbot.managers.db import DBManager
 from greenbot.models.user import User
 
@@ -54,7 +54,7 @@ class Dispatch:
             bot.private_message(author, f"Added your command (ID: {command.id})")
 
             log_msg = f"The !{command.command.split('|')[0]} command has been created"
-            # AdminLogManager.add_entry("Command created", user_id, log_msg)
+            AdminLogManager.add_entry("Command created", str(author.id), log_msg)
             return True
 
         # At least one alias is already in use, notify the user to use !edit command instead
@@ -90,16 +90,11 @@ class Dispatch:
                 return False
 
             alias = message_parts[0].replace("!", "").lower()
-            type = "say"
-            if options["whisper"] is True:
-                type = "whisper"
+            type = "reply"
+            if options["privatemessage"] is True:
+                type = "privatemessage"
             elif options["reply"] is True:
                 type = "reply"
-            elif response.startswith("/me") or response.startswith(".me"):
-                type = "me"
-                response = " ".join(response.split(" ")[1:])
-            elif options["whisper"] is False or options["reply"] is False:
-                type = "say"
             action = {"type": type, "message": response}
 
             command = bot.commands.get(alias, None)
@@ -128,9 +123,9 @@ class Dispatch:
             else:
                 log_msg = f"The !{command.command.split('|')[0]} command has been updated"
 
-            # AdminLogManager.add_entry(
-                # "Command edited", user_id, log_msg, data={"old_message": old_message, "new_message": new_message}
-            # )
+            AdminLogManager.add_entry(
+                "Command edited", str(author.id), log_msg, data={"old_message": old_message, "new_message": new_message}
+            )
 
     @staticmethod
     def add_funccommand(bot, author, channel, message, args):
@@ -156,8 +151,6 @@ class Dispatch:
                     f"You didnt specify any functions --function abc --function xyz",
                 )
                 return False
-
-           
 
             if options is False:
                 bot.private_message(author, "Invalid command")
@@ -195,7 +188,7 @@ class Dispatch:
             # Make sure we got both an alias and a response
             message_parts = message.split(" ")
             if len(message_parts) < 2:
-                bot.whisper(author, "Usage: !add funccommand ALIAS [options] CALLBACK")
+                bot.whisper(author, "Usage: !edit funccommand ALIAS [options] [CALLBACK]")
                 return False
 
             options, response = bot.commands.parse_command_arguments(message_parts[1:])
@@ -207,7 +200,21 @@ class Dispatch:
                 return False
 
             alias = message_parts[0].replace("!", "").lower()
-            action = {"type": "func", "cb": response.strip()}
+            type = "reply"
+            if options["privatemessage"] is True:
+                type = "privatemessage"
+            elif options["reply"] is True:
+                type = "reply"
+
+            if "functions" not in options:
+                bot.private_message(
+                    author,
+                    f"You didnt specify any functions --function abc --function xyz",
+                )
+                return False
+
+            action = {"type": type, "message": response, "functions": options["functions"]}
+            del options["functions"]
 
             command = bot.commands.get(alias, None)
 
@@ -267,7 +274,7 @@ class Dispatch:
 
                 bot.private_message(author, f"Successfully added the aliases {', '.join(added_aliases)} to {existing_alias}")
                 log_msg = f"The aliases {', '.join(added_aliases)} has been added to {existing_alias}"
-                # AdminLogManager.add_entry("Alias added", user_id, log_msg)
+                AdminLogManager.add_entry("Alias added", str(author.id), log_msg)
             if len(already_used_aliases) > 0:
                 bot.private_message(author, f"The following aliases were already in use: {', '.join(already_used_aliases)}")
         else:
@@ -311,7 +318,7 @@ class Dispatch:
                 num_removed += 1
                 del bot.commands[alias]
                 log_msg = f"The alias {alias} has been removed from {new_aliases.split('|')[0]}"
-                # AdminLogManager.add_entry("Alias removed", user_id, log_msg)
+                AdminLogManager.add_entry("Alias removed", str(author.id), log_msg)
 
             whisper_str = ""
             if num_removed > 0:
@@ -358,7 +365,7 @@ class Dispatch:
 
             bot.private_message(author, f"Successfully removed command with id {command.id}")
             log_msg = f"The !{command.command.split('|')[0]} command has been removed"
-            # AdminLogManager.add_entry("Command removed", user_id, log_msg)
+            AdminLogManager.add_entry("Command removed", str(author.id), log_msg)
             bot.commands.remove_command(command)
         else:
             bot.private_message(author, "Usage: !remove command (COMMAND_ID|COMMAND_ALIAS)")
