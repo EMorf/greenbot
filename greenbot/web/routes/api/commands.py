@@ -88,6 +88,7 @@ class APICommandUpdate(Resource):
 
     @greenbot.web.utils.requires_level(500)
     def post(self, command_id, **extra_args):
+        log.info("Yes")
         args = greenbot.utils.remove_none_values(self.post_parser.parse_args())
         if len(args) == 0:
             return {"error": "Missing parameter to edit."}, 400
