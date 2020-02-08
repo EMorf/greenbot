@@ -38,7 +38,7 @@ class User(Base):
 
     @staticmethod
     def _create_or_get_by_discord_id(db_session, discord_id, user_name=""):
-        user = db_session.query(User).filter_by(discord_id=str(discord_id)).one_or_none() or User._create(db_session, user_name, discord_id)
+        user = db_session.query(User).filter_by(discord_id=str(discord_id)).one_or_none() or User._create(db_session, discord_id=discord_id, user_name=user_name)
         user.user_name = user_name
         db_session.merge(user)
         return user
