@@ -28,7 +28,7 @@ class CustomClient(discord.Client):
 
     async def on_message(self, message):
         member = self.bot.guild.get_member(message.author.id)
-        if isinstance(message.author, discord.Member) and (message.guild != self.bot.guild or not message.channel in self.bot.listening_channels):
+        if isinstance(message.author, discord.Member) and (message.guild != self.bot.guild):
             return
         user_level = 50
         with DBManager.create_session_scope() as db_session:
@@ -47,22 +47,8 @@ class DiscordBotManager:
         
         self.private_loop = private_loop
         self.redis = redis
-        self.listening_channels = []
 
         self.guild = None
-        HandlerManager.add_handler("discord_ready", self.setup, priority=100)
-
-    def setup(self):
-        self.private_loop.create_task(self._setup())
-
-    async def _setup(self):
-        self.listening_channels = []
-        for channel_id in self.settings["channels"]:
-            channel = self.guild.get_channel(int(channel_id))
-            if not channel:
-                log.error(f"Cannot find channel {channel_id}")
-                continue
-            self.listening_channels.append(channel)
 
     def private_message(self, user, message, embed=None):
         self.private_loop.create_task(self._private_message(user, message, embed))
