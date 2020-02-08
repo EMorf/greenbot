@@ -72,12 +72,9 @@ $(document).ready(function() {
             },
             response: {
                 identifier: 'response',
-                rules: [
-                {
-                    type: 'empty',
-                    prompt: 'The response cannot be empty'
-                }
-                ]
+            },
+            functions: {
+                identifier: 'functions',
             },
         },
         keyboardShortcuts: false,
