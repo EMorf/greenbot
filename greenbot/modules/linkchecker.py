@@ -24,11 +24,6 @@ log = logging.getLogger(__name__)
 
 def is_subdomain(x, y):
     """ Returns True if x is a subdomain of y, otherwise return False.
-
-    Example:
-    is_subdomain('pajlada.se', 'pajlada.se') = True
-    is_subdomain('test.pajlada.se', 'pajlada.se') = True
-    is_subdomain('test.pajlada.se', 'pajlada.com') = False
     """
     if y.startswith("www."):
         y = y[4:]
@@ -233,7 +228,7 @@ class LinkCheckerModule(BaseModule):
         log.info(f"Loaded {len(self.blacklisted_links)} bad links and {len(self.whitelisted_links)} good links")
         return self
 
-    super_whitelist = ["pajlada.se", "pajlada.com", "forsen.tv", "pajbot.com"]
+    super_whitelist = []
 
     def on_message(self, source, whisper, urls, **rest):
         if whisper:
@@ -255,7 +250,7 @@ class LinkCheckerModule(BaseModule):
                 whisper_reason = "You cannot post non-verified links in chat if you're a subscriber"
 
             if do_timeout is True:
-                # Check if the links are in our super-whitelist. i.e. on the pajlada.se domain o forsen.tv
+                # Check if the links are in our super-whitelist.
                 for url in urls:
                     parsed_url = Url(url)
                     if len(parsed_url.parsed.netloc.split(".")) < 2:

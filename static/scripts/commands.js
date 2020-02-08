@@ -103,7 +103,7 @@ function handle_command(base_key, command)
                                 if (message.source.from == 'bot') {
                                     chat_html += bot_name;
                                 } else {
-                                    chat_html += 'pajlada';
+                                    chat_html += 'Troy';
                                 }
                                 chat_html += '</span>';
                             } else if (message.source.type == 'whisper') {
@@ -111,7 +111,7 @@ function handle_command(base_key, command)
                                 if (message.source.from == 'bot') {
                                     chat_html += bot_name;
                                 } else {
-                                    chat_html += 'pajlada';
+                                    chat_html += 'Troy';
                                 }
                                 chat_html += '</span>';
                                 chat_html += '<svg class="svg"><polyline points="6 2, 10 6, 6 10, 6 2"></polyline></svg>'
@@ -119,7 +119,7 @@ function handle_command(base_key, command)
                                 if (message.source.to == 'bot') {
                                     chat_html += bot_name;
                                 } else {
-                                    chat_html += 'pajlada';
+                                    chat_html += 'Troy';
                                 }
                                 chat_html += '</span>';
                             }
