@@ -49,6 +49,13 @@ def init(args):
         log.error("Missing [web] section in config.ini")
         sys.exit(1)
     
+    if "secret_key" not in config["web"]:
+        salt = generate_random_salt()
+        config.set("web", "secret_key", salt.decode("utf-8"))
+
+        with open(args.config, "w") as configfile:
+            config.write(configfile)
+
     bot_name = config["main"]["bot_name"]
     BotHelper.set_bot_name(bot_name)
     SocketClientManager.init(bot_name)
@@ -56,6 +63,7 @@ def init(args):
     app.bot_modules = config["web"].get("modules", "").split()
     app.bot_commands_list = []
     app.bot_config = config
+    app.secret_key = config["web"]["secret_key"]
     app.bot_dev = "flags" in config and "dev" in config["flags"] and config["flags"]["dev"] == "1"
 
     DBManager.init(config["main"]["db"])

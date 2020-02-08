@@ -35,16 +35,6 @@ def init(app):
         authorize_url="https://discordapp.com/api/oauth2/authorize",
     )
 
-    streamer_scopes = ["user_read", "channel:read:subscriptions", "bits:read"]  # remove this later
-    """Request these scopes on /streamer_login"""
-    spotify_scopes = [
-        "user-read-playback-state",
-        "user-modify-playback-state",
-        "user-read-currently-playing",
-        "user-read-email",
-        "user-read-private",
-    ]
-
     @app.route("/login")
     def discord_login():
         callback_url = (
