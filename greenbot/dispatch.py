@@ -86,7 +86,7 @@ class Dispatch:
                 del options["functions"]
 
             if options is False:
-                bot.whisper(author, "Invalid command")
+                bot.private_message(author, "Invalid command")
                 return False
 
             alias = message_parts[0].replace("!", "").lower()
@@ -188,7 +188,7 @@ class Dispatch:
             # Make sure we got both an alias and a response
             message_parts = message.split(" ")
             if len(message_parts) < 2:
-                bot.whisper(author, "Usage: !edit funccommand ALIAS [options] [CALLBACK]")
+                bot.private_message(author, "Usage: !edit funccommand ALIAS [options] [CALLBACK]")
                 return False
 
             options, response = bot.commands.parse_command_arguments(message_parts[1:])
@@ -196,7 +196,7 @@ class Dispatch:
             options["edited_by"] = str(author.id)
 
             if options is False:
-                bot.whisper(author, "Invalid command")
+                bot.private_message(author, "Invalid command")
                 return False
 
             alias = message_parts[0].replace("!", "").lower()
@@ -219,14 +219,14 @@ class Dispatch:
             command = bot.commands.get(alias, None)
 
             if command is None:
-                bot.whisper(
+                bot.private_message(
                     author,
                     f"No command found with the alias {alias}. Did you mean to create the command? If so, use !add funccommand instead.",
                 )
                 return False
 
             bot.commands.edit_command(command, **options)
-            bot.whisper(author, f"Updated the command (ID: {command.id})")
+            bot.private_message(author, f"Updated the command (ID: {command.id})")
 
     @staticmethod
     def add_alias(bot, author, channel, message, args):
@@ -324,7 +324,7 @@ class Dispatch:
             if len(commands_not_found) > 0:
                 whisper_str += f" Aliases {', '.join(commands_not_found)} not found"
             if len(whisper_str) > 0:
-                bot.whisper(author, whisper_str)
+                bot.private_message(author, whisper_str)
         else:
             bot.private_message(author, "Usage: !remove alias EXISTINGALIAS")
 
