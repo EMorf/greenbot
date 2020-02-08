@@ -558,7 +558,7 @@ class ReplyAction(MessageAction):
         extra = self.get_extra_data(author, channel, message, args)
         if self.functions:
             for func in self.functions:
-                final_args = get_argument_substitutions_array(get_substitutions_array(self.functions.arguments, bot, extra))
+                final_args = get_argument_substitutions_array(get_substitutions_array(func.arguments, bot, extra))
                 func.cb(final_args)
 
         resp, embed = self.get_response(bot, extra)
