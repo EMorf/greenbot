@@ -33,7 +33,7 @@ def requires_level(level, redirect_url="/"):
             if "user" not in session:
                 return redirect("/login?n=" + redirect_url)
             with DBManager.create_session_scope() as db_session:
-                user = db_session.query(User).filter_by(id=session["user"]["discord_id"]).one_or_none()
+                user = db_session.query(User).filter_by(discord_id=session["user"]["discord_id"]).one_or_none()
                 if user is None:
                     abort(403)
 
