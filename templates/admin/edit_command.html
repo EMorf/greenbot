@@ -67,7 +67,7 @@
 
 {% if command.action.type == 'message' %}
 {% set data_available = [
-    ('Reply Type', True, command.action.subtype, 'action_type', 'list(Reply:Say,Private Message:Whisper)', ''),
+    ('Reply Type', True, command.action.subtype, 'action_type', 'list(Reply:Reply,Private Message:Private Message)', ''),
     ('Response', True, command.action.response, 'action_message', 'string', ''),
 ] %}
 {% elif command.action.type == 'func' %}
