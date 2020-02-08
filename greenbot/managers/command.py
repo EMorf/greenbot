@@ -117,6 +117,9 @@ class CommandManager(UserDict):
                     level=500,
                     description="Adds an alias to an already existing command",
                 ),
+                "funccommand": Command.dispatch_command(
+                    "add_funccommand", level=2000, description="Add a command that uses a command"
+                ),
             },
             can_execute_with_whisper=True,
         )
