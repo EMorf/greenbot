@@ -291,6 +291,7 @@ class MessageAction(BaseAction):
 
     def __init__(self, response, bot, functions=[]):
         self.response = response
+        self.function = functions
         if bot:
             self.argument_subs = get_argument_substitutions(self.response)
             self.num_urlfetch_subs = len(get_urlfetch_substitutions(self.response, all=True))
@@ -483,8 +484,7 @@ class ReplyAction(MessageAction):
 
     def run(self, bot, author, channel, message, whisper, args):
         extra = self.get_extra_data(author, channel, message, args)
-        log.info(args)
-        if "functions" in args:
+        if self.functions:
             extra.pop("functions")
             functions = args["functions"]
             functions = get_functions(functions, bot)
