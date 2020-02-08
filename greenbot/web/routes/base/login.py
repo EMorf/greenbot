@@ -37,22 +37,9 @@ def init(app):
         user = discord.fetch_user()
         with DBManager.create_session_scope(expire_on_commit=False) as db_session:
             session["user"] = User._create_or_get_by_discord_id(db_session, str(user.id), str(user)).jsonify()
-        session["user_displayname"] = user.user_name
+        session["user_displayname"] = str(user)
         next_url = session.get("state", "/")
         return redirect(next_url)
-
-    @app.route("/me/")
-    def me():
-        user = discord.fetch_user()
-        return f"""
-        <html>
-            <head>
-                <title>{user}</title>
-            </head>
-            <body>
-                <img src='{user.avatar_url}' />
-            </body>
-        </html>"""
 
     @app.route("/logout")
     def logout():
