@@ -13,7 +13,6 @@ import re
 
 from greenbot.managers.db import DBManager
 from greenbot.managers.redis import RedisManager
-from greenbot.models.user import User, UserBasics
 
 import base64
 import time
