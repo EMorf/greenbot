@@ -64,6 +64,9 @@ def init(args):
     app.bot_commands_list = []
     app.bot_config = config
     app.secret_key = config["web"]["secret_key"]
+    app.config["DISCORD_CLIENT_ID"] = app.bot_config["discord"]["client_id"]
+    app.config["DISCORD_CLIENT_SECRET"] = app.bot_config["discord"]["client_secret"]
+    app.config["DISCORD_REDIRECT_URI"] = app.bot_config["discord"]["redirect_uri"]
     app.bot_dev = "flags" in config and "dev" in config["flags"] and config["flags"]["dev"] == "1"
 
     DBManager.init(config["main"]["db"])
