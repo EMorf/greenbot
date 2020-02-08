@@ -129,7 +129,8 @@ def init(page):
         response = request.form.get("response", "")
         log.info(user.level)
         functions = request.form.get("functions", "").split(" ") if user.level >= 1500 else []
-
+        log.info(functions)
+        
         action = {"type": action_type, "message": response, "functions": functions}
         options["action"] = action
 
