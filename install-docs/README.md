@@ -64,7 +64,7 @@ sudo adduser --system --group greenbot --home /opt/greenbot
 Download the latest stable version of greenbot:
 
 ```bash
-sudo -u greenbot git clone https://github.com/TroyDota/Greenbot.git
+sudo -u greenbot git clone https://github.com/TroyDota/greenbot.git
 ```
 
 Install greenbot's dependencies like this:
