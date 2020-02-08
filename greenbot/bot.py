@@ -236,7 +236,7 @@ class Bot:
         except:
             return f"Invalid points amount, {args[1]}", None
         with DBManager.create_session_scope() as db_session:
-            user = User._create_or_get_by_discord_id(db_session, int(user_id))
+            user = User._create_or_get_by_discord_id(db_session, str(user_id))
             user.points = amount
         currency = self._get_currency().get("name").capitalize()
         return f"{currency} balance for <@!{user_id}> set to {amount}", None
@@ -248,7 +248,7 @@ class Bot:
         except:
             return f"Invalid points amount, {args[1]}", None
         with DBManager.create_session_scope() as db_session:
-            user = User._create_or_get_by_discord_id(db_session, int(user_id))
+            user = User._create_or_get_by_discord_id(db_session, str(user_id))
             user.points += amount
         action = "added to" if amount > 0 else "removed from"
         currency = self._get_currency().get("name")
