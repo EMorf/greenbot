@@ -132,6 +132,8 @@ class APICommandUpdate(Resource):
                             if name == "type":
                                 parsed_value = "privatemessage" if parsed_value == "Private Message" else "reply"
                             if name == "functions":
+                                if extra_args["user"].level < 1500: 
+                                    continue
                                 parsed_value = parsed_value.split(" ")
                             parsed_action[name] = parsed_value
                         command.action_json = json.dumps(parsed_action)
