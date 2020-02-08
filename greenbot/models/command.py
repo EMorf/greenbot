@@ -67,8 +67,6 @@ def parse_command_for_web(alias, command, list):
             if command.action is not None:
                 if command.action.type == "message":
                     command.parsed_description = command.action.response
-                    if not command.action.response:
-                        return
             if command.description is not None:
                 command.parsed_description = command.description
         list.append(command)

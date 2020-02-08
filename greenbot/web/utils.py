@@ -74,7 +74,7 @@ def get_cached_commands():
         log.debug("Updating commands...")
         bot_commands = CommandManager(
             socket_manager=None, module_manager=ModuleManager(None).load(), bot=None
-        ).load(load_examples=True)
+        ).load(load_examples=False)
         bot_commands_list = bot_commands.parse_for_web()
 
         bot_commands_list.sort(key=lambda x: (x.id or -1, x.main_alias))
