@@ -53,7 +53,11 @@ class AdminLogManager:
     def add_entry(entry_type, source, message, data={}):
         with DBManager.create_session_scope() as db_session:
             entry_object = AdminLogEntry(
-                type=entry_type, user_id=source, message=message, created_at=utils.now(), data=data
+                type=entry_type,
+                user_id=source,
+                message=message,
+                created_at=utils.now(),
+                data=data,
             )
             db_session.add(entry_object)
 

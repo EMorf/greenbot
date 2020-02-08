@@ -27,7 +27,9 @@ def init(app):
         return render_template(
             "commands.html",
             custom_commands=sorted(custom_commands, key=lambda f: f["aliases"]),
-            point_commands=sorted(point_commands, key=lambda a: (a["cost"], a["aliases"])),
+            point_commands=sorted(
+                point_commands, key=lambda a: (a["cost"], a["aliases"])
+            ),
             moderator_commands=sorted(
                 moderator_commands, key=lambda c: (c["level"], c["aliases"])
             ),
@@ -48,7 +50,9 @@ def init(app):
         if command_id is not None:
             command = find(lambda c: c["id"] == command_id, bot_commands_list)
         else:
-            command = find(lambda c: c["resolve_string"] == command_string, bot_commands_list)
+            command = find(
+                lambda c: c["resolve_string"] == command_string, bot_commands_list
+            )
 
         if command is None:
             # XXX: Is it proper to have it return a 404 code as well?
@@ -56,4 +60,6 @@ def init(app):
 
         examples = command["examples"]
 
-        return render_template("command_detailed.html", command=command, examples=examples)
+        return render_template(
+            "command_detailed.html", command=command, examples=examples
+        )

@@ -41,9 +41,15 @@ class APICommand(Resource):
             pass
 
         if command_id:
-            command = find(lambda c: c["id"] == command_id, greenbot.web.utils.get_cached_commands())
+            command = find(
+                lambda c: c["id"] == command_id,
+                greenbot.web.utils.get_cached_commands(),
+            )
         else:
-            command = find(lambda c: c["resolve_string"] == command_string, greenbot.web.utils.get_cached_commands())
+            command = find(
+                lambda c: c["resolve_string"] == command_string,
+                greenbot.web.utils.get_cached_commands(),
+            )
 
         if not command:
             return {"message": "A command with the given ID was not found."}, 404
@@ -58,14 +64,19 @@ class APICommandRemove(Resource):
             command = db_session.query(Command).filter_by(id=command_id).one_or_none()
             if command is None:
                 return {"error": "Invalid command ID"}, 404
-            if command.level > options["user"].level or (command.action.functions and options["user"].level < 1500):
+            if command.level > options["user"].level or (
+                command.action.functions and options["user"].level < 1500
+            ):
                 return {"error": "Unauthorized"}, 403
             log_msg = f"The !{command.command.split('|')[0]} command has been removed"
             AdminLogManager.add_entry("Command removed", options["user"], log_msg)
             db_session.delete(command.data)
             db_session.delete(command)
 
-        if SocketClientManager.send("command.remove", {"command_id": command_id}) is True:
+        if (
+            SocketClientManager.send("command.remove", {"command_id": command_id})
+            is True
+        ):
             return {"success": "good job"}, 200
         else:
             return {"error": "could not push update"}, 500
@@ -93,7 +104,15 @@ class APICommandUpdate(Resource):
         if len(args) == 0:
             return {"error": "Missing parameter to edit."}, 400
 
-        valid_names = ["enabled", "level", "delay_all", "delay_user", "cost", "can_execute_with_whisper", "sub_only"]
+        valid_names = [
+            "enabled",
+            "level",
+            "delay_all",
+            "delay_user",
+            "cost",
+            "can_execute_with_whisper",
+            "sub_only",
+        ]
 
         valid_action_names = ["type", "message", "functions"]
 
@@ -118,7 +137,11 @@ class APICommandUpdate(Resource):
 
                     if name.startswith("action_"):
                         name = name[7:]
-                        if name in valid_action_names and name in parsed_action and command.action.type == "message":
+                        if (
+                            name in valid_action_names
+                            and name in parsed_action
+                            and command.action.type == "message"
+                        ):
                             value_type = type(parsed_action[name])
                             if value_type is bool:
                                 parsed_value = True if value == "1" else False
@@ -130,9 +153,13 @@ class APICommandUpdate(Resource):
                             else:
                                 parsed_value = value
                             if name == "type":
-                                parsed_value = "privatemessage" if parsed_value == "Private Message" else "reply"
+                                parsed_value = (
+                                    "privatemessage"
+                                    if parsed_value == "Private Message"
+                                    else "reply"
+                                )
                             if name == "functions":
-                                if extra_args["user"].level < 1500: 
+                                if extra_args["user"].level < 1500:
                                     continue
                                 parsed_value = parsed_value.split(" ")
                             parsed_action[name] = parsed_value
@@ -165,7 +192,9 @@ class APICommandUpdate(Resource):
             if len(old_message) > 0 and old_message != new_message:
                 log_msg = f'The !{command.command.split("|")[0]} command has been updated from "{old_message}" to "{new_message}"'
             else:
-                log_msg = f"The !{command.command.split('|')[0]} command has been updated"
+                log_msg = (
+                    f"The !{command.command.split('|')[0]} command has been updated"
+                )
 
             AdminLogManager.add_entry(
                 "Command edited",
@@ -174,7 +203,10 @@ class APICommandUpdate(Resource):
                 data={"old_message": old_message, "new_message": new_message},
             )
 
-        if SocketClientManager.send("command.update", {"command_id": command_id}) is True:
+        if (
+            SocketClientManager.send("command.update", {"command_id": command_id})
+            is True
+        ):
             return {"success": "good job"}, 200
         else:
             return {"error": "could not push update"}, 500

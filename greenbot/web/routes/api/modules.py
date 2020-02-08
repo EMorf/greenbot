@@ -53,7 +53,12 @@ class APIModuleToggle(Resource):
             row.enabled = True if new_state == 1 else False
             db_session.commit()
             payload = {"id": row.id, "new_state": row.enabled}
-            AdminLogManager.post("Module toggled", options["user"], "Enabled" if row.enabled else "Disabled", row.id)
+            AdminLogManager.post(
+                "Module toggled",
+                options["user"],
+                "Enabled" if row.enabled else "Disabled",
+                row.id,
+            )
             SocketClientManager.send("module.update", payload)
             return {"success": "successful toggle", "new_state": new_state}
 

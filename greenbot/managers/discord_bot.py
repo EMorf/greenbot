@@ -13,6 +13,7 @@ from greenbot.managers.handler import HandlerManager
 
 log = logging.getLogger("greenbot")
 
+
 class CustomClient(discord.Client):
     def __init__(self, bot):
         self.bot = bot
@@ -28,23 +29,48 @@ class CustomClient(discord.Client):
 
     async def on_message(self, message):
         member = self.bot.guild.get_member(message.author.id)
-        if isinstance(message.author, discord.Member) and (message.guild != self.bot.guild):
+        if isinstance(message.author, discord.Member) and (
+            message.guild != self.bot.guild
+        ):
             return
         user_level = 50
         with DBManager.create_session_scope() as db_session:
-            user = User._create_or_get_by_discord_id(db_session, message.author.id, user_name=str(member) if member else str(message.author))
-            Message._create(db_session, message.id, message.author.id, message.channel.id if isinstance(message.author, discord.Member) else None, message.content)
-            HandlerManager.trigger("discord_message", message_raw=message, message=message.content, author=message.author, user_level=user.level, channel=message.channel if isinstance(message.author, discord.Member) else None, whisper=not isinstance(message.author, discord.Member))
+            user = User._create_or_get_by_discord_id(
+                db_session,
+                message.author.id,
+                user_name=str(member) if member else str(message.author),
+            )
+            Message._create(
+                db_session,
+                message.id,
+                message.author.id,
+                message.channel.id
+                if isinstance(message.author, discord.Member)
+                else None,
+                message.content,
+            )
+            HandlerManager.trigger(
+                "discord_message",
+                message_raw=message,
+                message=message.content,
+                author=message.author,
+                user_level=user.level,
+                channel=message.channel
+                if isinstance(message.author, discord.Member)
+                else None,
+                whisper=not isinstance(message.author, discord.Member),
+            )
 
     async def on_error(self, event, *args, **kwargs):
         log.error(traceback.format_exc())
+
 
 class DiscordBotManager:
     def __init__(self, bot, settings, redis, private_loop):
         self.bot = bot
         self.settings = settings
         self.client = CustomClient(self)
-        
+
         self.private_loop = private_loop
         self.redis = redis
 
@@ -60,7 +86,14 @@ class DiscordBotManager:
         self.private_loop.create_task(self._add_role(user, role))
 
     def ban(self, user, timeout_in_seconds=0, reason=None, delete_message_days=0):
-        self.private_loop.create_task(self._ban(user=user, timeout_in_seconds=timeout_in_seconds, reason=reason, delete_message_days=delete_message_days))
+        self.private_loop.create_task(
+            self._ban(
+                user=user,
+                timeout_in_seconds=timeout_in_seconds,
+                reason=reason,
+                delete_message_days=delete_message_days,
+            )
+        )
 
     def unban(self, user_id, reason=None):
         self.private_loop.create_task(self._unban(user_id=user_id, reason=reason))
@@ -87,15 +120,23 @@ class DiscordBotManager:
             return None
 
     def say(self, channel, message, embed=None):
-        self.private_loop.create_task(self._say(channel=channel, message=message, embed=embed))
-    
+        self.private_loop.create_task(
+            self._say(channel=channel, message=message, embed=embed)
+        )
+
     async def _say(self, channel, message, embed=None):
         message = discord.utils.escape_markdown(message)
         if channel and (message or embed):
             await channel.send(content=message, embed=embed)
 
-    async def _ban(self, user, timeout_in_seconds=0, reason=None, delete_message_days=0):
-        delete_message_days = 7 if delete_message_days > 7 else (0 if delete_message_days < 0 else delete_message_days)
+    async def _ban(
+        self, user, timeout_in_seconds=0, reason=None, delete_message_days=0
+    ):
+        delete_message_days = (
+            7
+            if delete_message_days > 7
+            else (0 if delete_message_days < 0 else delete_message_days)
+        )
 
         if not self.guild:
             return
@@ -110,7 +151,9 @@ class DiscordBotManager:
             }
             """
             timeouts[str(user.id)] = timeout_in_seconds
-        await self.guild.ban(user=user, reason=reason, delete_message_days=delete_message_days)
+        await self.guild.ban(
+            user=user, reason=reason, delete_message_days=delete_message_days
+        )
 
     async def _unban(self, user_id, reason=None):
         if not self.guild:
@@ -152,7 +195,9 @@ class DiscordBotManager:
                     log.error(e)
 
     def schedule_task_periodically(self, wait_time, func, *args):
-        return self.private_loop.create_task(self.run_periodically(wait_time, func, *args))
+        return self.private_loop.create_task(
+            self.run_periodically(wait_time, func, *args)
+        )
 
     async def cancel_scheduled_task(self, task):
         task.cancel()

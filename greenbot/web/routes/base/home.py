@@ -13,7 +13,4 @@ def init(app):
     def home():
         custom_content = ""
 
-        return render_template(
-            "home.html",
-            custom_content=custom_content
-        )
+        return render_template("home.html", custom_content=custom_content)

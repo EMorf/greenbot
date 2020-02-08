@@ -52,7 +52,12 @@ class APITimerToggle(Resource):
             row.enabled = True if new_state == 1 else False
             db_session.commit()
             payload = {"id": row.id, "new_state": row.enabled}
-            AdminLogManager.post("Timer toggled", options["user"], "Enabled" if row.enabled else "Disabled", row.name)
+            AdminLogManager.post(
+                "Timer toggled",
+                options["user"],
+                "Enabled" if row.enabled else "Disabled",
+                row.name,
+            )
             SocketClientManager.send("timer.update", payload)
             return {"success": "successful toggle", "new_state": new_state}
 

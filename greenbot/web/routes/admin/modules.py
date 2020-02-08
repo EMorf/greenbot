@@ -21,11 +21,15 @@ def init(page):
             module.db_module = None
         with DBManager.create_session_scope() as db_session:
             for db_module in db_session.query(Module):
-                module = find(lambda m: m.ID == db_module.id, module_manager.all_modules)
+                module = find(
+                    lambda m: m.ID == db_module.id, module_manager.all_modules
+                )
                 if module:
                     module.db_module = db_module
 
-            return render_template("admin/modules.html", modules=module_manager.all_modules)
+            return render_template(
+                "admin/modules.html", modules=module_manager.all_modules
+            )
 
     @page.route("/modules/edit/<module_id>", methods=["GET", "POST"])
     @requires_level(500)
@@ -38,7 +42,8 @@ def init(page):
         if user.level < current_module.CONFIGURE_LEVEL:
             return (
                 render_template(
-                    "errors/403.html", extra_message="You do not have permission to configure this module."
+                    "errors/403.html",
+                    extra_message="You do not have permission to configure this module.",
                 ),
                 403,
             )
@@ -52,7 +57,9 @@ def init(page):
 
         with DBManager.create_session_scope() as db_session:
             for db_module in db_session.query(Module):
-                module = find(lambda m: m.ID == db_module.id, module_manager.all_modules)
+                module = find(
+                    lambda m: m.ID == db_module.id, module_manager.all_modules
+                )
                 if module:
                     module.db_module = db_module
                     if module.PARENT_MODULE == current_module.__class__:
@@ -69,7 +76,11 @@ def init(page):
                     pass
                 current_module.load(settings=settings)
 
-                return render_template("admin/configure_module.html", module=current_module, sub_modules=sub_modules)
+                return render_template(
+                    "admin/configure_module.html",
+                    module=current_module,
+                    sub_modules=sub_modules,
+                )
 
             form_values = {key: value for key, value in request.form.items()}
             res = current_module.parse_settings(**form_values)
@@ -92,4 +103,8 @@ def init(page):
 
             AdminLogManager.post("Module edited", user, current_module.NAME)
 
-            return render_template("admin/configure_module.html", module=current_module, sub_modules=sub_modules)
+            return render_template(
+                "admin/configure_module.html",
+                module=current_module,
+                sub_modules=sub_modules,
+            )

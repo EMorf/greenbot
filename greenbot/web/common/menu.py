@@ -22,19 +22,34 @@ def init(app):
         MenuItem(
             [
                 MenuItem("/admin/banphrases", "admin_banphrases", "Banphrases"),
-                MenuItem("/admin/links/blacklist", "admin_links_blacklist", "Blacklisted links"),
-                MenuItem("/admin/links/whitelist", "admin_links_whitelist", "Whitelisted links"),
+                MenuItem(
+                    "/admin/links/blacklist",
+                    "admin_links_blacklist",
+                    "Blacklisted links",
+                ),
+                MenuItem(
+                    "/admin/links/whitelist",
+                    "admin_links_whitelist",
+                    "Whitelisted links",
+                ),
             ],
             None,
             "Filters",
         )
     )
-    nav_bar_admin_header.append(MenuItem("/admin/commands", "admin_commands", "Commands"))
+    nav_bar_admin_header.append(
+        MenuItem("/admin/commands", "admin_commands", "Commands")
+    )
     nav_bar_admin_header.append(MenuItem("/admin/timers", "admin_timers", "Timers"))
-    nav_bar_admin_header.append(MenuItem("/admin/moderators", "admin_moderators", "Moderators"))
+    nav_bar_admin_header.append(
+        MenuItem("/admin/moderators", "admin_moderators", "Moderators")
+    )
     nav_bar_admin_header.append(MenuItem("/admin/modules", "admin_modules", "Modules"))
 
     @app.context_processor
     def menu():
-        data = {"nav_bar_header": nav_bar_header, "nav_bar_admin_header": nav_bar_admin_header}
+        data = {
+            "nav_bar_header": nav_bar_header,
+            "nav_bar_admin_header": nav_bar_admin_header,
+        }
         return data

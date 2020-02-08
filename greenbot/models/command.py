@@ -37,7 +37,9 @@ def parse_command_for_web(alias, command, list):
         if command.description is not None:
             command.json_description = json.loads(command.description)
             if "description" in command.json_description:
-                command.parsed_description = Markup(markdown.markdown(command.json_description["description"]))
+                command.parsed_description = Markup(
+                    markdown.markdown(command.json_description["description"])
+                )
             if command.json_description.get("hidden", False) is True:
                 return
     except ValueError:
@@ -56,7 +58,11 @@ def parse_command_for_web(alias, command, list):
             command.main_alias = command.command.split("|")[0]
         for inner_alias, inner_command in command.action.commands.items():
             parse_command_for_web(
-                alias if command.command is None else command.main_alias + " " + inner_alias, inner_command, list
+                alias
+                if command.command is None
+                else command.main_alias + " " + inner_alias,
+                inner_command,
+                list,
             )
     else:
         test = re.compile(r"[^\w]")
@@ -75,11 +81,22 @@ def parse_command_for_web(alias, command, list):
 class CommandData(Base):
     __tablename__ = "command_data"
 
-    command_id = Column(INT, ForeignKey("command.id", ondelete="CASCADE"), primary_key=True, autoincrement=False)
+    command_id = Column(
+        INT,
+        ForeignKey("command.id", ondelete="CASCADE"),
+        primary_key=True,
+        autoincrement=False,
+    )
     num_uses = Column(INT, nullable=False, default=0)
-    added_by = Column(TEXT, ForeignKey("user.discord_id", ondelete="SET NULL"), nullable=True)
-    edited_by = Column(TEXT, ForeignKey("user.discord_id", ondelete="SET NULL"), nullable=True)
-    _last_date_used = Column("last_date_used", UtcDateTime(), nullable=True, default=None)
+    added_by = Column(
+        TEXT, ForeignKey("user.discord_id", ondelete="SET NULL"), nullable=True
+    )
+    edited_by = Column(
+        TEXT, ForeignKey("user.discord_id", ondelete="SET NULL"), nullable=True
+    )
+    _last_date_used = Column(
+        "last_date_used", UtcDateTime(), nullable=True, default=None
+    )
 
     user = relationship(
         "User",
@@ -130,7 +147,9 @@ class CommandData(Base):
             "num_uses": self.num_uses,
             "added_by": self.added_by,
             "edited_by": self.edited_by,
-            "last_date_used": self.last_date_used.isoformat() if self.last_date_used else None,
+            "last_date_used": self.last_date_used.isoformat()
+            if self.last_date_used
+            else None,
         }
 
 
@@ -138,7 +157,9 @@ class CommandExample(Base):
     __tablename__ = "command_example"
 
     id = Column(INT, primary_key=True)
-    command_id = Column(INT, ForeignKey("command.id", ondelete="CASCADE"), nullable=False)
+    command_id = Column(
+        INT, ForeignKey("command.id", ondelete="CASCADE"), nullable=False
+    )
     title = Column(TEXT, nullable=False)
     chat = Column(TEXT, nullable=False)
     description = Column(TEXT, nullable=False)
@@ -156,7 +177,10 @@ class CommandExample(Base):
         self.parse()
 
     def add_chat_message(self, type, message, user_from, user_to=None):
-        chat_message = {"source": {"type": type, "from": user_from, "to": user_to}, "message": message}
+        chat_message = {
+            "source": {"type": type, "from": user_from, "to": user_to},
+            "message": message,
+        }
         self.chat_messages.append(chat_message)
 
     def parse(self):
@@ -253,7 +277,9 @@ class Command(Base):
         self.cost = options.get("cost", self.cost)
         if self.cost < 0:
             self.cost = 0
-        self.can_execute_with_whisper = options.get("can_execute_with_whisper", self.can_execute_with_whisper)
+        self.can_execute_with_whisper = options.get(
+            "can_execute_with_whisper", self.can_execute_with_whisper
+        )
         self.examples = options.get("examples", self.examples)
         self.run_in_thread = options.get("run_in_thread", self.run_in_thread)
         self.notify_on_error = options.get("notify_on_error", self.notify_on_error)
@@ -287,7 +313,9 @@ class Command(Base):
     @classmethod
     def dispatch_command(cls, cb, **options):
         cmd = cls(**options)
-        cmd.action = ActionParser.parse('{"type": "func", "cb": "' + cb + '"}', command=cmd.command)
+        cmd.action = ActionParser.parse(
+            '{"type": "func", "cb": "' + cb + '"}', command=cmd.command
+        )
         return cmd
 
     @classmethod
@@ -296,7 +324,9 @@ class Command(Base):
         try:
             cmd.action = RawFuncAction(cb)
         except:
-            log.exception("Uncaught exception in Command.raw_command. catch the following exception manually!")
+            log.exception(
+                "Uncaught exception in Command.raw_command. catch the following exception manually!"
+            )
             cmd.enabled = False
         return cmd
 
@@ -317,7 +347,9 @@ class Command(Base):
         from greenbot.models.action import MultiAction
 
         cmd = cls(**options)
-        cmd.action = MultiAction.ready_built(options.get("commands"), default=default, fallback=fallback)
+        cmd.action = MultiAction.ready_built(
+            options.get("commands"), default=default, fallback=fallback
+        )
         return cmd
 
     def load_args(self, level, action):
@@ -336,10 +368,7 @@ class Command(Base):
             # User does not have a high enough power level to run this command
             return False
 
-        if (
-            args["whisper"]
-            and self.can_execute_with_whisper is False
-        ):
+        if args["whisper"] and self.can_execute_with_whisper is False:
             # This user cannot execute the command through a whisper
             return False
 
@@ -348,25 +377,41 @@ class Command(Base):
         cur_time = greenbot.utils.now().timestamp()
         time_since_last_run = (cur_time - self.last_run) / cd_modifier
 
-        if time_since_last_run < self.delay_all and args["user_level"] < Command.BYPASS_DELAY_LEVEL:
-            log.debug(f"Command was run {time_since_last_run:.2f} seconds ago, waiting...")
+        if (
+            time_since_last_run < self.delay_all
+            and args["user_level"] < Command.BYPASS_DELAY_LEVEL
+        ):
+            log.debug(
+                f"Command was run {time_since_last_run:.2f} seconds ago, waiting..."
+            )
             return False
 
-        time_since_last_run_user = (cur_time - self.last_run_by_user.get(str(author.id), 0)) / cd_modifier
+        time_since_last_run_user = (
+            cur_time - self.last_run_by_user.get(str(author.id), 0)
+        ) / cd_modifier
 
-        if time_since_last_run_user < self.delay_user and args["user_level"] < Command.BYPASS_DELAY_LEVEL:
-            log.debug(f"{author.name}#{author.discriminator} ran command {time_since_last_run_user:.2f} seconds ago, waiting...")
+        if (
+            time_since_last_run_user < self.delay_user
+            and args["user_level"] < Command.BYPASS_DELAY_LEVEL
+        ):
+            log.debug(
+                f"{author.name}#{author.discriminator} ran command {time_since_last_run_user:.2f} seconds ago, waiting..."
+            )
             return False
         with DBManager.create_session_scope() as db_session:
-            user = User._create_or_get_by_discord_id(db_session, str(author.id), str(author))
+            user = User._create_or_get_by_discord_id(
+                db_session, str(author.id), str(author)
+            )
             if self.cost > 0 and not user.can_afford(self.cost):
                 # User does not have enough points to use the command
                 return False
-        
+
             args.update(self.extra_args)
             if self.run_in_thread:
                 log.debug(f"Running {self} in a thread")
-                ScheduleManager.execute_now(self.run_action, args=[bot, author, channel, message, args])
+                ScheduleManager.execute_now(
+                    self.run_action, args=[bot, author, channel, message, args]
+                )
             else:
                 self.run_action(bot, author, channel, message, args)
 
@@ -375,7 +420,9 @@ class Command(Base):
     def run_action(self, bot, author, channel, message, args):
         cur_time = greenbot.utils.now().timestamp()
         with DBManager.create_session_scope() as db_session:
-            user = User._create_or_get_by_discord_id(db_session, str(author.id), str(author))
+            user = User._create_or_get_by_discord_id(
+                db_session, str(author.id), str(author)
+            )
             with user.spend_currency_context(self.cost):
                 ret = self.action.run(bot, author, channel, message, args)
                 if not ret:
@@ -391,13 +438,20 @@ class Command(Base):
                 self.last_run_by_user[args["user_level"]] = cur_time
 
     def autogenerate_examples(self):
-        if not self.examples and self.id is not None and self.action and self.action.type == "message":
+        if (
+            not self.examples
+            and self.id is not None
+            and self.action
+            and self.action.type == "message"
+        ):
             examples = []
 
             example = CommandExample(self.id, "Default usage")
             subtype = self.action.subtype if self.action.subtype != "reply" else "say"
             example.add_chat_message("say", self.main_alias, "user")
-            clean_response = Substitution.urlfetch_substitution_regex.sub("(urlfetch)", self.action.response)
+            clean_response = Substitution.urlfetch_substitution_regex.sub(
+                "(urlfetch)", self.action.response
+            )
 
             if subtype in ("say", "me"):
                 example.add_chat_message(subtype, clean_response, "bot")
@@ -407,7 +461,9 @@ class Command(Base):
 
             if self.can_execute_with_whisper is True:
                 example = CommandExample(self.id, "Default usage through whisper")
-                subtype = self.action.subtype if self.action.subtype != "reply" else "say"
+                subtype = (
+                    self.action.subtype if self.action.subtype != "reply" else "say"
+                )
                 example.add_chat_message("whisper", self.main_alias, "user", "bot")
                 if subtype in ("say", "me"):
                     example.add_chat_message(subtype, clean_response, "bot")

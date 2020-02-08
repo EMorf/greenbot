@@ -24,7 +24,7 @@ class User(Base):
             "discord_id": self.discord_id,
             "points": self.points,
             "level": self.level,
-            "user_name": self.user_name
+            "user_name": self.user_name,
         }
 
     def can_afford(self, points):
@@ -32,13 +32,19 @@ class User(Base):
 
     @staticmethod
     def _create(db_session, discord_id, points=0, level=100, user_name=""):
-        user = User(user_name=user_name, discord_id=str(discord_id), points=points, level=level)
+        user = User(
+            user_name=user_name, discord_id=str(discord_id), points=points, level=level
+        )
         db_session.add(user)
         return user
 
     @staticmethod
     def _create_or_get_by_discord_id(db_session, discord_id, user_name=""):
-        user = db_session.query(User).filter_by(discord_id=str(discord_id)).one_or_none() or User._create(db_session, discord_id=discord_id, user_name=user_name)
+        user = db_session.query(User).filter_by(
+            discord_id=str(discord_id)
+        ).one_or_none() or User._create(
+            db_session, discord_id=discord_id, user_name=user_name
+        )
         user.user_name = user_name
         return user
 

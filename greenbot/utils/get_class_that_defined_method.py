@@ -9,7 +9,10 @@ def get_class_that_defined_method(meth):
         meth = meth.__func__
 
     if inspect.isfunction(meth):
-        cls = getattr(inspect.getmodule(meth), meth.__qualname__.split(".<locals>", 1)[0].rsplit(".", 1)[0])
+        cls = getattr(
+            inspect.getmodule(meth),
+            meth.__qualname__.split(".<locals>", 1)[0].rsplit(".", 1)[0],
+        )
         if isinstance(cls, type):
             return cls
 

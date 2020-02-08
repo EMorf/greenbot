@@ -47,13 +47,17 @@ def init(page):
 
         with DBManager.create_session_scope() as db_session:
             commands_data = (
-                db_session.query(CommandData).options(joinedload(CommandData.user), joinedload(CommandData.user2)).all()
+                db_session.query(CommandData)
+                .options(joinedload(CommandData.user), joinedload(CommandData.user2))
+                .all()
             )
             return render_template(
                 "admin/commands.html",
                 commands_data=commands_data,
                 custom_commands=sorted(custom_commands, key=lambda f: f.command),
-                point_commands=sorted(point_commands, key=lambda a: (a.cost, a.command)),
+                point_commands=sorted(
+                    point_commands, key=lambda a: (a.cost, a.command)
+                ),
                 moderator_commands=sorted(
                     moderator_commands, key=lambda c: (c.level, c.command)
                 ),
@@ -72,12 +76,20 @@ def init(page):
                 .one_or_none()
             )
             with DBManager.create_session_scope() as db_session:
-                user = db_session.query(User).filter_by(discord_id=session["user"]["discord_id"]).one_or_none()
+                user = (
+                    db_session.query(User)
+                    .filter_by(discord_id=session["user"]["discord_id"])
+                    .one_or_none()
+                )
                 if command.action.functions and user.level < 1500:
                     abort(403)
             if command is None:
                 return render_template("admin/command_404.html"), 404
-            return render_template("admin/edit_command.html", command=command, user=options.get("user", None))
+            return render_template(
+                "admin/edit_command.html",
+                command=command,
+                user=options.get("user", None),
+            )
 
     @page.route("/commands/create", methods=["GET", "POST"])
     @requires_level(500)
@@ -119,7 +131,13 @@ def init(page):
         if user is None:
             abort(403)
 
-        options = {"delay_all": delay_all, "delay_user": delay_user, "level": level, "cost": cost, "added_by": user.discord_id}
+        options = {
+            "delay_all": delay_all,
+            "delay_user": delay_user,
+            "level": level,
+            "cost": cost,
+            "added_by": user.discord_id,
+        }
 
         valid_action_types = ["reply", "privatemessage"]
         action_type = request.form.get("type").lower()
@@ -128,9 +146,11 @@ def init(page):
 
         response = request.form.get("response", "")
         log.info(user.level)
-        functions = request.form.get("functions", "").split(" ") if user.level >= 1500 else []
+        functions = (
+            request.form.get("functions", "").split(" ") if user.level >= 1500 else []
+        )
         log.info(functions)
-        
+
         action = {"type": action_type, "message": response, "functions": functions}
         options["action"] = action
 

@@ -45,7 +45,11 @@ class SocketManager:
             try:
                 parsed_data = json.loads(message["data"])
             except json.decoder.JSONDecodeError:
-                log.exception("Bad JSON data on %s topic: '%s'", message["channel"], message["data"])
+                log.exception(
+                    "Bad JSON data on %s topic: '%s'",
+                    message["channel"],
+                    message["data"],
+                )
                 continue
 
             for handler in self.handlers[message["channel"]]:

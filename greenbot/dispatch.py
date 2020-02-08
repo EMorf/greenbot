@@ -49,7 +49,9 @@ class Dispatch:
 
         action = {"type": type, "message": response}
 
-        command, new_command, alias_matched = bot.commands.create_command(alias_str, action=action, **options)
+        command, new_command, alias_matched = bot.commands.create_command(
+            alias_str, action=action, **options
+        )
         if new_command is True:
             bot.private_message(author, f"Added your command (ID: {command.id})")
 
@@ -75,7 +77,9 @@ class Dispatch:
             # Make sure we got both an alias and a response
             message_parts = message.split()
             if len(message_parts) < 2:
-                bot.private_message(author, "Usage: !add command ALIAS [options] RESPONSE")
+                bot.private_message(
+                    author, "Usage: !add command ALIAS [options] RESPONSE"
+                )
                 return False
 
             options, response = bot.commands.parse_command_arguments(message_parts[1:])
@@ -121,10 +125,15 @@ class Dispatch:
             if len(new_message) > 0:
                 log_msg = f'The !{command.command.split("|")[0]} command has been updated from "{old_message}" to "{new_message}"'
             else:
-                log_msg = f"The !{command.command.split('|')[0]} command has been updated"
+                log_msg = (
+                    f"The !{command.command.split('|')[0]} command has been updated"
+                )
 
             AdminLogManager.add_entry(
-                "Command edited", str(author.id), log_msg, data={"old_message": old_message, "new_message": new_message}
+                "Command edited",
+                str(author.id),
+                log_msg,
+                data={"old_message": old_message, "new_message": new_message},
             )
 
     @staticmethod
@@ -138,7 +147,9 @@ class Dispatch:
             # Make sure we got both an alias and a response
             message_parts = message.split(" ")
             if len(message_parts) < 2:
-                bot.private_message(author, "Usage: !add funccommand ALIAS [options] CALLBACK")
+                bot.private_message(
+                    author, "Usage: !add funccommand ALIAS [options] CALLBACK"
+                )
                 return False
 
             options, response = bot.commands.parse_command_arguments(message_parts[1:])
@@ -162,10 +173,16 @@ class Dispatch:
                 type = "privatemessage"
             elif options["reply"] is True:
                 type = "reply"
-            action = {"type": type, "message": response, "functions": options["functions"]}
+            action = {
+                "type": type,
+                "message": response,
+                "functions": options["functions"],
+            }
             del options["functions"]
 
-            command, new_command, alias_matched = bot.commands.create_command(alias_str, action=action, **options)
+            command, new_command, alias_matched = bot.commands.create_command(
+                alias_str, action=action, **options
+            )
             if new_command is True:
                 bot.private_message(author, f"Added your command (ID: {command.id})")
                 return True
@@ -188,7 +205,9 @@ class Dispatch:
             # Make sure we got both an alias and a response
             message_parts = message.split(" ")
             if len(message_parts) < 2:
-                bot.private_message(author, "Usage: !edit funccommand ALIAS [options] [CALLBACK]")
+                bot.private_message(
+                    author, "Usage: !edit funccommand ALIAS [options] [CALLBACK]"
+                )
                 return False
 
             options, response = bot.commands.parse_command_arguments(message_parts[1:])
@@ -213,7 +232,11 @@ class Dispatch:
                 )
                 return False
 
-            options["action"] = {"type": type, "message": response, "functions": options["functions"]}
+            options["action"] = {
+                "type": type,
+                "message": response,
+                "functions": options["functions"],
+            }
             del options["functions"]
 
             command = bot.commands.get(alias, None)
@@ -248,7 +271,9 @@ class Dispatch:
             already_used_aliases = []
 
             if existing_alias not in bot.commands:
-                bot.private_message(author, f'No command called "{existing_alias}" found')
+                bot.private_message(
+                    author, f'No command called "{existing_alias}" found'
+                )
                 return False
 
             command = bot.commands[existing_alias]
@@ -256,7 +281,9 @@ class Dispatch:
             # error out on commands that are not from the DB, e.g. module commands like !8ball that cannot have
             # aliases registered. (command.command and command.data are None on those commands)
             if command.data is None or command.command is None:
-                bot.private_message(author, "That command cannot have aliases added to.")
+                bot.private_message(
+                    author, "That command cannot have aliases added to."
+                )
                 return False
 
             for alias in set(new_aliases):
@@ -270,11 +297,17 @@ class Dispatch:
                 new_aliases = f"{command.command}|{'|'.join(added_aliases)}"
                 bot.commands.edit_command(command, command=new_aliases)
 
-                bot.private_message(author, f"Successfully added the aliases {', '.join(added_aliases)} to {existing_alias}")
+                bot.private_message(
+                    author,
+                    f"Successfully added the aliases {', '.join(added_aliases)} to {existing_alias}",
+                )
                 log_msg = f"The aliases {', '.join(added_aliases)} has been added to {existing_alias}"
                 AdminLogManager.add_entry("Alias added", str(author.id), log_msg)
             if len(already_used_aliases) > 0:
-                bot.private_message(author, f"The following aliases were already in use: {', '.join(already_used_aliases)}")
+                bot.private_message(
+                    author,
+                    f"The following aliases were already in use: {', '.join(already_used_aliases)}",
+                )
         else:
             bot.private_message(author, "Usage: !add alias existingalias newalias")
 
@@ -300,14 +333,19 @@ class Dispatch:
                 # error out on commands that are not from the DB, e.g. module commands like !8ball that cannot have
                 # aliases registered. (command.command and command.data are None on those commands)
                 if command.data is None or command.command is None:
-                    bot.private_message(author, "That command cannot have aliases removed from.")
+                    bot.private_message(
+                        author, "That command cannot have aliases removed from."
+                    )
                     return False
 
                 current_aliases = command.command.split("|")
                 current_aliases.remove(alias)
 
                 if len(current_aliases) == 0:
-                    bot.private_message(author, f"{alias} is the only remaining alias for this command and can't be removed.")
+                    bot.private_message(
+                        author,
+                        f"{alias} is the only remaining alias for this command and can't be removed.",
+                    )
                     continue
 
                 new_aliases = "|".join(current_aliases)
@@ -349,21 +387,32 @@ class Dispatch:
                         break
 
             if command is None:
-                bot.private_message(author, "No command with the given parameters found")
+                bot.private_message(
+                    author, "No command with the given parameters found"
+                )
                 return False
 
             if command.id == -1:
-                bot.private_message(author, "That command is an internal command, it cannot be removed.")
+                bot.private_message(
+                    author, "That command is an internal command, it cannot be removed."
+                )
                 return False
 
             if args["user_level"] < 2000:
                 if command.action is not None and not command.action.type == "message":
-                    bot.private_message(author, "That command is not a normal command, it cannot be removed by you.")
+                    bot.private_message(
+                        author,
+                        "That command is not a normal command, it cannot be removed by you.",
+                    )
                     return False
 
-            bot.private_message(author, f"Successfully removed command with id {command.id}")
+            bot.private_message(
+                author, f"Successfully removed command with id {command.id}"
+            )
             log_msg = f"The !{command.command.split('|')[0]} command has been removed"
             AdminLogManager.add_entry("Command removed", str(author.id), log_msg)
             bot.commands.remove_command(command)
         else:
-            bot.private_message(author, "Usage: !remove command (COMMAND_ID|COMMAND_ALIAS)")
+            bot.private_message(
+                author, "Usage: !remove command (COMMAND_ID|COMMAND_ALIAS)"
+            )

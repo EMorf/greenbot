@@ -71,7 +71,11 @@ def init(page):
         if user is None:
             abort(403)
 
-        options = {"name": name, "interval_online": interval_online, "interval_offline": interval_offline}
+        options = {
+            "name": name,
+            "interval_online": interval_online,
+            "interval_offline": interval_offline,
+        }
 
         action = {"type": message_type, "message": message}
         options["action"] = action
@@ -101,7 +105,10 @@ def init(page):
                     log_msg = f'Timer "{timer.name}" has been updated'
 
                 AdminLogManager.add_entry(
-                    "Timer edited", user, log_msg, data={"old_message": old_message, "new_message": new_message}
+                    "Timer edited",
+                    user,
+                    log_msg,
+                    data={"old_message": old_message, "new_message": new_message},
                 )
             else:
                 db_session.add(timer)

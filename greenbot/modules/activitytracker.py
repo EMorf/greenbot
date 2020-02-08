@@ -24,28 +24,60 @@ class ActivityTracker(BaseModule):
 
     SETTINGS = [
         ModuleSetting(
-            key="sub_role_id", label="ID of the sub role", type="text", placeholder="", default=""
+            key="sub_role_id",
+            label="ID of the sub role",
+            type="text",
+            placeholder="",
+            default="",
         ),
         ModuleSetting(
-            key="regular_role_id", label="ID of the regular role", type="text", placeholder="", default=""
+            key="regular_role_id",
+            label="ID of the regular role",
+            type="text",
+            placeholder="",
+            default="",
         ),
         ModuleSetting(
-            key="channels_to_listen_in", label="Channel IDs to listen in seperated by a ';'", type="text", placeholder="", default=""
+            key="channels_to_listen_in",
+            label="Channel IDs to listen in seperated by a ';'",
+            type="text",
+            placeholder="",
+            default="",
         ),
         ModuleSetting(
-            key="hourly_credit", label="If he wrote enough messages this hour, the hour will be credited with this many points", type="number", placeholder="", default="8"
+            key="hourly_credit",
+            label="If he wrote enough messages this hour, the hour will be credited with this many points",
+            type="number",
+            placeholder="",
+            default="8",
         ),
         ModuleSetting(
-            key="daily_max_msgs", label="Maximum hours(msgs) that can be credited per day", type="number", placeholder="", default="12"
+            key="daily_max_msgs",
+            label="Maximum hours(msgs) that can be credited per day",
+            type="number",
+            placeholder="",
+            default="12",
         ),
         ModuleSetting(
-            key="daily_limit", label="If user reached daily max msgs he will get this many points", type="number", placeholder="", default="10"
+            key="daily_limit",
+            label="If user reached daily max msgs he will get this many points",
+            type="number",
+            placeholder="",
+            default="10",
         ),
         ModuleSetting(
-            key="min_msgs_per_week", label="If user can't keep up this many credited hours per week he loses the role", type="number", placeholder="", default="10"
+            key="min_msgs_per_week",
+            label="If user can't keep up this many credited hours per week he loses the role",
+            type="number",
+            placeholder="",
+            default="10",
         ),
         ModuleSetting(
-            key="min_regular_points", label="Points required for the regular role", type="number", placeholder="", default="10"
+            key="min_regular_points",
+            label="Points required for the regular role",
+            type="number",
+            placeholder="",
+            default="10",
         ),
     ]
 
@@ -60,12 +92,18 @@ class ActivityTracker(BaseModule):
             sub_role = self.bot.get_role(self.settings["sub_role_id"])
             for member in regular_role.members:
                 count = Message._get_week_count_user(db_session, str(member.id))
-                if count < self.settings["min_msgs_per_week"] or sub_role not in member.roles:
+                if (
+                    count < self.settings["min_msgs_per_week"]
+                    or sub_role not in member.roles
+                ):
                     self.bot.remove_role(member, regular_role)
             db_session.commit()
             messages = Message._get_last_hour(db_session)
             for message in messages:
-                if message.channel_id not in self.settings["channels_to_listen_in"].split(";"): return
+                if message.channel_id not in self.settings[
+                    "channels_to_listen_in"
+                ].split(";"):
+                    return
                 count = Message._get_last_day_count_user(db_session, message.user_id)
                 if count < self.settings["daily_max_msgs"] - 1:
                     message.user.points += self.settings["hourly_credit"]
@@ -73,16 +111,25 @@ class ActivityTracker(BaseModule):
                     message.user.points += self.settings["daily_limit"]
                 message.credited = True
                 db_session.commit()
-            for user in User._get_users_with_points(db_session, self.settings["min_regular_points"]):
+            for user in User._get_users_with_points(
+                db_session, self.settings["min_regular_points"]
+            ):
                 member = self.bot.get_member(user.discord_id)
-                if not member or sub_role not in member.roles or regular_role in member.roles: continue
+                if (
+                    not member
+                    or sub_role not in member.roles
+                    or regular_role in member.roles
+                ):
+                    continue
                 self.bot.add_role(member, regular_role)
 
     def enable(self, bot):
         if not bot:
             return
         ScheduleManager.execute_now(self.process_messages)
-        self.process_messages_job = ScheduleManager.execute_every(3600, self.process_messages) # Checks every hour
+        self.process_messages_job = ScheduleManager.execute_every(
+            3600, self.process_messages
+        )  # Checks every hour
 
     def disable(self, bot):
         if not bot:

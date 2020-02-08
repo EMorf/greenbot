@@ -16,8 +16,18 @@ class Module(Base):
     __tablename__ = "module"
 
     id = Column(TEXT, primary_key=True)
-    enabled = Column(BOOLEAN, nullable=False, default=False, server_default=sqlalchemy.sql.expression.false())
-    settings = Column(TEXT, nullable=True, default=None, server_default=sqlalchemy.sql.expression.null())
+    enabled = Column(
+        BOOLEAN,
+        nullable=False,
+        default=False,
+        server_default=sqlalchemy.sql.expression.false(),
+    )
+    settings = Column(
+        TEXT,
+        nullable=True,
+        default=None,
+        server_default=sqlalchemy.sql.expression.null(),
+    )
 
     def __init__(self, module_id, **options):
         self.id = module_id
@@ -64,7 +74,9 @@ class ModuleManager:
         module.enable(self.bot)
 
         if module in self.modules:
-            log.error("Module %s is already in the list of enabled modules pajaW", module_id)
+            log.error(
+                "Module %s is already in the list of enabled modules pajaW", module_id
+            )
             return False
 
         self.modules.append(module)
@@ -98,7 +110,11 @@ class ModuleManager:
             # Make sure there's a row in the DB for each module that's available
             db_modules = db_session.query(Module).all()
             for module in self.all_modules:
-                mod = find(lambda db_module, registered_module=module: db_module.id == registered_module.ID, db_modules)
+                mod = find(
+                    lambda db_module, registered_module=module: db_module.id
+                    == registered_module.ID,
+                    db_modules,
+                )
                 if mod is None:
                     log.info(f"Creating row in DB for module {module.ID}")
                     mod = Module(module.ID, enabled=module.ENABLED_DEFAULT)
@@ -137,7 +153,9 @@ class ModuleManager:
             if module.PARENT_MODULE is None:
                 module.submodules = []
             else:
-                parent = find(lambda m: m.__class__ == module.PARENT_MODULE, self.modules)
+                parent = find(
+                    lambda m: m.__class__ == module.PARENT_MODULE, self.modules
+                )
                 if parent is not None:
                     parent.submodules.append(module)
                     module.parent_module = parent

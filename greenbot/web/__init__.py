@@ -5,8 +5,12 @@ from flask import Flask
 
 app = Flask(
     __name__,
-    static_folder=os.path.join(os.path.dirname(os.path.abspath(__file__ + "/../..")), "static"),
-    template_folder=os.path.join(os.path.dirname(os.path.abspath(__file__ + "/../..")), "templates"),
+    static_folder=os.path.join(
+        os.path.dirname(os.path.abspath(__file__ + "/../..")), "static"
+    ),
+    template_folder=os.path.join(
+        os.path.dirname(os.path.abspath(__file__ + "/../..")), "templates"
+    ),
 )
 
 app.url_map.strict_slashes = False
@@ -48,7 +52,7 @@ def init(args):
     if "web" not in config:
         log.error("Missing [web] section in config.ini")
         sys.exit(1)
-    
+
     if "secret_key" not in config["web"]:
         salt = generate_random_salt()
         config.set("web", "secret_key", salt.decode("utf-8"))
@@ -67,7 +71,9 @@ def init(args):
     app.config["DISCORD_CLIENT_ID"] = app.bot_config["discord"]["client_id"]
     app.config["DISCORD_CLIENT_SECRET"] = app.bot_config["discord"]["client_secret"]
     app.config["DISCORD_REDIRECT_URI"] = app.bot_config["discord"]["redirect_uri"]
-    app.bot_dev = "flags" in config and "dev" in config["flags"] and config["flags"]["dev"] == "1"
+    app.bot_dev = (
+        "flags" in config and "dev" in config["flags"] and config["flags"]["dev"] == "1"
+    )
 
     DBManager.init(config["main"]["db"])
 
@@ -86,7 +92,11 @@ def init(args):
     last_commit = None
     if app.bot_dev:
         try:
-            last_commit = subprocess.check_output(["git", "log", "-1", "--format=%cd"]).decode("utf8").strip()
+            last_commit = (
+                subprocess.check_output(["git", "log", "-1", "--format=%cd"])
+                .decode("utf8")
+                .strip()
+            )
         except:
             log.exception("Failed to get last_commit, will not show last commit")
 
@@ -94,9 +104,7 @@ def init(args):
         "last_commit": last_commit,
         "version": "v1.0",
         "bot": {"name": config["main"]["bot_name"]},
-        "site": {
-            "domain": config["web"]["domain"]
-        },
+        "site": {"domain": config["web"]["domain"]},
         "modules": app.bot_modules,
         "request": request,
         "session": session,

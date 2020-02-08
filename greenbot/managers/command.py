@@ -51,7 +51,9 @@ class CommandManager(UserDict):
             log.warning("No command ID found in on_command_update")
             return
 
-        command = find(lambda command: command.id == command_id, self.db_commands.values())
+        command = find(
+            lambda command: command.id == command_id, self.db_commands.values()
+        )
         if command is not None:
             self.remove_command_aliases(command)
 
@@ -68,7 +70,9 @@ class CommandManager(UserDict):
             log.warning("No command ID found in on_command_update")
             return
 
-        command = find(lambda command: command.id == command_id, self.db_commands.values())
+        command = find(
+            lambda command: command.id == command_id, self.db_commands.values()
+        )
         if command is None:
             log.warning("Invalid ID sent to on_command_update")
             return
@@ -108,9 +112,7 @@ class CommandManager(UserDict):
             command="add",
             commands={
                 "command": Command.dispatch_command(
-                    "add_command",
-                    level=500,
-                    description="Add a command!",
+                    "add_command", level=500, description="Add a command!",
                 ),
                 "alias": Command.dispatch_command(
                     "add_alias",
@@ -118,7 +120,9 @@ class CommandManager(UserDict):
                     description="Adds an alias to an already existing command",
                 ),
                 "funccommand": Command.dispatch_command(
-                    "add_funccommand", level=2000, description="Add a command that uses a command"
+                    "add_funccommand",
+                    level=2000,
+                    description="Add a command that uses a command",
                 ),
             },
             can_execute_with_whisper=True,
@@ -136,7 +140,9 @@ class CommandManager(UserDict):
                     description="Edit an already-existing command",
                 ),
                 "funccommand": Command.dispatch_command(
-                    "edit_funccommand", level=2000, description="Add a command that uses a command"
+                    "edit_funccommand",
+                    level=2000,
+                    description="Add a command that uses a command",
                 ),
             },
             can_execute_with_whisper=True,
@@ -149,9 +155,7 @@ class CommandManager(UserDict):
             command="remove",
             commands={
                 "command": Command.dispatch_command(
-                    "remove_command",
-                    level=500,
-                    description="Remove a command!",
+                    "remove_command", level=500, description="Remove a command!",
                 ),
                 "alias": Command.dispatch_command(
                     "remove_alias",
@@ -200,7 +204,9 @@ class CommandManager(UserDict):
             if alias in self.db_commands:
                 del self.db_commands[alias]
             else:
-                log.warning(f"For some reason, {alias} was not in the list of commands when we removed it.")
+                log.warning(
+                    f"For some reason, {alias} was not in the list of commands when we removed it."
+                )
 
     def remove_command(self, command):
         self.remove_command_aliases(command)
@@ -273,7 +279,11 @@ class CommandManager(UserDict):
                     out[alias] = command
 
         self.data = {}
-        db_commands = {alias: command for alias, command in self.db_commands.items() if command.enabled is True}
+        db_commands = {
+            alias: command
+            for alias, command in self.db_commands.items()
+            if command.enabled is True
+        }
 
         merge_commands(self.internal_commands, self.data)
         merge_commands(db_commands, self.data)
@@ -291,7 +301,11 @@ class CommandManager(UserDict):
 
     def load_by_id(self, command_id):
         self.db_session.commit()
-        command = self.db_session.query(Command).filter_by(id=command_id, enabled=True).one_or_none()
+        command = (
+            self.db_session.query(Command)
+            .filter_by(id=command_id, enabled=True)
+            .one_or_none()
+        )
         if command:
             self.add_db_command_aliases(command)
             self.db_session.expunge(command)
@@ -311,14 +325,18 @@ class CommandManager(UserDict):
     @staticmethod
     def parse_command_arguments(message):
         parser = argparse.ArgumentParser()
-        parser.add_argument("--privatemessage", dest="privatemessage", action="store_true")
+        parser.add_argument(
+            "--privatemessage", dest="privatemessage", action="store_true"
+        )
         parser.add_argument("--reply", dest="reply", action="store_true")
-        parser.add_argument("--allow_whisper", dest="can_execute_with_whisper", action="store_true")
+        parser.add_argument(
+            "--allow_whisper", dest="can_execute_with_whisper", action="store_true"
+        )
         parser.add_argument("--cd", type=int, dest="delay_all")
         parser.add_argument("--usercd", type=int, dest="delay_user")
         parser.add_argument("--level", type=int, dest="level")
         parser.add_argument("--cost", type=int, dest="cost")
-        parser.add_argument('--function', '-f', action='append', dest="functions")
+        parser.add_argument("--function", "-f", action="append", dest="functions")
 
         try:
             args, unknown = parser.parse_known_args(message)

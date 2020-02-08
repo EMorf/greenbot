@@ -22,9 +22,13 @@ class ActionParser:
         if not data:
             data = json.loads(raw_data)
         if data["type"] == "reply":
-            action = ReplyAction(data["message"], ActionParser.bot, functions=data.get("functions", []))
+            action = ReplyAction(
+                data["message"], ActionParser.bot, functions=data.get("functions", [])
+            )
         elif data["type"] == "privatemessage":
-            action = PrivateMessageAction(data["message"], ActionParser.bot, functions=data.get("functions", []))
+            action = PrivateMessageAction(
+                data["message"], ActionParser.bot, functions=data.get("functions", [])
+            )
         elif data["type"] == "func":
             action = FuncAction(getattr(Dispatch, data["cb"]))
         elif data["type"] == "multi":
@@ -39,7 +43,9 @@ def apply_substitutions(text, substitutions, bot, extra):
     for needle, sub in substitutions.items():
         if sub.key and sub.argument:
             param = sub.key
-            extra["argument"] = MessageAction.get_argument_value(extra["message"], sub.argument - 1)
+            extra["argument"] = MessageAction.get_argument_value(
+                extra["message"], sub.argument - 1
+            )
         elif sub.key:
             param = sub.key
         elif sub.argument:
@@ -66,12 +72,9 @@ def apply_substitutions(text, substitutions, bot, extra):
 
 
 class Function:
-    function_regex = re.compile(
-        r'\$\(([a-z_]+)(;\$\(\w+(;\d+)?(:\w+)?\)|;\w+)*\)'
-    )
-    args_regex = re.compile(
-        r'(;\$\(\w+(;\d)?(:\w+)?\)|;\w+)'
-    )
+    function_regex = re.compile(r"\$\(([a-z_]+)(;\$\(\w+(;\d+)?(:\w+)?\)|;\w+)*\)")
+    args_regex = re.compile(r"(;\$\(\w+(;\d)?(:\w+)?\)|;\w+)")
+
     def __init__(self, cb, arguments=[]):
         self.cb = cb
         self.arguments = arguments
@@ -83,7 +86,9 @@ class Substitution:
         r'\$\(([a-z_]+)(\;[0-9]+)?(\:[\w\.\/ -]+|\:\$\([\w_:;\._\/ -]+\))?(\|[\w]+(\([\w%:/ +-]+\))?)*(\,[\'"]{1}[\w \|$;_\-:()\.]+[\'"]{1}){0,2}\)'
     )
     # https://stackoverflow.com/a/7109208
-    urlfetch_substitution_regex = re.compile(r"\$\(urlfetch ([A-Za-z0-9\-._~:/?#\[\]@!$%&\'()*+,;=]+)\)")
+    urlfetch_substitution_regex = re.compile(
+        r"\$\(urlfetch ([A-Za-z0-9\-._~:/?#\[\]@!$%&\'()*+,;=]+)\)"
+    )
     urlfetch_substitution_regex_all = re.compile(r"\$\(urlfetch (.+?)\)")
 
     def __init__(self, cb, needle, key=None, argument=None, filters=[]):
@@ -116,7 +121,9 @@ class FuncAction(BaseAction):
 
     def run(self, bot, author, channel, message, args):
         try:
-            return self.cb(bot=bot, author=author, channel=channel, message=message, args=args)
+            return self.cb(
+                bot=bot, author=author, channel=channel, message=message, args=args
+            )
         except:
             log.exception("Uncaught exception in FuncAction")
 
@@ -128,7 +135,9 @@ class RawFuncAction(BaseAction):
         self.cb = cb
 
     def run(self, bot, author, channel, message, args):
-        return self.cb(bot=bot, author=author, channel=channel, message=message, args=args)
+        return self.cb(
+            bot=bot, author=author, channel=channel, message=message, args=args
+        )
 
 
 def get_argument_substitutions(string):
@@ -152,9 +161,12 @@ def get_argument_substitutions(string):
                 break
         if found:
             continue
-        argument_substitutions.append(Substitution(None, needle=needle, argument=argument_num))
+        argument_substitutions.append(
+            Substitution(None, needle=needle, argument=argument_num)
+        )
 
     return argument_substitutions
+
 
 def get_substitution_arguments(sub_key):
     sub_string = sub_key.group(0)
@@ -185,12 +197,14 @@ def get_substitution_arguments(sub_key):
 
     return sub_string, path, argument, key, filters, if_arguments
 
+
 def get_function_arguments(sub_key):
     path = sub_key.group(1)
     match = sub_key.string
     arguments = Function.args_regex.findall(match)
     arguments = [x[0][1:] for x in arguments]
     return path, arguments
+
 
 def get_urlfetch_substitutions(string, all=False):
     substitutions = {}
@@ -204,6 +218,7 @@ def get_urlfetch_substitutions(string, all=False):
         substitutions[sub_key.group(0)] = sub_key.group(1)
 
     return substitutions
+
 
 class MultiAction(BaseAction):
     type = "multi"
@@ -275,7 +290,9 @@ class MultiAction(BaseAction):
             if args["user_level"] >= cmd.level:
                 return cmd.run(bot, author, channel, extra_msg, args)
 
-            log.info(f"User {author} tried running a sub-command he had no access to ({command}).")
+            log.info(
+                f"User {author} tried running a sub-command he had no access to ({command})."
+            )
 
         return None
 
@@ -286,11 +303,15 @@ class MessageAction(BaseAction):
     def __init__(self, response, bot, functions=[]):
         self.response = response
         self.functions_raw = functions
-        self.functions = get_functions(self.functions_raw, bot) if self.functions_raw else []
-        
+        self.functions = (
+            get_functions(self.functions_raw, bot) if self.functions_raw else []
+        )
+
         if bot:
             self.argument_subs = get_argument_substitutions(self.response)
-            self.num_urlfetch_subs = len(get_urlfetch_substitutions(self.response, all=True))
+            self.num_urlfetch_subs = len(
+                get_urlfetch_substitutions(self.response, all=True)
+            )
             self.subs = get_substitutions(self.response, bot)
         else:
             self.argument_subs = []
@@ -318,7 +339,9 @@ class MessageAction(BaseAction):
 
         for sub in self.argument_subs:
             needle = sub.needle
-            value = str(MessageAction.get_argument_value(extra["message"], sub.argument - 1))
+            value = str(
+                MessageAction.get_argument_value(extra["message"], sub.argument - 1)
+            )
             resp = resp.replace(needle, value)
             log.debug(f"Replacing {needle} with {value}")
         return resp, embed
@@ -360,10 +383,13 @@ def urlfetch_msg(method, message, num_urlfetch_subs, bot, extra={}, args=[], kwa
 
     method(*args, **kwargs)
 
+
 class IfSubstitution:
     def __call__(self, key, extra={}):
         if self.sub.key is None:
-            msg = MessageAction.get_argument_value(extra.get("message", ""), self.sub.argument - 1)
+            msg = MessageAction.get_argument_value(
+                extra.get("message", ""), self.sub.argument - 1
+            )
             if msg:
                 return self.get_true_response(extra)
 
@@ -379,7 +405,9 @@ class IfSubstitution:
         return apply_substitutions(self.true_response, self.true_subs, self.bot, extra)
 
     def get_false_response(self, extra):
-        return apply_substitutions(self.false_response, self.false_subs, self.bot, extra)
+        return apply_substitutions(
+            self.false_response, self.false_subs, self.bot, extra
+        )
 
     def __init__(self, key, arguments, bot):
         self.bot = bot
@@ -398,6 +426,7 @@ class IfSubstitution:
         self.true_subs = get_substitutions(self.true_response, bot)
         self.false_subs = get_substitutions(self.false_response, bot)
 
+
 def get_substitutions(string, bot):
     """
     Returns a dictionary of `Substitution` objects thare are found in the passed `string`.
@@ -408,7 +437,14 @@ def get_substitutions(string, bot):
     substitutions = collections.OrderedDict()
 
     for sub_key in Substitution.substitution_regex.finditer(string):
-        sub_string, path, argument, key, filters, if_arguments = get_substitution_arguments(sub_key)
+        (
+            sub_string,
+            path,
+            argument,
+            key,
+            filters,
+            if_arguments,
+        ) = get_substitution_arguments(sub_key)
 
         if sub_string in substitutions:
             # We already matched this variable
@@ -420,7 +456,13 @@ def get_substitutions(string, bot):
                     if_substitution = IfSubstitution(key, if_arguments, bot)
                     if if_substitution.sub is None:
                         continue
-                    sub = Substitution(if_substitution, needle=sub_string, key=key, argument=argument, filters=filters)
+                    sub = Substitution(
+                        if_substitution,
+                        needle=sub_string,
+                        key=key,
+                        argument=argument,
+                        filters=filters,
+                    )
                     substitutions[sub_string] = sub
         except:
             log.exception("BabyRage")
@@ -428,17 +470,31 @@ def get_substitutions(string, bot):
     method_mapping = method_subs(bot)
 
     for sub_key in Substitution.substitution_regex.finditer(string):
-        sub_string, path, argument, key, filters, if_arguments = get_substitution_arguments(sub_key)
+        (
+            sub_string,
+            path,
+            argument,
+            key,
+            filters,
+            if_arguments,
+        ) = get_substitution_arguments(sub_key)
 
         if sub_string in substitutions:
             # We already matched this variable
             continue
 
         if path in method_mapping:
-            sub = Substitution(method_mapping[path], needle=sub_string, key=key, argument=argument, filters=filters)
+            sub = Substitution(
+                method_mapping[path],
+                needle=sub_string,
+                key=key,
+                argument=argument,
+                filters=filters,
+            )
             substitutions[sub_string] = sub
 
     return substitutions
+
 
 def get_functions(_functions, bot):
     functions = []
@@ -452,8 +508,9 @@ def get_functions(_functions, bot):
         if function not in method_mapping:
             log.info(f"Function not in method mapping {function}")
             continue
-        functions.append(Function(method_mapping[function], arguments))        
+        functions.append(Function(method_mapping[function], arguments))
     return functions
+
 
 def method_func(bot):
     method_mapping = {}
@@ -466,6 +523,7 @@ def method_func(bot):
     except AttributeError:
         pass
     return method_mapping
+
 
 def method_subs(bot):
     method_mapping = {}
@@ -488,6 +546,7 @@ def method_subs(bot):
         pass
     return method_mapping
 
+
 def get_substitutions_array(array, bot, extra):
     """
     Returns a dictionary of `Substitution` objects thare are found in the passed `string`.
@@ -507,15 +566,24 @@ def get_substitutions_array(array, bot, extra):
             return_array.append(string)
             continue
 
-        sub_string, path, argument, key, filters, if_arguments = get_substitution_arguments(sub_key)
+        (
+            sub_string,
+            path,
+            argument,
+            key,
+            filters,
+            if_arguments,
+        ) = get_substitution_arguments(sub_key)
 
         if path not in method_mapping:
             return_array.append(string)
             continue
-        
+
         if key and argument:
             param = key
-            extra["argument"] = MessageAction.get_argument_value(extra["message"], argument - 1)
+            extra["argument"] = MessageAction.get_argument_value(
+                extra["message"], argument - 1
+            )
         elif key:
             param = key
         elif argument:
@@ -534,6 +602,7 @@ def get_substitutions_array(array, bot, extra):
 
     return return_array
 
+
 def get_argument_substitutions_array(array, extra):
     return_array = []
     for string in array:
@@ -544,16 +613,31 @@ def get_argument_substitutions_array(array, extra):
         if not sub_key:
             return_array.append(string)
             continue
-        return_array.append(str(MessageAction.get_argument_value(extra["message"], int(sub_key.group(1)) - 1)))
+        return_array.append(
+            str(
+                MessageAction.get_argument_value(
+                    extra["message"], int(sub_key.group(1)) - 1
+                )
+            )
+        )
     return return_array
 
-def run_functions(functions, bot, extra, author, channel,args, num_urlfetch_subs, private_message):
+
+def run_functions(
+    functions, bot, extra, author, channel, args, num_urlfetch_subs, private_message
+):
     for func in functions:
-        final_args = get_argument_substitutions_array(get_substitutions_array(func.arguments, bot, extra), extra)
+        final_args = get_argument_substitutions_array(
+            get_substitutions_array(func.arguments, bot, extra), extra
+        )
         resp, embed = func.cb(final_args, extra)
         if num_urlfetch_subs == 0:
-            
-            return bot.private_message(author, resp, embed) if private_message else bot.say(channel, resp, embed)
+
+            return (
+                bot.private_message(author, resp, embed)
+                if private_message
+                else bot.say(channel, resp, embed)
+            )
 
         return ScheduleManager.execute_now(
             urlfetch_msg,
@@ -570,18 +654,28 @@ def run_functions(functions, bot, extra, author, channel,args, num_urlfetch_subs
             },
         )
 
+
 class ReplyAction(MessageAction):
     subtype = "Reply"
 
     def run(self, bot, author, channel, message, args):
         extra = self.get_extra_data(author, channel, message, args)
         if self.functions:
-            run_functions(self.functions, bot, extra, author, channel, args, self.num_urlfetch_subs, args["whisper"])
+            run_functions(
+                self.functions,
+                bot,
+                extra,
+                author,
+                channel,
+                args,
+                self.num_urlfetch_subs,
+                args["whisper"],
+            )
 
         resp, embed = self.get_response(bot, extra)
         if not resp and not embed:
             return False
-        
+
         if self.num_urlfetch_subs == 0:
             if args["whisper"]:
                 return bot.private_message(author, resp, embed)
@@ -610,7 +704,16 @@ class PrivateMessageAction(MessageAction):
         extra = self.get_extra_data(author, channel, message, args)
         resp, embed = self.get_response(bot, extra)
         if self.functions:
-            run_functions(self.functions, bot, extra, author, channel, args, self.num_urlfetch_subs, True)
+            run_functions(
+                self.functions,
+                bot,
+                extra,
+                author,
+                channel,
+                args,
+                self.num_urlfetch_subs,
+                True,
+            )
 
         if not resp and embed:
             return False
@@ -628,7 +731,7 @@ class PrivateMessageAction(MessageAction):
                 "bot": bot,
                 "extra": extra,
                 "message": resp,
-                "embed": embed, 
+                "embed": embed,
                 "num_urlfetch_subs": self.num_urlfetch_subs,
             },
         )

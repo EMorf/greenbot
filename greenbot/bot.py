@@ -24,6 +24,7 @@ import greenbot.utils as utils
 
 log = logging.getLogger(__name__)
 
+
 def custom_exception_handler(loop, context):
     # first, handle with default handler
     loop.default_exception_handler(context)
@@ -45,7 +46,7 @@ class Bot:
 
         ScheduleManager.init()
         DBManager.init(self.config["main"]["db"])
-        
+
         ActionParser.bot = self
 
         # redis
@@ -59,7 +60,9 @@ class Bot:
         try:
             with DBManager.create_dbapi_connection_scope() as sql_conn:
                 sql_migratable = DatabaseMigratable(sql_conn)
-                sql_migration = Migration(sql_migratable, greenbot.migration_revisions.db, self)
+                sql_migration = Migration(
+                    sql_migratable, greenbot.migration_revisions.db, self
+                )
                 sql_migration.run()
         except ValueError as error:
             log.error(error)
@@ -73,20 +76,31 @@ class Bot:
             "bot_name": self.bot_name,
             "channels": self.config["discord"]["channels_to_listen_in"].split(" "),
             "command_prefix": self.command_prefix,
-            "discord_guild_id": self.config["discord"]["discord_guild_id"]
+            "discord_guild_id": self.config["discord"]["discord_guild_id"],
         }
 
-        self.discord_bot = DiscordBotManager(bot=self, settings=self.settings, redis=RedisManager.get(), private_loop=self.private_loop)
+        self.discord_bot = DiscordBotManager(
+            bot=self,
+            settings=self.settings,
+            redis=RedisManager.get(),
+            private_loop=self.private_loop,
+        )
         self.socket_manager = SocketManager(self.bot_name, self.execute_now)
         self.module_manager = ModuleManager(self.socket_manager, bot=self).load()
 
-        self.commands = CommandManager(socket_manager=self.socket_manager, module_manager=self.module_manager, bot=self).load()
+        self.commands = CommandManager(
+            socket_manager=self.socket_manager,
+            module_manager=self.module_manager,
+            bot=self,
+        ).load()
         HandlerManager.trigger("manager_loaded")
 
         # promote the admin to level 2000
         owner = self.config["main"].get("owner_id", None)
         if owner is None:
-            log.warning("No admin user specified. See the [main] section in the example config for its usage.")
+            log.warning(
+                "No admin user specified. See the [main] section in the example config for its usage."
+            )
         else:
             with DBManager.create_session_scope() as db_session:
                 owner = User._create_or_get_by_discord_id(db_session, str(owner))
@@ -124,11 +138,16 @@ class Bot:
         self.private_loop.run_forever()
 
     def ban(self, user, timeout_in_seconds=0, delete_message_days=0, reason=None):
-        self.discord_bot.ban(user=user, timeout_in_seconds=timeout_in_seconds, delete_message_days=delete_message_days, reason=reason)
+        self.discord_bot.ban(
+            user=user,
+            timeout_in_seconds=timeout_in_seconds,
+            delete_message_days=delete_message_days,
+            reason=reason,
+        )
 
     def unban(self, user_id, reason=None):
         self.discord_bot.unban(user_id=user_id, reason=reason)
-    
+
     def kick(self, user, reason=None):
         self.discord_bot.kick(user=user, reason=reason)
 
@@ -138,22 +157,32 @@ class Bot:
     def say(self, channel, message, embed=None):
         self.discord_bot.say(channel, message, embed)
 
-    def discord_message(self, message_raw, message, author, channel, user_level, whisper):
+    def discord_message(
+        self, message_raw, message, author, channel, user_level, whisper
+    ):
         msg_lower = message.lower()
         if msg_lower[:1] == self.settings["command_prefix"]:
             msg_lower_parts = msg_lower.split(" ")
             trigger = msg_lower_parts[0][1:]
             msg_raw_parts = message.split(" ")
-            remaining_message = " ".join(msg_raw_parts[1:]) if len(msg_raw_parts) > 1 else None
+            remaining_message = (
+                " ".join(msg_raw_parts[1:]) if len(msg_raw_parts) > 1 else None
+            )
             if trigger in self.commands:
                 command = self.commands[trigger]
                 extra_args = {
                     "trigger": trigger,
                     "message_raw": message_raw,
                     "user_level": user_level,
-                    "whisper": whisper
+                    "whisper": whisper,
                 }
-                command.run(bot=self, author=author, channel=channel, message=remaining_message, args=extra_args)
+                command.run(
+                    bot=self,
+                    author=author,
+                    channel=channel,
+                    message=remaining_message,
+                    args=extra_args,
+                )
 
     def get_role_id(self, role_name):
         return self.discord_bot.get_role_id(role_name)
@@ -183,8 +212,12 @@ class Bot:
         if not member:
             return "Member not found"
         with DBManager.create_session_scope() as db_session:
-            author_user = User._create_or_get_by_discord_id(db_session, str(author.id), user_name=str(author))
-            member_user = User._create_or_get_by_discord_id(db_session, str(member.id), user_name=str(member))
+            author_user = User._create_or_get_by_discord_id(
+                db_session, str(author.id), user_name=str(author)
+            )
+            member_user = User._create_or_get_by_discord_id(
+                db_session, str(member.id), user_name=str(member)
+            )
             if author_user.level <= member_user.level:
                 return "You cannot kick someone who has the same level as you :)", None
         reason = args[1:]
@@ -198,8 +231,12 @@ class Bot:
         if not member:
             return "Member not found"
         with DBManager.create_session_scope() as db_session:
-            author_user = User._create_or_get_by_discord_id(db_session, str(author.id), user_name=str(author))
-            member_user = User._create_or_get_by_discord_id(db_session, str(member.id), user_name=str(member))
+            author_user = User._create_or_get_by_discord_id(
+                db_session, str(author.id), user_name=str(author)
+            )
+            member_user = User._create_or_get_by_discord_id(
+                db_session, str(member.id), user_name=str(member)
+            )
             if author_user.level <= member_user.level:
                 return "You cannot ban someone who has the same level as you :)", None
         reason = None
@@ -216,9 +253,14 @@ class Bot:
                 reason = args[2:]
         if not reason:
             reason = args[3:]
-        
+
         message = f"Member <@!{member.id}> has been banned!"
-        self.ban(user=member, timeout_in_seconds=timeout_in_seconds, delete_message_days=delete_message_days, reason=" ".join(reason) if len(reason) > 0 else None)
+        self.ban(
+            user=member,
+            timeout_in_seconds=timeout_in_seconds,
+            delete_message_days=delete_message_days,
+            reason=" ".join(reason) if len(reason) > 0 else None,
+        )
         return message, None
 
     def func_unban_member(self, args, extra={}):
@@ -226,7 +268,9 @@ class Bot:
         reason = args[1:]
 
         message = f"Member <@!{member_id}> has been unbanned!"
-        self.unban(user_id=member_id, reason=" ".join(reason) if len(reason) > 0 else None)
+        self.unban(
+            user_id=member_id, reason=" ".join(reason) if len(reason) > 0 else None
+        )
         return message, None
 
     def func_set_balance(self, args, extra={}):
@@ -269,7 +313,9 @@ class Bot:
             "time_since_minutes": lambda var, args: "no time"
             if var == 0
             else utils.time_since(var * 60, 0, time_format="long"),
-            "time_since": lambda var, args: "no time" if var == 0 else utils.time_since(var, 0, time_format="long"),
+            "time_since": lambda var, args: "no time"
+            if var == 0
+            else utils.time_since(var, 0, time_format="long"),
             "time_since_dt": _filter_time_since_dt,
             "urlencode": _filter_urlencode,
             "join": _filter_join,
@@ -319,7 +365,7 @@ class Bot:
             user_joined = joined_at.strftime("%d %b %Y %H:%M")
         else:
             since_joined = "?"
-            user_joined = ("Unknown")
+            user_joined = "Unknown"
         user_created = user.created_at.strftime("%d %b %Y %H:%M")
         voice_state = user.voice
 
@@ -332,7 +378,9 @@ class Bot:
         elif user.activity.type == discord.ActivityType.playing:
             activity = ("Playing {}").format(user.activity.name)
         elif user.activity.type == discord.ActivityType.streaming:
-            activity = ("Streaming [{}]({})").format(user.activity.name, user.activity.url)
+            activity = ("Streaming [{}]({})").format(
+                user.activity.name, user.activity.url
+            )
         elif user.activity.type == discord.ActivityType.listening:
             activity = ("Listening to {}").format(user.activity.name)
         elif user.activity.type == discord.ActivityType.watching:
@@ -352,7 +400,9 @@ class Bot:
                 continuation_string = (
                     "and {numeric_number} more roles not displayed due to embed limits."
                 )
-                available_length = 1024 - len(continuation_string)  # do not attempt to tweak, i18n
+                available_length = 1024 - len(
+                    continuation_string
+                )  # do not attempt to tweak, i18n
 
                 role_chunks = []
                 remaining_roles = 0
@@ -367,7 +417,9 @@ class Bot:
                     else:
                         remaining_roles += 1
 
-                role_chunks.append(continuation_string.format(numeric_number=remaining_roles))
+                role_chunks.append(
+                    continuation_string.format(numeric_number=remaining_roles)
+                )
 
                 role_str = "".join(role_chunks)
 
@@ -405,7 +457,10 @@ class Bot:
         role = self.get_role(role_id)
         data = discord.Embed(colour=role.colour)
         data.add_field(name=("Role Name"), value=role.name)
-        data.add_field(name=("Created"), value=f"{(datetime.datetime.now() - role.created_at).days}d ago")
+        data.add_field(
+            name=("Created"),
+            value=f"{(datetime.datetime.now() - role.created_at).days}d ago",
+        )
         data.add_field(name=("Users in Role"), value=len(role.members))
         data.add_field(name=("ID"), value=role.id)
         data.add_field(name=("Color"), value=str(role.color))
@@ -418,16 +473,30 @@ class Bot:
                 continue
             invalid_permissions.append(perm)
 
-        data.add_field(name=("Valid Permissions"), value="\n".join([str(x) for x in valid_permissions]))
-        data.add_field(name=("Invalid Permissions"), value="\n".join([str(x) for x in invalid_permissions]))
+        data.add_field(
+            name=("Valid Permissions"),
+            value="\n".join([str(x) for x in valid_permissions]),
+        )
+        data.add_field(
+            name=("Invalid Permissions"),
+            value="\n".join([str(x) for x in invalid_permissions]),
+        )
         data.set_thumbnail(url=extra["message_raw"].guild.icon_url)
         return data
 
     def get_commands(self, key, extra={}):
-        data = discord.Embed(description=("All Commands"), colour=discord.Colour.dark_gold())
+        data = discord.Embed(
+            description=("All Commands"), colour=discord.Colour.dark_gold()
+        )
         commands = list(self.commands.keys())
-        data.add_field(name=("All Commands"), value="\n".join([str(x) for x in commands[:len(commands)//2]]))
-        data.add_field(name=("All Commands"), value="\n".join([str(x) for x in commands[len(commands)//2:]]))
+        data.add_field(
+            name=("All Commands"),
+            value="\n".join([str(x) for x in commands[: len(commands) // 2]]),
+        )
+        data.add_field(
+            name=("All Commands"),
+            value="\n".join([str(x) for x in commands[len(commands) // 2 :]]),
+        )
         data.set_thumbnail(url=extra["message_raw"].guild.icon_url)
         return data
 
@@ -435,7 +504,9 @@ class Bot:
         if key not in self.commands:
             return f"Cannot find command {key}"
         command = self.commands[key]
-        data = discord.Embed(description=(command.command), colour=discord.Colour.dark_gold())
+        data = discord.Embed(
+            description=(command.command), colour=discord.Colour.dark_gold()
+        )
         data.add_field(name=("ID"), value=command.id)
         data.add_field(name=("Level"), value=command.level)
         data.add_field(name=("Delay All"), value=command.delay_all)
@@ -443,10 +514,16 @@ class Bot:
         data.add_field(name=("Enabled"), value="Yes" if command.enabled else "No")
         currency = self._get_currency().get("name")
         data.add_field(name=("Cost"), value=f"{command.cost} {currency}")
-        data.add_field(name=("Whispers"), value="Yes" if command.can_execute_with_whisper else "No")
+        data.add_field(
+            name=("Whispers"), value="Yes" if command.can_execute_with_whisper else "No"
+        )
         if command.data:
             data.add_field(name=("Number of uses"), value=command.data.num_uses)
-            data.set_footer(text=(f"Made by: {command.data.added_by} | Edited by {command.data.edited_by}"))
+            data.set_footer(
+                text=(
+                    f"Made by: {command.data.added_by} | Edited by {command.data.edited_by}"
+                )
+            )
         try:
             data.add_field(name=("Description"), value=command.action.response)
         except:
@@ -462,13 +539,15 @@ class Bot:
         return self._get_currency().get(key) if key else None
 
     def get_user(self, key, extra={}):
-        user = self.get_member(extra["argument"][3:][:-1]) if extra["argument"] else None
+        user = (
+            self.get_member(extra["argument"][3:][:-1]) if extra["argument"] else None
+        )
         if not user:
             user = extra["author"]
         with DBManager.create_session_scope() as db_session:
             db_user = User._create_or_get_by_discord_id(db_session, user.id)
             return getattr(db_user, key) if db_user else None
-    
+
     @staticmethod
     def get_args_value(key, extra={}):
         r = None
@@ -521,6 +600,7 @@ class Bot:
 
         return None
 
+
 def _filter_time_since_dt(var, args):
     try:
         ts = utils.time_since(utils.now().timestamp(), var.timestamp())
@@ -531,6 +611,7 @@ def _filter_time_since_dt(var, args):
     except:
         return "never FeelsBadMan ?"
 
+
 def _filter_join(var, args):
     try:
         separator = args[0]
@@ -539,6 +620,7 @@ def _filter_join(var, args):
 
     return separator.join(var.split(" "))
 
+
 def _filter_number_format(var, args):
     try:
         return f"{int(var):,d}"
@@ -546,23 +628,29 @@ def _filter_number_format(var, args):
         log.exception("asdasd")
     return var
 
+
 def _filter_strftime(var, args):
     return var.strftime(args[0])
+
 
 def _filter_timezone(var, args):
     return var.astimezone(timezone(args[0]))
 
+
 def _filter_urlencode(var, args):
     return urllib.parse.urlencode({"x": var})[2:]
 
+
 def lowercase_first_letter(s):
     return s[:1].lower() + s[1:] if s else ""
+
 
 def _filter_add(var, args):
     try:
         return str(int(var) + int(args[0]))
     except:
         return ""
+
 
 def _filter_or_else(var, args):
     if var is None or len(var) <= 0:

@@ -25,7 +25,9 @@ def init_logging(app="greenbot"):
         def format(self, record):
             levelname = record.levelname
             if levelname in colors:
-                levelname_color = Style.BRIGHT + colors[levelname] + levelname + Style.RESET_ALL
+                levelname_color = (
+                    Style.BRIGHT + colors[levelname] + levelname + Style.RESET_ALL
+                )
                 record.levelname = levelname_color
             return logging.Formatter.format(self, record)
 

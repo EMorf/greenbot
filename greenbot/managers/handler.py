@@ -34,7 +34,9 @@ class HandlerManager:
     def add_handler(event, method, priority=0):
         try:
             HandlerManager.handlers[event].append((method, priority))
-            HandlerManager.handlers[event].sort(key=operator.itemgetter(1), reverse=True)
+            HandlerManager.handlers[event].sort(
+                key=operator.itemgetter(1), reverse=True
+            )
         except KeyError:
             # No handlers for this event found
             log.error(f"add_handler No handler for {event} found.")
@@ -47,7 +49,10 @@ class HandlerManager:
     def remove_handler(event, method):
         handler = None
         try:
-            handler = find(lambda h: HandlerManager.method_matches(h, method), HandlerManager.handlers[event])
+            handler = find(
+                lambda h: HandlerManager.method_matches(h, method),
+                HandlerManager.handlers[event],
+            )
             if handler is not None:
                 HandlerManager.handlers[event].remove(handler)
         except KeyError:

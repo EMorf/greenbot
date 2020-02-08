@@ -22,24 +22,41 @@ class Migration:
 
         with self.migratable.create_resource() as resource:
             current_revision_id = self.migratable.get_current_revision(resource)
-        log.debug("migrate %s: current revision ID is %s", self.migratable.describe_resource(), current_revision_id)
+        log.debug(
+            "migrate %s: current revision ID is %s",
+            self.migratable.describe_resource(),
+            current_revision_id,
+        )
 
         if current_revision_id is not None:
-            revisions_to_run = [rev for rev in revisions if rev.id > current_revision_id]
+            revisions_to_run = [
+                rev for rev in revisions if rev.id > current_revision_id
+            ]
         else:
             revisions_to_run = revisions
 
         # don't run all revisions, only up to the specified revision_id
         if target_revision_id is not None:
-            revisions_to_run = [rev for rev in revisions_to_run if rev.id <= target_revision_id]
+            revisions_to_run = [
+                rev for rev in revisions_to_run if rev.id <= target_revision_id
+            ]
 
-        log.debug("migrate %s: %s revisions to run", self.migratable.describe_resource(), len(revisions_to_run))
+        log.debug(
+            "migrate %s: %s revisions to run",
+            self.migratable.describe_resource(),
+            len(revisions_to_run),
+        )
 
         for rev in revisions_to_run:
             # create a fresh resource for each individual migration
             # (we want to COMMIT after each successful migration revision)
             with self.migratable.create_resource() as resource:
-                log.debug("migrate %s: running migration %s: %s", self.migratable.describe_resource(), rev.id, rev.name)
+                log.debug(
+                    "migrate %s: running migration %s: %s",
+                    self.migratable.describe_resource(),
+                    rev.id,
+                    rev.name,
+                )
                 rev.up_action(resource, self.context)
                 self.migratable.set_revision(resource, rev.id)
 
@@ -88,7 +105,9 @@ class Migration:
                 )
 
             if up_action is None:
-                raise ValueError(f"Module {modname} does not specify `def up()`. Cannot proceed.")
+                raise ValueError(
+                    f"Module {modname} does not specify `def up()`. Cannot proceed."
+                )
 
             if any(rev.id == id for rev in revisions):
                 raise ValueError(f"ID {id} was defined twice. Cannot proceed.")

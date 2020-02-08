@@ -39,7 +39,12 @@ class AdminCommandsModule(BaseModule):
 
         if sub_command == "list":
             messages = split_into_chunks_with_prefix(
-                [{"prefix": "Available modules:", "parts": [module.ID for module in module_manager.all_modules]}],
+                [
+                    {
+                        "prefix": "Available modules:",
+                        "parts": [module.ID for module in module_manager.all_modules],
+                    }
+                ],
                 " ",
                 default="No modules available.",
             )
@@ -57,7 +62,9 @@ class AdminCommandsModule(BaseModule):
             module = module_manager.get_module(module_id)
             if not module:
                 if whisper:
-                    bot.private_message(author, f"No module with the id {module_id} found")
+                    bot.private_message(
+                        author, f"No module with the id {module_id} found"
+                    )
                     return
                 bot.say(channel, f"No module with the id {module_id} found")
                 return
@@ -71,9 +78,15 @@ class AdminCommandsModule(BaseModule):
 
             if not module_manager.disable_module(module_id):
                 if whisper:
-                    bot.private_message(author, f"Unable to disable module {module_id}, maybe it's not enabled?")
+                    bot.private_message(
+                        author,
+                        f"Unable to disable module {module_id}, maybe it's not enabled?",
+                    )
                     return
-                bot.say(channel, f"Unable to disable module {module_id}, maybe it's not enabled?")
+                bot.say(
+                    channel,
+                    f"Unable to disable module {module_id}, maybe it's not enabled?",
+                )
                 return
 
             # Rebuild command cache
@@ -98,7 +111,9 @@ class AdminCommandsModule(BaseModule):
             module = module_manager.get_module(module_id)
             if not module:
                 if whisper:
-                    bot.private_message(author, f"No module with the id {module_id} found")
+                    bot.private_message(
+                        author, f"No module with the id {module_id} found"
+                    )
                     return
                 bot.say(channel, f"No module with the id {module_id} found")
                 return
@@ -112,9 +127,15 @@ class AdminCommandsModule(BaseModule):
 
             if not module_manager.enable_module(module_id):
                 if whisper:
-                    bot.private_message(author, f"Unable to enable module {module_id}, maybe it's already enabled?")
+                    bot.private_message(
+                        author,
+                        f"Unable to enable module {module_id}, maybe it's already enabled?",
+                    )
                     return
-                bot.say(channel, f"Unable to enable module {module_id}, maybe it's already enabled?")
+                bot.say(
+                    channel,
+                    f"Unable to enable module {module_id}, maybe it's already enabled?",
+                )
                 return
 
             # Rebuild command cache
@@ -133,5 +154,10 @@ class AdminCommandsModule(BaseModule):
 
     def load_commands(self, **options):
         self.commands["module"] = Command.raw_command(
-            self.cmd_module, level=500, description="Modify module", delay_all=0, delay_user=0, can_execute_with_whisper=True
+            self.cmd_module,
+            level=500,
+            description="Modify module",
+            delay_all=0,
+            delay_user=0,
+            can_execute_with_whisper=True,
         )

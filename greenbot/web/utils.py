@@ -33,7 +33,11 @@ def requires_level(level, redirect_url="/"):
             if "user" not in session:
                 return redirect("/login?n=" + redirect_url)
             with DBManager.create_session_scope() as db_session:
-                user = db_session.query(User).filter_by(discord_id=session["user"]["discord_id"]).one_or_none()
+                user = (
+                    db_session.query(User)
+                    .filter_by(discord_id=session["user"]["discord_id"])
+                    .one_or_none()
+                )
                 if user is None:
                     abort(403)
 
@@ -55,7 +59,9 @@ def nocache(view):
     def no_cache(*args, **kwargs):
         response = make_response(view(*args, **kwargs))
         response.headers["Last-Modified"] = utils.now()
-        response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, post-check=0, pre-check=0, max-age=0"
+        response.headers[
+            "Cache-Control"
+        ] = "no-store, no-cache, must-revalidate, post-check=0, pre-check=0, max-age=0"
         response.headers["Pragma"] = "no-cache"
         response.headers["Expires"] = "-1"
         return response
@@ -79,7 +85,11 @@ def get_cached_commands():
 
         bot_commands_list.sort(key=lambda x: (x.id or -1, x.main_alias))
         bot_commands_list = [c.jsonify() for c in bot_commands_list]
-        redis.setex(commands_key, value=json.dumps(bot_commands_list, separators=(",", ":")), time=CACHE_TIME)
+        redis.setex(
+            commands_key,
+            value=json.dumps(bot_commands_list, separators=(",", ":")),
+            time=CACHE_TIME,
+        )
     else:
         bot_commands_list = json.loads(commands)
 
@@ -109,7 +119,14 @@ def jsonify_query(query):
     return [v.jsonify() for v in query]
 
 
-def jsonify_list(key, query, base_url=None, default_limit=None, max_limit=None, jsonify_method=jsonify_query):
+def jsonify_list(
+    key,
+    query,
+    base_url=None,
+    default_limit=None,
+    max_limit=None,
+    jsonify_method=jsonify_query,
+):
     """ Must be called in the context of a request """
     _total = query.count()
 
@@ -150,12 +167,20 @@ def jsonify_list(key, query, base_url=None, default_limit=None, max_limit=None, 
 
         if limit:
             payload["_links"]["next"] = (
-                base_url + "?" + urllib.parse.urlencode([("limit", limit), ("offset", (offset or 0) + limit)])
+                base_url
+                + "?"
+                + urllib.parse.urlencode(
+                    [("limit", limit), ("offset", (offset or 0) + limit)]
+                )
             )
 
             if offset:
                 payload["_links"]["prev"] = (
-                    base_url + "?" + urllib.parse.urlencode([("limit", limit), ("offset", max(0, offset - limit))])
+                    base_url
+                    + "?"
+                    + urllib.parse.urlencode(
+                        [("limit", limit), ("offset", max(0, offset - limit))]
+                    )
                 )
 
     return payload
