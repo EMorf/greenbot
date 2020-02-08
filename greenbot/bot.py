@@ -181,8 +181,6 @@ class Bot:
         author = extra["author"]
         member = self.get_member(args[0][3:][:-1])
         if not member:
-            if args["whisper"]:
-                
             return "Member not found"
         with DBManager.create_session_scope() as db_session:
             author_user = User._create_or_get_by_discord_id(db_session, str(author.id), user_name=str(author))
@@ -243,7 +241,7 @@ class Bot:
         currency = self._get_currency().get("name").capitalize()
         return f"{currency} balance for <@!{user_id}> set to {amount}"
 
-    def adj_balance(self, args, extra={}):
+    def func_adj_balance(self, args, extra={}):
         user_id = args[0][3:][:-1]
         try:
             amount = int(args[1])
