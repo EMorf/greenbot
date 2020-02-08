@@ -312,13 +312,13 @@ class CommandManager(UserDict):
     def parse_command_arguments(message):
         parser = argparse.ArgumentParser()
         parser.add_argument("--privatemessage", dest="privatemessage", action="store_true")
-        parser.add_argument("--channelmessage", dest="reply", action="store_true")
+        parser.add_argument("--reply", dest="reply", action="store_true")
         parser.add_argument("--allow_whisper", dest="can_execute_with_whisper", action="store_true")
         parser.add_argument("--cd", type=int, dest="delay_all")
         parser.add_argument("--usercd", type=int, dest="delay_user")
         parser.add_argument("--level", type=int, dest="level")
         parser.add_argument("--cost", type=int, dest="cost")
-        parser.add_argument('--function', '-f', action='append', dest="functions", required=True)
+        parser.add_argument('--function', '-f', action='append', dest="functions")
 
         try:
             args, unknown = parser.parse_known_args(message)
