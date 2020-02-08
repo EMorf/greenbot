@@ -17,7 +17,7 @@ def init(app):
         bot_commands_list = get_commands_list()
 
         for command in bot_commands_list:
-            if command["level"] > 100 or command["mod_only"]:
+            if command["level"] > 100:
                 moderator_commands.append(command)
             elif command["cost"] > 0:
                 point_commands.append(command)
