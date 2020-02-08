@@ -50,7 +50,7 @@ def init(app):
         callback_url = (
             app.bot_config["discord"]["redirect_uri"]
             if "redirect_uri" in app.bot_config["discord"]
-            else url_for("authorized", _external=True)
+            else url_for("/login/authorized", _external=True)
         )
         state = request.args.get("n") or request.referrer or None
         return discord.authorize(callback=callback_url, state=state, scope="identify", force_verify="true")
