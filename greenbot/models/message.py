@@ -87,7 +87,7 @@ class Message(Base):
             db_session.query(func.count(Message.message_id))
             .filter(Message.credited == True)
             .filter(Message.user_id == str(user_id))
-            .filter(Message.time_sent > utils.now() - timedelta(day=1))
+            .filter(Message.time_sent > utils.now() - timedelta(days=1))
             .scalar()
         )
 
@@ -96,6 +96,6 @@ class Message(Base):
         return (
             db_session.query(func.count(Message.message_id))
             .filter(Message.user_id == str(user_id))
-            .filter(Message.time_sent > utils.now() - timedelta(day=7))
+            .filter(Message.time_sent > utils.now() - timedelta(days=7))
             .scalar()
         )
