@@ -448,7 +448,6 @@ def get_functions(_functions, bot):
             continue
         function, arguments = get_function_arguments(func)
         if function not in method_mapping:
-            log.info(method_mapping)
             log.info(f"Function not in method mapping {function}")
             continue
         functions.append(Function(method_mapping[function], arguments))        
@@ -457,35 +456,33 @@ def get_functions(_functions, bot):
 def method_func(bot):
     method_mapping = {}
     try:
-        method_mapping["kick"] = bot.func_kick_member
-        method_mapping["setpoints"] = bot.func_set_balance
-        method_mapping["adjpoints"] = bot.func_adj_balance
-        method_mapping["banmember"] = bot.func_ban_member
-        method_mapping["unbanmember"] = bot.func_unban_member
-    except AttributeError as e:
-        log.error(e)
+        method_mapping["kick"] = bot.func_kick_member if bot else None
+        method_mapping["setpoints"] = bot.func_set_balance if bot else None
+        method_mapping["adjpoints"] = bot.func_adj_balance if bot else None
+        method_mapping["banmember"] = bot.func_ban_member if bot else None
+        method_mapping["unbanmember"] = bot.func_unban_member if bot else None
+    except AttributeError:
         pass
     return method_mapping
 
 def method_subs(bot):
     method_mapping = {}
     try:
-        method_mapping["author"] = bot.get_author_value
-        method_mapping["channel"] = bot.get_channel_value
-        method_mapping["time"] = bot.get_time_value
-        method_mapping["args"] = bot.get_args_value
-        method_mapping["strictargs"] = bot.get_strictargs_value
-        method_mapping["command"] = bot.get_command_value
-        method_mapping["member"] = bot.get_member_value
-        method_mapping["role"] = bot.get_role_value
-        method_mapping["userinfo"] = bot.get_user_info
-        method_mapping["roleinfo"] = bot.get_role_info
-        method_mapping["commands"] = bot.get_commands
-        method_mapping["commandinfo"] = bot.get_command_info
-        method_mapping["user"] = bot.get_user
-        method_mapping["currency"] = bot.get_currency
-    except AttributeError as e:
-        log.error(e)
+        method_mapping["author"] = bot.get_author_value if bot else None
+        method_mapping["channel"] = bot.get_channel_value if bot else None
+        method_mapping["time"] = bot.get_time_value if bot else None
+        method_mapping["args"] = bot.get_args_value if bot else None
+        method_mapping["strictargs"] = bot.get_strictargs_value if bot else None
+        method_mapping["command"] = bot.get_command_value if bot else None
+        method_mapping["member"] = bot.get_member_value if bot else None
+        method_mapping["role"] = bot.get_role_value if bot else None
+        method_mapping["userinfo"] = bot.get_user_info if bot else None
+        method_mapping["roleinfo"] = bot.get_role_info if bot else None
+        method_mapping["commands"] = bot.get_commands if bot else None
+        method_mapping["commandinfo"] = bot.get_command_info if bot else None
+        method_mapping["user"] = bot.get_user if bot else None
+        method_mapping["currency"] = bot.get_currency if bot else None
+    except AttributeError:
         pass
     return method_mapping
 
