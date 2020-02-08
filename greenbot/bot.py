@@ -154,6 +154,9 @@ class Bot:
                 }
                 command.run(bot=self, author=author, channel=channel, message=remaining_message, whisper=whisper, args=extra_args)
 
+    def test(self):
+        log.info("I RAN!")
+
     def get_role_id(self, role_name):
         return self.discord_bot.get_role_id(role_name)
 
