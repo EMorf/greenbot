@@ -99,12 +99,13 @@ class ActivityTracker(BaseModule):
                     self.bot.remove_role(member, regular_role)
             db_session.commit()
             messages = Message._get_last_hour(db_session)
-            channels_to_listen_in = self.settings["channels_to_listen_in"].split(" ")
+            channels_to_listen_in = self.settings["channels_to_listen_in"].split(" ") if len(self.settings["channels_to_listen_in"]) != 0 else []
             for message in messages:
                 log.info(message.channel_id not in channels_to_listen_in and len(channels_to_listen_in) != 0)
                 log.info(message.content)
+                log.info(channels_to_listen_in)
                 if message.channel_id not in channels_to_listen_in and len(channels_to_listen_in) != 0:
-                    return
+                    continue
                 count = Message._get_last_day_count_user(db_session, message.user_id)
                 if count < self.settings["daily_max_msgs"] - 1:
                     message.user.points += self.settings["hourly_credit"]
