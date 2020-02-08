@@ -69,7 +69,7 @@
 {% set data_available = [
     ('Reply Type', True, command.action.subtype, 'action_type', 'list(Reply:Reply,Private Message:Private Message)', ''),
     ('Response', False, command.action.response, 'action_message', 'string', ''),
-    ('Functions', False, command.action, 'functions_message', 'string', ''),
+    ('Functions', False, command.action.web_functions, 'functions_message', 'string', ''),
 ] %}
 {% elif command.action.type == 'func' %}
 {% set data_available = [

@@ -285,11 +285,9 @@ class MessageAction(BaseAction):
 
     def __init__(self, response, bot, functions=[]):
         self.response = response
-        self.functions = functions
-        if self.functions:
-            self.functions = get_functions(self.functions, bot)
-            log.info(functions)
-            log.info(self.functions)
+        self.functions_raw = functions
+        self.functions = get_functions(self.functions_raw, bot) if self.functions_raw else []
+        
         if bot:
             self.argument_subs = get_argument_substitutions(self.response)
             self.num_urlfetch_subs = len(get_urlfetch_substitutions(self.response, all=True))
@@ -324,6 +322,10 @@ class MessageAction(BaseAction):
             resp = resp.replace(needle, value)
             log.debug(f"Replacing {needle} with {value}")
         return resp, embed
+
+    @property
+    def web_functions(self):
+        return " ".join(self.functions_raw)
 
     @staticmethod
     def get_extra_data(author, channel, message, args):
