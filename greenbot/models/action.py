@@ -462,7 +462,8 @@ def method_func(bot):
         method_mapping["adjpoints"] = bot.func_adj_balance
         method_mapping["banmember"] = bot.func_ban_member
         method_mapping["unbanmember"] = bot.func_unban_member
-    except AttributeError:
+    except AttributeError as e:
+        log.error(e)
         pass
     return method_mapping
 
@@ -483,7 +484,8 @@ def method_subs(bot):
         method_mapping["commandinfo"] = bot.get_command_info
         method_mapping["user"] = bot.get_user
         method_mapping["currency"] = bot.get_currency
-    except AttributeError:
+    except AttributeError as e:
+        log.error(e)
         pass
     return method_mapping
 
