@@ -441,12 +441,14 @@ def get_substitutions(string, bot):
 def get_functions(_functions, bot):
     functions = []
     method_mapping = method_func(bot)
-    for func in _functions:
-        func = Function.function_regex.finditer(func)
+    for func_name in _functions:
+        func = Function.function_regex.finditer(func_name)
         if not func:
+            log.info(func_name)
             continue
         function, arguments = get_function_arguments(next(func))
         if function not in method_mapping:
+            log.info(func_name)
             continue
         functions.append(Function(method_mapping[function], arguments))        
     return functions
