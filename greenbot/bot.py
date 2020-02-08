@@ -77,6 +77,8 @@ class Bot:
             "command_prefix": self.command_prefix,
             "discord_guild_id": self.config["discord"]["discord_guild_id"],
         }
+        HandlerManager.add_handler("discord_ready", self.wait_discord_load)
+        self.discord_loaded = False
 
         self.discord_bot = DiscordBotManager(
             bot=self,
@@ -84,6 +86,10 @@ class Bot:
             redis=RedisManager.get(),
             private_loop=self.private_loop,
         )
+
+        while (not self.discord_loaded):
+            continue
+
         self.socket_manager = SocketManager(self.bot_name, self.execute_now)
         self.module_manager = ModuleManager(self.socket_manager, bot=self).load()
 
@@ -110,6 +116,9 @@ class Bot:
                     )
                 else:
                     owner.level = 2000
+
+    def wait_discord_load(self):
+        self.discord_loaded = True
 
     def execute_now(self, function, *args, **kwargs):
         self.execute_delayed(0, function, *args, **kwargs)
