@@ -77,8 +77,9 @@ class Bot:
             "command_prefix": self.command_prefix,
             "discord_guild_id": self.config["discord"]["discord_guild_id"],
         }
-        HandlerManager.add_handler("discord_ready", self.wait_discord_load)
+
         self.discord_loaded = False
+        HandlerManager.add_handler("discord_ready", self.wait_discord_load)
 
         self.discord_bot = DiscordBotManager(
             bot=self,
