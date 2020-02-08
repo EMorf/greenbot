@@ -181,6 +181,8 @@ class Bot:
         author = extra["author"]
         member = self.get_member(args[0][3:][:-1])
         if not member:
+            if args["whisper"]:
+                
             return "Member not found"
         with DBManager.create_session_scope() as db_session:
             author_user = User._create_or_get_by_discord_id(db_session, str(author.id), user_name=str(author))

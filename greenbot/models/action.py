@@ -544,15 +544,36 @@ def get_argument_substitutions_array(array, extra):
         return_array.append(str(MessageAction.get_argument_value(extra["message"], int(sub_key.group(1)) - 1)))
     return return_array
 
+def run_functions(functions, bot, extra, author, channel,args, num_urlfetch_subs, private_message):
+    for func in functions:
+        final_args = get_argument_substitutions_array(get_substitutions_array(func.arguments, bot, extra), extra)
+        resp, embed = func.cb(final_args, extra)
+        if num_urlfetch_subs == 0:
+            
+            return bot.private_message(author, resp, embed) if private_message else bot.say(channel, resp, embed)
+
+        return ScheduleManager.execute_now(
+            urlfetch_msg,
+            args=[],
+            kwargs={
+                "args": [author if private_message else channel],
+                "kwargs": {},
+                "method": bot.private_message if private_message else bot.say,
+                "bot": bot,
+                "extra": extra,
+                "message": resp,
+                "embed": embed,
+                "num_urlfetch_subs": num_urlfetch_subs,
+            },
+        )
+
 class ReplyAction(MessageAction):
     subtype = "Reply"
 
     def run(self, bot, author, channel, message, args):
         extra = self.get_extra_data(author, channel, message, args)
         if self.functions:
-            for func in self.functions:
-                final_args = get_argument_substitutions_array(get_substitutions_array(func.arguments, bot, extra), extra)
-                func.cb(final_args, extra)
+            run_functions(self.functions, bot, extra, author, channel, args, self.num_urlfetch_subs, args["whisper"])
 
         resp, embed = self.get_response(bot, extra)
         if not resp and not embed:
@@ -586,9 +607,7 @@ class PrivateMessageAction(MessageAction):
         extra = self.get_extra_data(author, channel, message, args)
         resp, embed = self.get_response(bot, extra)
         if self.functions:
-            for func in self.functions:
-                final_args = get_argument_substitutions_array(get_substitutions_array(func.arguments, bot, extra), extra)
-                func.cb(final_args, extra)
+            run_functions(self.functions, bot, extra, author, channel, args, self.num_urlfetch_subs, True)
 
         if not resp and embed:
             return False
