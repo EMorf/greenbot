@@ -505,7 +505,7 @@ def get_substitutions_array(array, bot, extra):
     except AttributeError:
         pass
     for string in array:
-        if not string:
+        if not string or not isinstance(string, str):
             return_array.append(string)
             continue
         sub_key = Substitution.substitution_regex.search(string)
@@ -536,14 +536,14 @@ def get_substitutions_array(array, bot, extra):
             log.exception("Exception caught in filter application")
         if value is None:
             return_array.append(None)
-        return_array.append(str(value))
+        return_array.append(value)
 
     return return_array
 
 def get_argument_substitutions_array(array, extra):
     return_array = []
     for string in array:
-        if not string:
+        if not string or not isinstance(string, str):
             return_array.append(string)
             continue
         sub_key = Substitution.argument_substitution_regex.search(string)
