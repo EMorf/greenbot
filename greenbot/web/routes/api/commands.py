@@ -130,6 +130,8 @@ class APICommandUpdate(Resource):
                                     continue
                             else:
                                 parsed_value = value
+                            if name == "type":
+                                parsed_value = "privatemessage" if parsed_value == "Private Message" else "reply"
                             parsed_action[name] = parsed_value
                         command.action_json = json.dumps(parsed_action)
                     else:
@@ -154,8 +156,6 @@ class APICommandUpdate(Resource):
                 new_message = aj["message"]
             except:
                 pass
-            options["action"]["type"] = "privatemessage" if options["action"]["type"] == "Private Message" else "reply"
-            log.info(options)
             command.set(**options)
             command.data.set(**options)
 
