@@ -201,7 +201,6 @@ class Command(Base):
     data = relationship("CommandData", uselist=False, cascade="", lazy="joined")
     examples = relationship("CommandExample", uselist=True, cascade="", lazy="noload")
 
-    MIN_WHISPER_LEVEL = 420
     BYPASS_DELAY_LEVEL = 2000
 
     DEFAULT_CD_ALL = 5

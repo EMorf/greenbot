@@ -37,45 +37,19 @@ class Dispatch:
 
         options["added_by"] = str(author.id)
 
+        if "functions" in options:
+            del options["functions"]
+
         alias_str = message_parts[0].replace("!", "").lower()
         type = "reply"
         if options["privatemessage"] is True:
             type = "privatemessage"
         elif options["reply"] is True:
             type = "reply"
-        
-
-        add_role_id = options.get("addrole_id", None)
-        remove_role_id = options.get("removerole_id", None)
-
-        addrole_focus = options.get("addrole_focus", None)
-        removerole_focus = options.get("removerole_focus", None)
-
-        extra_args = {
-            "role_management": {
-                "add": {
-                    "id": add_role_id,
-                    "arg": addrole_focus
-                },
-                "remove": {
-                    "id": remove_role_id,
-                    "arg": removerole_focus
-                }
-            }
-        }
 
         action = {"type": type, "message": response}
 
-        if add_role_id:
-            del options["addrole_id"]
-        if addrole_focus:
-            del options["removerole_id"]
-        if removerole_focus:
-            del options["removerole_focus"]
-        if remove_role_id:
-            del options["removerole_names"]
-
-        command, new_command, alias_matched = bot.commands.create_command(alias_str, extra_args=extra_args, action=action, **options)
+        command, new_command, alias_matched = bot.commands.create_command(alias_str, action=action, **options)
         if new_command is True:
             bot.private_message(author, f"Added your command (ID: {command.id})")
 
@@ -107,6 +81,9 @@ class Dispatch:
             options, response = bot.commands.parse_command_arguments(message_parts[1:])
 
             options["edited_by"] = str(author.id)
+
+            if "functions" in options:
+                del options["functions"]
 
             if options is False:
                 bot.whisper(author, "Invalid command")
@@ -173,6 +150,19 @@ class Dispatch:
 
             options["added_by"] = str(author.id)
 
+            if "functions" not in options:
+                bot.whisper(
+                    author,
+                    f"You didnt specify any functions --function abc --function xyz",
+                )
+                return False
+
+            extra_agrs = {
+                "functions": options["functions"]
+            }
+
+            del options["functions"]
+
             if options is False:
                 bot.whisper(author, "Invalid command")
                 return False
@@ -180,7 +170,7 @@ class Dispatch:
             alias_str = message_parts[0].replace("!", "").lower()
             action = {"type": "func", "cb": response.strip()}
 
-            command, new_command, alias_matched = bot.commands.create_command(alias_str, action=action, **options)
+            command, new_command, alias_matched = bot.commands.create_command(alias_str, extra_agrs=extra_agrs, action=action, **options)
             if new_command is True:
                 bot.whisper(author, f"Added your command (ID: {command.id})")
                 return True
@@ -208,7 +198,7 @@ class Dispatch:
 
             options, response = bot.commands.parse_command_arguments(message_parts[1:])
 
-            options["edited_by"] = str(author)
+            options["edited_by"] = str(author.id)
 
             if options is False:
                 bot.whisper(author, "Invalid command")

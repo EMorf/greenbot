@@ -17,21 +17,13 @@ class ActionParser:
 
     @staticmethod
     def parse(raw_data=None, data=None, command=""):
-        from greenbot.dispatch import Dispatch
-
         if not data:
             data = json.loads(raw_data)
 
         if data["type"] == "reply":
-            action = SayAction(data["message"], ActionParser.bot)
+            action = ReplyAction(data["message"], ActionParser.bot)
         elif data["type"] == "privatemessage":
-            action = WhisperAction(data["message"], ActionParser.bot)
-        elif data["type"] == "func":
-            try:
-                action = FuncAction(getattr(Dispatch, data["cb"]))
-            except AttributeError as e:
-                log.error(f'AttributeError caught when parsing action for action "{command}": {e}')
-                return None
+            action = PrivateMessageAction(data["message"], ActionParser.bot)
         else:
             raise Exception(f"Unknown action type: {data['type']}")
 
@@ -69,6 +61,20 @@ def apply_substitutions(text, substitutions, bot, extra):
 
     return text, embed
 
+
+class Function:
+    function_regex = re.compile(
+        r'\$\(([a-z_]+)(;\$\(\w+(;\d)?\)|;\w+)*\)'
+    )
+    args_regex = re.compile(
+        r'(;\$\(\w+(;\d)?\)|;\w+)'
+    )
+    def __init__(self, cb, arguments=[]):
+        self.cb = cb
+        self.arguments = arguments
+
+    def __str__(self):
+        return f"method:{self.cb}, args:{self.args}"
 
 class Substitution:
     argument_substitution_regex = re.compile(r"\$\((\d+)\)")
@@ -179,6 +185,12 @@ def get_substitution_arguments(sub_key):
 
     return sub_string, path, argument, key, filters, if_arguments
 
+def get_function_arguments(sub_key):
+    path = sub_key.group(1)
+    match = sub_key.string
+    arguments = Function.args_regex.findall(match)
+    arguments = [x[0][1:] for x in arguments]
+    return path, arguments
 
 def get_urlfetch_substitutions(string, all=False):
     substitutions = {}
@@ -348,11 +360,6 @@ def get_substitutions(string, bot):
         method_mapping["commandinfo"] = bot.get_command_info
         method_mapping["user"] = bot.get_user
         method_mapping["currency"] = bot.get_currency
-        method_mapping["kick"] = bot.kick_member
-        method_mapping["setpoints"] = bot.set_balance
-        method_mapping["adjpoints"] = bot.adj_balance
-        method_mapping["banmember"] = bot.ban_member
-        method_mapping["unbanmember"] = bot.unban_member
     except AttributeError:
         pass
 
@@ -369,105 +376,39 @@ def get_substitutions(string, bot):
 
     return substitutions
 
-class MultiAction(BaseAction):
-    type = "multi"
-
-    def __init__(self, args, default=None, fallback=None):
-        from greenbot.models.command import Command
-
-        self.commands = {}
-        self.default = default
-        self.fallback = fallback
-
-        for command in args:
-            cmd = Command.from_json(command)
-            for alias in command["command"].split("|"):
-                if alias not in self.commands:
-                    self.commands[alias] = cmd
-                else:
-                    log.error(f"Alias {alias} for this multiaction is already in use.")
-
-        import copy
-
-        self.original_commands = copy.copy(self.commands)
-
-    def reset(self):
-        import copy
-
-        self.commands = copy.copy(self.original_commands)
-
-    def __iadd__(self, other):
-        if other is not None and other.type == "multi":
-            self.commands.update(other.commands)
-        return self
-
-    @classmethod
-    def ready_built(cls, commands, default=None, fallback=None):
-        """ Useful if you already have a dictionary
-        with commands pre-built.
-        """
-
-        multiaction = cls(args=[], default=default, fallback=fallback)
-        multiaction.commands = commands
-        import copy
-
-        multiaction.original_commands = copy.copy(commands)
-        return multiaction
-
-    def run(self, bot, author, channel, message, whisper, args):
-        """ If there is more text sent to the multicommand after the
-        initial alias, we _ALWAYS_ assume it's trying the subaction command.
-        If the extra text was not a valid command, we try to run the fallback command.
-        In case there's no extra text sent, we will try to run the default command.
-        """
-
-        cmd = None
-        if message:
-            msg_lower_parts = message.lower().split(" ")
-            command = msg_lower_parts[0]
-            cmd = self.commands.get(command, None)
-            extra_msg = " ".join(message.split(" ")[1:])
-            if cmd is None and self.fallback:
-                cmd = self.commands.get(self.fallback, None)
-                extra_msg = message
-        elif self.default:
-            command = self.default
-            cmd = self.commands.get(command, None)
-            extra_msg = None
-
-        if cmd:
-            if args["user_level"] >= cmd.level:
-                return cmd.run(bot=bot, author=author, channel=channel, message=extra_msg, whisper=whisper, args=args)
-            log.info(f"User {author.name}#{author.discriminator} tried running a sub-command he had no access to ({command}).")
-
-        return None
+def get_functions(_functions, bot):
+    method_mapping = {}
+    functions = []
+    try:
+        method_mapping["kick"] = bot.kick_member
+        method_mapping["setpoints"] = bot.set_balance
+        method_mapping["adjpoints"] = bot.adj_balance
+        method_mapping["banmember"] = bot.ban_member
+        method_mapping["unbanmember"] = bot.unban_member
+    except AttributeError:
+        pass
+    for func in _functions:
+        func = Substitution.substitution_regex.finditer(func)
+        if not func:
+            continue
+        function, arguments = get_function_arguments(func)
+        if function not in method_mapping:
+            continue
+        functions.append(Function(method_mapping[function], arguments))        
+    return functions
 
 
-class SayAction(MessageAction):
+class ReplyAction(MessageAction):
     subtype = "Reply"
 
     def run(self, bot, author, channel, message, whisper, args):
         extra = self.get_extra_data(author, channel, message, args)
-        if "role_management" in args:
-            extra.pop("role_management")
-            arg_num = 1
-            if args["role_management"]["add"]["id"]:
-                arg = args["role_management"]["add"]["arg"] or arg_num
-                member = bot.get_member(str(MessageAction.get_argument_value(extra["message"], arg-1))[3:][:-1])
-                role = bot.get_role(args["role_management"]["add"]["id"])
-                if member and role:
-                    bot.add_role(member, role)
-                else:
-                    log.error(f"cannot find role: {role} or member: {member}")
-                arg_num+=1
-            if args["role_management"]["remove"]["id"]:
-                arg = args["role_management"]["remove"]["arg"] or arg_num
-                member = bot.get_member(str(MessageAction.get_argument_value(extra["message"], arg-1))[3:][:-1])
-                role = bot.get_role(args["role_management"]["remove"]["id"])
-                if member and role:
-                    bot.remove_role(member, role)
-                else:
-                    log.error(f"cannot find role: {role} or member: {member}")
+        if "functions" in args:
+            extra.pop("functions")
+            functions = args["functions"]
+            functions = get_functions(functions, bot)
+            log.info(functions)
+
         resp, embed = self.get_response(bot, extra)
         if not resp and not embed:
             return False
@@ -493,32 +434,18 @@ class SayAction(MessageAction):
         )
 
 
-class WhisperAction(MessageAction):
+class PrivateMessageAction(MessageAction):
     subtype = "Private Message"
 
     def run(self, bot, author, channel, message, whisper, args):
         extra = self.get_extra_data(author, channel, message, args)
         resp, embed = self.get_response(bot, extra)
-        if "role_management" in args:
-            extra.pop("role_management")
-            arg_num = 1
-            if args["role_management"]["add"]["id"]:
-                arg = args["role_management"]["add"]["arg"] or arg_num
-                member = bot.get_member(str(MessageAction.get_argument_value(extra["message"], arg-1))[3:][:-1])
-                role = bot.get_role(args["role_management"]["add"]["id"])
-                if member and role:
-                    bot.add_role(member, role)
-                else:
-                    log.error(f"cannot find role: {role} or member: {member}")
-                arg_num+=1
-            if args["role_management"]["remove"]["id"]:
-                arg = args["role_management"]["remove"]["arg"] or arg_num
-                member = bot.get_member(str(MessageAction.get_argument_value(extra["message"], arg-1))[3:][:-1])
-                role = bot.get_role(args["role_management"]["remove"]["id"])
-                if member and role:
-                    bot.remove_role(member, role)
-                else:
-                    log.error(f"cannot find role: {role} or member: {member}")
+        if "functions" in args:
+            extra.pop("functions")
+            functions = args["functions"]
+            functions = get_functions(functions, bot)
+            log.info(functions)
+
         if not resp and embed:
             return False
 

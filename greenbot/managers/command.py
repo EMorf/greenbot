@@ -315,10 +315,7 @@ class CommandManager(UserDict):
         parser.add_argument("--usercd", type=int, dest="delay_user")
         parser.add_argument("--level", type=int, dest="level")
         parser.add_argument("--cost", type=int, dest="cost")
-        parser.add_argument("--addrole", type=str, dest="addrole_id")
-        parser.add_argument("--removerole", type=str, dest="removerole_id")
-        parser.add_argument('--addrole_focus', dest="addrole_focus", type=int)
-        parser.add_argument('--removerole_focus', dest="removerole_focus", type=int)
+        parser.add_argument('--function', '-f', action='append', dest="functions", required=True)
 
         try:
             args, unknown = parser.parse_known_args(message)
