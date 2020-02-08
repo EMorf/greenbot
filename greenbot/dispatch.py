@@ -225,8 +225,6 @@ class Dispatch:
                 )
                 return False
 
-            if len(action["cb"]) > 0:
-                options["action"] = action
             bot.commands.edit_command(command, **options)
             bot.whisper(author, f"Updated the command (ID: {command.id})")
 
