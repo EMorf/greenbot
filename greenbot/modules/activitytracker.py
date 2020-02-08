@@ -106,7 +106,7 @@ class ActivityTracker(BaseModule):
                 log.info(channels_to_listen_in)
                 if message.channel_id not in channels_to_listen_in and len(channels_to_listen_in) != 0:
                     continue
-                count = Message._get_last_day_count_user(db_session, message.user_id)
+                count = Message._get_day_count_user(db_session, message.user_id)
                 if count < self.settings["daily_max_msgs"] - 1:
                     message.user.points += self.settings["hourly_credit"]
                 elif count == self.settings["daily_max_msgs"] - 1:
