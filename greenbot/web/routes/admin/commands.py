@@ -127,7 +127,7 @@ def init(page):
             abort(403)
 
         response = request.form.get("response", "")
-
+        log.info(user.level)
         functions = request.form.get("functions", "").split(" ") if user.level >= 1500 else []
 
         action = {"type": action_type, "message": response, "functions": functions}
