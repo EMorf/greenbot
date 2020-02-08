@@ -1,6 +1,7 @@
 import logging
 
 from greenbot.managers.db import DBManager
+from greenbot.managers.adminlog import AdminLogManager
 from greenbot.models.command import Command
 from greenbot.models.command import CommandExample
 from greenbot.models.module import Module
@@ -96,7 +97,7 @@ class AdminCommandsModule(BaseModule):
                 db_module = db_session.query(Module).filter_by(id=module_id).one()
                 db_module.enabled = False
 
-            # AdminLogManager.post("Module toggled", source, "Disabled", module_id)
+            AdminLogManager.post("Module toggled", source.discord_id, "Disabled", module_id)
             if whisper:
                 bot.private_message(author, f"Disabled module {module_id}")
                 return
@@ -145,7 +146,7 @@ class AdminCommandsModule(BaseModule):
                 db_module = db_session.query(Module).filter_by(id=module_id).one()
                 db_module.enabled = True
 
-            # AdminLogManager.post("Module toggled", source, "Enabled", module_id)
+            AdminLogManager.post("Module toggled", source.discord_id, "Enabled", module_id)
 
             if whisper:
                 bot.private_message(author, "Enabled module {module_id}")

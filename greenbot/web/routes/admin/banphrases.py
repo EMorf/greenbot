@@ -118,7 +118,7 @@ def init(page):
                         f"Updated banphrase ID {banphrase.id} by user ID {options['edited_by']}"
                     )
                     AdminLogManager.post(
-                        "Banphrase edited", user, banphrase.id, banphrase.phrase
+                        "Banphrase edited", user.discord_id, banphrase.id, banphrase.phrase
                     )
                 else:
                     db_session.add(banphrase)
@@ -126,7 +126,7 @@ def init(page):
                     db_session.flush()
                     log.info(f"Added a new banphrase by user ID {options['added_by']}")
                     AdminLogManager.post(
-                        "Banphrase added", user, banphrase.id, banphrase.phrase
+                        "Banphrase added", user.discord_id, banphrase.id, banphrase.phrase
                     )
 
             SocketClientManager.send("banphrase.update", {"id": banphrase.id})

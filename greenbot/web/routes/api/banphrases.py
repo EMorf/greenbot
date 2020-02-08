@@ -25,7 +25,7 @@ class APIBanphraseRemove(Resource):
             if banphrase is None:
                 return {"error": "Invalid banphrase ID"}, 404
             AdminLogManager.post(
-                "Banphrase removed", options["user"], banphrase.id, banphrase.phrase
+                "Banphrase removed", options["user"].discord_id, banphrase.id, banphrase.phrase
             )
             db_session.delete(banphrase)
             db_session.delete(banphrase.data)
@@ -60,7 +60,7 @@ class APIBanphraseToggle(Resource):
             payload = {"id": row.id, "new_state": row.enabled}
             AdminLogManager.post(
                 "Banphrase toggled",
-                options["user"],
+                options["user"].discord_id,
                 "Enabled" if row.enabled else "Disabled",
                 row.id,
                 row.phrase,

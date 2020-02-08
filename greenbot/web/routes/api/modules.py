@@ -55,7 +55,7 @@ class APIModuleToggle(Resource):
             payload = {"id": row.id, "new_state": row.enabled}
             AdminLogManager.post(
                 "Module toggled",
-                options["user"],
+                options["user"].discord_id,
                 "Enabled" if row.enabled else "Disabled",
                 row.id,
             )

@@ -106,13 +106,13 @@ def init(page):
 
                 AdminLogManager.add_entry(
                     "Timer edited",
-                    user,
+                    user.discord_id,
                     log_msg,
                     data={"old_message": old_message, "new_message": new_message},
                 )
             else:
                 db_session.add(timer)
-                AdminLogManager.post("Timer added", user, timer.name)
+                AdminLogManager.post("Timer added", user.discord_id, timer.name)
 
         SocketClientManager.send("timer.update", {"id": timer.id})
         if id is None:

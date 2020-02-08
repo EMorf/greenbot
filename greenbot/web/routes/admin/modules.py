@@ -101,7 +101,7 @@ def init(page):
 
             SocketClientManager.send("module.update", payload)
 
-            AdminLogManager.post("Module edited", user, current_module.NAME)
+            AdminLogManager.post("Module edited", user.discord_id, current_module.NAME)
 
             return render_template(
                 "admin/configure_module.html",

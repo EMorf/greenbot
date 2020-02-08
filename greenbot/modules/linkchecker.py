@@ -755,7 +755,7 @@ class LinkCheckerModule(BaseModule):
                 for link in parts:
                     if len(link) > 1:
                         self.blacklist_url(link, **options)
-                        AdminLogManager.post("Blacklist link added", source, link)
+                        AdminLogManager.post("Blacklist link added", source.discord_id, link)
                 bot.whisper(source, "Successfully added your links")
                 return True
             except:
@@ -771,7 +771,7 @@ class LinkCheckerModule(BaseModule):
         try:
             for link in parts:
                 self.whitelist_url(link)
-                AdminLogManager.post("Whitelist link added", source, link)
+                AdminLogManager.post("Whitelist link added", source.discord_id, link)
         except:
             log.exception("Unhandled exception in add_link")
             bot.whisper(source, "Some error occurred white adding your links")
@@ -800,7 +800,7 @@ class LinkCheckerModule(BaseModule):
             bot.whisper(source, "No link with the given id found")
             return False
 
-        AdminLogManager.post("Blacklist link removed", source, link.domain)
+        AdminLogManager.post("Blacklist link removed", source.discord_id, link.domain)
         bot.whisper(source, f"Successfully removed blacklisted link with id {link.id}")
 
     def remove_link_whitelist(self, bot, source, message, **rest):
@@ -824,7 +824,7 @@ class LinkCheckerModule(BaseModule):
             bot.whisper(source, "No link with the given id found")
             return False
 
-        AdminLogManager.post("Whitelist link removed", source, link.domain)
+        AdminLogManager.post("Whitelist link removed", source.discord_id, link.domain)
         bot.whisper(source, f"Successfully removed whitelisted link with id {link.id}")
 
     @staticmethod
