@@ -11,6 +11,7 @@ import re
 
 from greenbot.managers.db import DBManager
 from greenbot.managers.redis import RedisManager
+from greenbot.models.user import User
 
 import base64
 import time
@@ -32,6 +33,10 @@ def init(app):
     @app.route("/login/authorized")
     def discord_auth():
         discord.callback()
+        user = discord.fetch_user()
+        with DBManager.create_session_scope(expire_on_commit=False) as db_session:
+            session["user"] = User._create_or_get_by_discord_id(db_session, str(user.id)).jsonify()
+        session["user_displayname"] = str(user) 
         return redirect(url_for(".me"))
 
     @app.route("/me/")

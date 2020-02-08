@@ -18,6 +18,13 @@ class User(Base):
     points = Column(INT, nullable=False, default=0)
     level = Column(INT, nullable=False, default=100)
 
+    def jsonify(self):
+        return {
+            "discord_id": self.discord_id,
+            "points": self.points,
+            "level": self.level
+        }
+
     def can_afford(self, points):
         return not self.points < points
 
