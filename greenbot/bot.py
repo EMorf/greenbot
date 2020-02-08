@@ -511,7 +511,7 @@ class Bot:
         try:
             return getattr(extra["command"].data, key)
         except:
-            log.exception("Caught exception in get_command_value")
+            return extra["command"].data
 
         return None
 
@@ -520,16 +520,14 @@ class Bot:
         try:
             return getattr(extra["author"], key)
         except:
-            log.exception("Caught exception in get_author_value")
-
-        return None
+            return extra["author"]
 
     @staticmethod
     def get_channel_value(key, extra={}):
         try:
             return getattr(extra["channel"], key)
         except:
-            log.exception("Caught exception in get_channel_value")
+            return extra["channel"]
 
         return None
 
