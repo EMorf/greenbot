@@ -73,7 +73,7 @@ def init(page):
 
             if command is None:
                 return render_template("admin/command_404.html"), 404
-            log.info(command.action.funtions)
+            log.info(command.action.functions)
             return render_template("admin/edit_command.html", command=command, user=options.get("user", None))
 
     @page.route("/commands/create", methods=["GET", "POST"])
