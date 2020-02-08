@@ -58,7 +58,7 @@ class APICommandRemove(Resource):
             command = db_session.query(Command).filter_by(id=command_id).one_or_none()
             if command is None:
                 return {"error": "Invalid command ID"}, 404
-            if command.level > options["user"].level:
+            if command.level > options["user"].level or (command.action.functions and options["user"].level < 1500):
                 return {"error": "Unauthorized"}, 403
             log_msg = f"The !{command.command.split('|')[0]} command has been removed"
             AdminLogManager.add_entry("Command removed", options["user"], log_msg)
