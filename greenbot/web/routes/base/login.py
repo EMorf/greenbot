@@ -54,19 +54,11 @@ def init(app):
             </body>
         </html>"""
 
-    def get_next_url(request, key="n"):
-        next_url = request.args.get(key, "/")
-        if next_url.startswith("//"):
-            return "/"
-        return next_url
-
     @app.route("/logout")
     def logout():
-        session.pop("steam_id", None)
-        session.pop("discord_token", None)
-        session.pop("discord_id", None)
-        session.pop("discord_username", None)
-        next_url = get_next_url(request)
+        discord.revoke()
+        session.pop("user_displayname", None)
+        next_url = request.args.get("n") or request.referrer or None
         if next_url.startswith("/admin"):
             next_url = "/"
         return redirect(next_url)
