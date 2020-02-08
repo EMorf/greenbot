@@ -257,7 +257,6 @@ class Command(Base):
         if self.cost < 0:
             self.cost = 0
         self.can_execute_with_whisper = options.get("can_execute_with_whisper", self.can_execute_with_whisper)
-        self.run_through_banphrases = options.get("run_through_banphrases", self.run_through_banphrases)
         self.examples = options.get("examples", self.examples)
         self.run_in_thread = options.get("run_in_thread", self.run_in_thread)
         self.notify_on_error = options.get("notify_on_error", self.notify_on_error)
