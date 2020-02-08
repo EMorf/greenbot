@@ -292,6 +292,7 @@ class MessageAction(BaseAction):
     def __init__(self, response, bot, functions=[]):
         self.response = response
         self.functions = functions
+        log.info(self.functions)
         if self.functions:
             self.functions = get_functions(self.functions, bot)
         if bot:
@@ -477,6 +478,7 @@ def get_functions(_functions, bot):
             continue
         function, arguments = get_function_arguments(func)
         if function not in method_mapping:
+            log.info(function)
             continue
         functions.append(Function(method_mapping[function], arguments))        
     return functions
@@ -487,8 +489,7 @@ class ReplyAction(MessageAction):
 
     def run(self, bot, author, channel, message, whisper, args):
         extra = self.get_extra_data(author, channel, message, args)
-        if self.functions:
-            log.info(self.functions)
+        log.info(self.functions)
 
         resp, embed = self.get_response(bot, extra)
         if not resp and not embed:
