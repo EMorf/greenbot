@@ -468,6 +468,7 @@ def get_functions(_functions, bot):
         method_mapping["adjpoints"] = bot.adj_balance
         method_mapping["banmember"] = bot.ban_member
         method_mapping["unbanmember"] = bot.unban_member
+        method_mapping["currency"] = bot.get_currency
     except AttributeError:
         pass
     for func in _functions:
