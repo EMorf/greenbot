@@ -442,13 +442,13 @@ def get_functions(_functions, bot):
     functions = []
     method_mapping = method_func(bot)
     for func_name in _functions:
-        func = Function.function_regex.finditer(func_name)
+        func = Function.function_regex.search(func_name)
         if not func:
-            log.info(func_name)
+            log.info(f"Function not found in {func_name}")
             continue
-        function, arguments = get_function_arguments(next(func))
+        function, arguments = get_function_arguments(func)
         if function not in method_mapping:
-            log.info(func_name)
+            log.info(f"Function not in method mapping {function}")
             continue
         functions.append(Function(method_mapping[function], arguments))        
     return functions
