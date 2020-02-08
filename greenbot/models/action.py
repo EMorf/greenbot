@@ -470,10 +470,10 @@ def get_functions(_functions, bot):
         pass
     for func in _functions:
         log.info(func)
-        func = next(Substitution.substitution_regex.finditer(func))
+        func = Function.function_regex.finditer(func)
         if not func:
             continue
-        function, arguments = get_function_arguments(func)
+        function, arguments = get_function_arguments(next(func))
         if function not in method_mapping:
             continue
         functions.append(Function(method_mapping[function], arguments))        
