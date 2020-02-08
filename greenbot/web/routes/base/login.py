@@ -63,7 +63,3 @@ def init(app):
         if next_url.startswith("/admin"):
             next_url = "/"
         return redirect(next_url)
-
-    @discord.tokengetter
-    def get_discord_oauth_token():
-        return session.get("discord_token")
