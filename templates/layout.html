@@ -27,24 +27,10 @@
         {% for menuitem in nav_bar_header %}
         <a class="item{% if menuitem.id == active_page %} active{% endif %}" href="{{ menuitem.href }}">
             {% if menuitem.id == 'home' %}
-            <!-- <img class="logo" src="/static/images/logo_ streamer.full_name _tn.png" alt=" streamer.name  logo"/> -->
+            <img class="logo" src="/static/images/logo_ streamer.full_name _tn.png" alt=" streamer.name  logo"/>
             {% endif %}
             {{ menuitem.caption }}</a>
         {% endfor %}
-        </div>
-        <div class="left menu">
-            <div class="item">
-                <div class="ui transparent icon input">
-                    <form id="usersearch">
-                        <div class="ui action input">
-                            <input type="text" name="username" class="username" placeholder="Username">
-                            <button class="ui icon button">
-                                <i class="search icon"></i>
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
         </div>
     </div>
 {% endblock %}
@@ -62,17 +48,7 @@
         <div class="three wide column">
           <h4 class="ui inverted header">Community</h4>
           <div class="ui inverted link list">
-           <a class="item" href="https://github.com/pajbot/pajbot/issues"><i class="warning circle icon"></i> Submit an Issue</a>
-           <a class="item" href="/contact"><i class="mail icon"></i> Contact</a>
-           <a class="item" href="https://twitter.com/pajlada"><i class="twitter icon"></i> Created by @pajlada</a>
-           <a class="item" href="https://twitter.com/troydota"><i class="twitter icon"></i> Maintained by @TroyDota</a>
-          </div>
-        </div>
-        <div class="three wide column">
-          <h4 class="ui inverted header">Network</h4>
-          <div class="ui inverted link list">
-           <a class="item" href="https://github.com/pajbot/pajbot/"><i class="github icon"></i> GitHub Repo</a>
-           <a class="item" href="http://pajbot.com/"><i class="sitemap icon"></i> Other Bots</a>
+           <a class="item" href="https://twitter.com/troydota"><i class="twitter icon"></i> Created by @TroyDota</a>
           </div>
         </div>
         <div class="four wide column">{% if session.user %}
@@ -84,7 +60,7 @@
            <a class="item" href="/logout?n={{ request.path }}"><i class="sign out icon"></i> Log out</a>{% else %}
           <h4 class="ui inverted header">Login <i class="sign in icon"></i></h4>
           <div class="ui inverted link list">
-          <a href="/login?n={{ request.path }}" class="ui twitch button"><i class="twitch icon"></i>Connect with Twitch</a>{% endif %}
+          <a href="/login?n={{ request.path }}" class="ui twitch button">Connect with Discord</a>{% endif %}
           </div>
         </div>
       </div>
