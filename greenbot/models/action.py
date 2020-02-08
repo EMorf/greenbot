@@ -21,7 +21,6 @@ class ActionParser:
 
         if not data:
             data = json.loads(raw_data)
-        log.info(data)
         if data["type"] == "reply":
             action = ReplyAction(data["message"], ActionParser.bot, functions=data.get("functions", []))
         elif data["type"] == "privatemessage":
@@ -32,7 +31,7 @@ class ActionParser:
             action = MultiAction(data["args"], data["default"])
         else:
             raise Exception(f"Unknown action type: {data['type']}")
-
+        log.info(action.functions)
         return action
 
 
