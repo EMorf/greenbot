@@ -241,8 +241,9 @@ class Command(Base):
             self.action_json = json.dumps(options["action"])
             log.info(self.action_json)
             self.action = ActionParser.parse(self.action_json, command=self.command)
-        self.action_json["type"] = "privatemessage" if self.action_json["type"] == "Private Message" else "reply"
-        self.action = ActionParser.parse(self.action_json, command=self.command)
+        if self.action_json:
+            self.action_json["type"] = "privatemessage" if self.action_json["type"] == "Private Message" else "reply"
+            self.action = ActionParser.parse(self.action_json, command=self.command)
         if "extra_args" in options:
             self.extra_args = {"command": self}
             self.extra_args.update(options["extra_args"])
