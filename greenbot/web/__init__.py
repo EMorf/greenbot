@@ -72,7 +72,7 @@ def init(args):
 
     errors.init(app, config)
 
-
+    last_commit = None
     if app.bot_dev:
         try:
             last_commit = subprocess.check_output(["git", "log", "-1", "--format=%cd"]).decode("utf8").strip()
