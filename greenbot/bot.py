@@ -252,7 +252,7 @@ class Bot:
             user.points += amount
         action = "added to" if amount > 0 else "removed from"
         currency = self._get_currency().get("name")
-        return f"{amount} {currency}s {action} <@!{user_id}> ", None
+        return f"{amount} {currency} {action} <@!{user_id}> ", None
 
     def quit(self, bot, author, channel, message, whisper, args):
         self.quit_bot()
