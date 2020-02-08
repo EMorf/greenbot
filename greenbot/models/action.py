@@ -70,14 +70,15 @@ def apply_substitutions(text, substitutions, bot, extra):
 
 class Function:
     function_regex = re.compile(
-        r'\$\(([a-z_]+)(;\$\(\w+(;\d)?\)|;\w+)*\)'
+        r'\$\(([a-z_]+)(;\$\(\w+(;\d+)?(:\w+)?\)|;\w+)*\)'
     )
     args_regex = re.compile(
-        r'(;\$\(\w+(;\d)?\)|;\w+)'
+        r'(;\$\(\w+(;\d)?(:\w+)?\)|;\w+)'
     )
     def __init__(self, cb, arguments=[]):
         self.cb = cb
         self.arguments = arguments
+
 
 class Substitution:
     argument_substitution_regex = re.compile(r"\$\((\d+)\)")
@@ -157,7 +158,6 @@ def get_argument_substitutions(string):
         argument_substitutions.append(Substitution(None, needle=needle, argument=argument_num))
 
     return argument_substitutions
-
 
 def get_substitution_arguments(sub_key):
     sub_string = sub_key.group(0)
@@ -479,6 +479,77 @@ def get_functions(_functions, bot):
         functions.append(Function(method_mapping[function], arguments))        
     return functions
 
+def get_substitutions_array(array, bot, extra):
+    """
+    Returns a dictionary of `Substitution` objects thare are found in the passed `string`.
+    Will not return multiple `Substitution` objects for the same string.
+    This means "You have $(source:points) points xD $(source:points)" only returns one Substitution.
+    """
+
+    return_array = []
+    method_mapping = {}
+    try:
+        method_mapping["author"] = bot.get_author_value
+        method_mapping["channel"] = bot.get_channel_value
+        method_mapping["time"] = bot.get_time_value
+        method_mapping["args"] = bot.get_args_value
+        method_mapping["strictargs"] = bot.get_strictargs_value
+        method_mapping["command"] = bot.get_command_value
+        method_mapping["member"] = bot.get_member_value
+        method_mapping["role"] = bot.get_role_value
+        method_mapping["userinfo"] = bot.get_user_info
+        method_mapping["roleinfo"] = bot.get_role_info
+        method_mapping["commands"] = bot.get_commands
+        method_mapping["commandinfo"] = bot.get_command_info
+        method_mapping["user"] = bot.get_user
+        method_mapping["currency"] = bot.get_currency
+    except AttributeError:
+        pass
+    for string in array:
+        sub_key = Substitution.substitution_regex.search(string)
+        if not sub_key:
+            return_array.append(string)
+            continue
+
+        sub_string, path, argument, key, filters, if_arguments = get_substitution_arguments(sub_key)
+
+        if path not in method_mapping:
+            return_array.append(string)
+            continue
+        
+        if key and argument:
+            param = key
+            extra["argument"] = MessageAction.get_argument_value(extra["message"], argument - 1)
+        elif key:
+            param = key
+        elif argument:
+            param = MessageAction.get_argument_value(extra["message"], argument - 1)
+        else:
+            log.error("Unknown param for response.")
+            continue
+        value = path(param, extra)
+        try:
+            for f in filters:
+                value = bot.apply_filter(value, f)
+        except:
+            log.exception("Exception caught in filter application")
+        if value is None:
+            return_array.append(None)
+        return_array.append(str(value))
+
+    return return_array
+
+def get_argument_substitutions_array(array):
+    return_array = []
+    for string in array:
+        sub_key = Substitution.argument_substitution_regex.search(string)
+        if not sub_key:
+            continue
+        needle = sub_key.group(0)
+        argument_num = int(sub_key.group(1))
+        return_array.append(argument_num)
+
+    return return_array
 
 class ReplyAction(MessageAction):
     subtype = "Reply"
@@ -487,7 +558,8 @@ class ReplyAction(MessageAction):
         extra = self.get_extra_data(author, channel, message, args)
         if self.functions:
             for func in self.functions:
-                func.cb(func.arguments)
+                final_args = get_argument_substitutions_array(get_substitutions_array(self.functions.arguments, bot, extra))
+                func.cb(final_args)
 
         resp, embed = self.get_response(bot, extra)
         if not resp and not embed:
