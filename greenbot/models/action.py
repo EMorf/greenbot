@@ -448,6 +448,7 @@ def get_functions(_functions, bot):
             continue
         function, arguments = get_function_arguments(func)
         if function not in method_mapping:
+            log.info(method_mapping)
             log.info(f"Function not in method mapping {function}")
             continue
         functions.append(Function(method_mapping[function], arguments))        
