@@ -284,11 +284,12 @@ class MessageAction(BaseAction):
     type = "message"
 
     def __init__(self, response, bot, functions=[]):
-        log.info(functions)
         self.response = response
         self.functions = functions
         if self.functions:
             self.functions = get_functions(self.functions, bot)
+            log.info(functions)
+            log.info(self.functions)
         if bot:
             self.argument_subs = get_argument_substitutions(self.response)
             self.num_urlfetch_subs = len(get_urlfetch_substitutions(self.response, all=True))
