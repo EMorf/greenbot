@@ -91,8 +91,8 @@ def init(page):
                 "sub_immunity": sub_immunity,
                 "remove_accents": remove_accents,
                 "length": length,
-                "added_by": user.id,
-                "edited_by": user.id,
+                "added_by": user.discord_id,
+                "edited_by": user.discord_id,
                 "operator": operator,
             }
 
