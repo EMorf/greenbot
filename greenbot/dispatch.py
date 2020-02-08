@@ -38,11 +38,11 @@ class Dispatch:
         options["added_by"] = str(author.id)
 
         alias_str = message_parts[0].replace("!", "").lower()
-        type = "channelmessage"
+        type = "reply"
         if options["privatemessage"] is True:
             type = "privatemessage"
-        elif options["channelmessage"] is True:
-            type = "channelmessage"
+        elif options["reply"] is True:
+            type = "reply"
         
 
         add_role_id = options.get("addrole_id", None)
