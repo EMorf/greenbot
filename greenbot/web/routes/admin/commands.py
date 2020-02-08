@@ -37,7 +37,7 @@ def init(page):
         for command in bot_commands_list:
             if command.id is None:
                 continue
-            if command.level > 100 or command.mod_only:
+            if command.level > 100:
                 moderator_commands.append(command)
             elif command.cost > 0:
                 point_commands.append(command)
@@ -54,7 +54,7 @@ def init(page):
                 custom_commands=sorted(custom_commands, key=lambda f: f.command),
                 point_commands=sorted(point_commands, key=lambda a: (a.cost, a.command)),
                 moderator_commands=sorted(
-                    moderator_commands, key=lambda c: (c.level if c.mod_only is False else 500, c.command)
+                    moderator_commands, key=lambda c: (c.level, c.command)
                 ),
                 created=session.pop("command_created_id", None),
                 edited=session.pop("command_edited_id", None),
