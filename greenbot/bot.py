@@ -89,7 +89,7 @@ class Bot:
 
     @property
     def bot_id(self):
-        return self.discord_bot.client.id
+        return self.discord_bot.client.user.id
 
     def wait_discord_load(self):
         self.socket_manager = SocketManager(self.bot_name, self.execute_now)
