@@ -116,9 +116,9 @@ class FuncAction(BaseAction):
     def __init__(self, cb):
         self.cb = cb
 
-    def run(self, bot, author, channel, message, whisper, args):
+    def run(self, bot, author, channel, message, args):
         try:
-            return self.cb(bot=bot, author=author, channel=channel, message=message, whisper=whisper, args=args)
+            return self.cb(bot=bot, author=author, channel=channel, message=message, args=args)
         except:
             log.exception("Uncaught exception in FuncAction")
 
@@ -129,8 +129,8 @@ class RawFuncAction(BaseAction):
     def __init__(self, cb):
         self.cb = cb
 
-    def run(self, bot, author, channel, message, whisper, args):
-        return self.cb(bot=bot, author=author, channel=channel, message=message, whisper=whisper, args=args)
+    def run(self, bot, author, channel, message, args):
+        return self.cb(bot=bot, author=author, channel=channel, message=message, args=args)
 
 
 def get_argument_substitutions(string):
@@ -252,7 +252,7 @@ class MultiAction(BaseAction):
         multiaction.original_commands = copy.copy(commands)
         return multiaction
 
-    def run(self, bot, author, channel, message, whisper, args):
+    def run(self, bot, author, channel, message, args):
         """ If there is more text sent to the multicommand after the
         initial alias, we _ALWAYS_ assume it's trying the subaction command.
         If the extra text was not a valid command, we try to run the fallback command.
@@ -275,7 +275,7 @@ class MultiAction(BaseAction):
 
         if cmd:
             if args["user_level"] >= cmd.level:
-                return cmd.run(bot, author, channel, extra_msg, whisper, args)
+                return cmd.run(bot, author, channel, extra_msg, args)
 
             log.info(f"User {author} tried running a sub-command he had no access to ({command}).")
 
@@ -329,7 +329,7 @@ class MessageAction(BaseAction):
     def get_extra_data(author, channel, message, args):
         return {"author": author, "channel": channel, "message": message, **args}
 
-    def run(self, bot, author, channel, message, whisper, args):
+    def run(self, bot, author, channel, message, args):
         raise NotImplementedError("Please implement the run method.")
 
 
@@ -423,24 +423,7 @@ def get_substitutions(string, bot):
         except:
             log.exception("BabyRage")
 
-    method_mapping = {}
-    try:
-        method_mapping["author"] = bot.get_author_value
-        method_mapping["channel"] = bot.get_channel_value
-        method_mapping["time"] = bot.get_time_value
-        method_mapping["args"] = bot.get_args_value
-        method_mapping["strictargs"] = bot.get_strictargs_value
-        method_mapping["command"] = bot.get_command_value
-        method_mapping["member"] = bot.get_member_value
-        method_mapping["role"] = bot.get_role_value
-        method_mapping["userinfo"] = bot.get_user_info
-        method_mapping["roleinfo"] = bot.get_role_info
-        method_mapping["commands"] = bot.get_commands
-        method_mapping["commandinfo"] = bot.get_command_info
-        method_mapping["user"] = bot.get_user
-        method_mapping["currency"] = bot.get_currency
-    except AttributeError:
-        pass
+    method_mapping = method_subs(bot)
 
     for sub_key in Substitution.substitution_regex.finditer(string):
         sub_string, path, argument, key, filters, if_arguments = get_substitution_arguments(sub_key)
@@ -456,17 +439,8 @@ def get_substitutions(string, bot):
     return substitutions
 
 def get_functions(_functions, bot):
-    method_mapping = {}
     functions = []
-    try:
-        method_mapping["kick"] = bot.kick_member
-        method_mapping["setpoints"] = bot.set_balance
-        method_mapping["adjpoints"] = bot.adj_balance
-        method_mapping["banmember"] = bot.ban_member
-        method_mapping["unbanmember"] = bot.unban_member
-        method_mapping["test"] = bot.test
-    except AttributeError:
-        pass
+    method_mapping = method_func(bot)
     for func in _functions:
         log.info(func)
         func = Function.function_regex.finditer(func)
@@ -478,14 +452,19 @@ def get_functions(_functions, bot):
         functions.append(Function(method_mapping[function], arguments))        
     return functions
 
-def get_substitutions_array(array, bot, extra):
-    """
-    Returns a dictionary of `Substitution` objects thare are found in the passed `string`.
-    Will not return multiple `Substitution` objects for the same string.
-    This means "You have $(source:points) points xD $(source:points)" only returns one Substitution.
-    """
+def method_func(bot):
+    method_mapping = {}
+    try:
+        method_mapping["kick"] = bot.func_kick_member
+        method_mapping["setpoints"] = bot.func_set_balance
+        method_mapping["adjpoints"] = bot.func_adj_balance
+        method_mapping["banmember"] = bot.func_ban_member
+        method_mapping["unbanmember"] = bot.func_unban_member
+    except AttributeError:
+        pass
+    return method_mapping
 
-    return_array = []
+def method_subs(bot):
     method_mapping = {}
     try:
         method_mapping["author"] = bot.get_author_value
@@ -504,6 +483,18 @@ def get_substitutions_array(array, bot, extra):
         method_mapping["currency"] = bot.get_currency
     except AttributeError:
         pass
+    return method_mapping
+
+def get_substitutions_array(array, bot, extra):
+    """
+    Returns a dictionary of `Substitution` objects thare are found in the passed `string`.
+    Will not return multiple `Substitution` objects for the same string.
+    This means "You have $(source:points) points xD $(source:points)" only returns one Substitution.
+    """
+
+    return_array = []
+    method_mapping = method_subs(bot)
+
     for string in array:
         if not string or not isinstance(string, str):
             return_array.append(string)
@@ -556,19 +547,19 @@ def get_argument_substitutions_array(array, extra):
 class ReplyAction(MessageAction):
     subtype = "Reply"
 
-    def run(self, bot, author, channel, message, whisper, args):
+    def run(self, bot, author, channel, message, args):
         extra = self.get_extra_data(author, channel, message, args)
         if self.functions:
             for func in self.functions:
                 final_args = get_argument_substitutions_array(get_substitutions_array(func.arguments, bot, extra), extra)
-                func.cb(final_args)
+                func.cb(final_args, extra)
 
         resp, embed = self.get_response(bot, extra)
         if not resp and not embed:
             return False
         
         if self.num_urlfetch_subs == 0:
-            if whisper:
+            if args["whisper"]:
                 return bot.private_message(author, resp, embed)
             return bot.say(channel, resp, embed)
 
@@ -576,9 +567,9 @@ class ReplyAction(MessageAction):
             urlfetch_msg,
             args=[],
             kwargs={
-                "args": [author if whisper else channel],
+                "args": [author if args["whisper"] else channel],
                 "kwargs": {},
-                "method": bot.private_message if whisper else bot.say,
+                "method": bot.private_message if args["whisper"] else bot.say,
                 "bot": bot,
                 "extra": extra,
                 "message": resp,
@@ -591,13 +582,13 @@ class ReplyAction(MessageAction):
 class PrivateMessageAction(MessageAction):
     subtype = "Private Message"
 
-    def run(self, bot, author, channel, message, whisper, args):
+    def run(self, bot, author, channel, message, args):
         extra = self.get_extra_data(author, channel, message, args)
         resp, embed = self.get_response(bot, extra)
-        if "functions" in args:
-            extra.pop("functions")
-            functions = args["functions"]
-            functions = get_functions(functions, bot)
+        if self.functions:
+            for func in self.functions:
+                final_args = get_argument_substitutions_array(get_substitutions_array(func.arguments, bot, extra), extra)
+                func.cb(final_args, extra)
 
         if not resp and embed:
             return False

@@ -14,7 +14,7 @@ class Dispatch:
     """
 
     @staticmethod
-    def add_command(bot, author, channel, message, whisper, args):
+    def add_command(bot, author, channel, message, args):
         """Dispatch method for creating commands.
         Usage: !add command ALIAS [options] RESPONSE
         See greenbot/managers/command.py parse_command_arguments for available options
@@ -65,7 +65,7 @@ class Dispatch:
         return False
 
     @staticmethod
-    def edit_command(bot, author, channel, message, whisper, args):
+    def edit_command(bot, author, channel, message, args):
         """Dispatch method for editing commands.
         Usage: !edit command ALIAS [options] RESPONSE
         See greenbot/managers/command.py parse_command_arguments for available options
@@ -133,7 +133,7 @@ class Dispatch:
             # )
 
     @staticmethod
-    def add_funccommand(bot, author, channel, message, whisper, args):
+    def add_funccommand(bot, author, channel, message, args):
         """Dispatch method for creating function commands.
         Usage: !add funccommand ALIAS [options] CALLBACK
         See greenbot/managers/command.py parse_command_arguments for available options
@@ -185,7 +185,7 @@ class Dispatch:
             return False
 
     @staticmethod
-    def edit_funccommand(bot, author, channel, message, whisper, args):
+    def edit_funccommand(bot, author, channel, message, args):
         """Dispatch method for editing function commands.
         Usage: !edit funccommand ALIAS [options] CALLBACK
         See greenbot/managers/command.py parse_command_arguments for available options
@@ -224,7 +224,7 @@ class Dispatch:
             bot.whisper(author, f"Updated the command (ID: {command.id})")
 
     @staticmethod
-    def add_alias(bot, author, channel, message, whisper, args):
+    def add_alias(bot, author, channel, message, args):
         """Dispatch method for adding aliases to already-existing commands.
         Usage: !add alias EXISTING_ALIAS NEW_ALIAS_1 NEW_ALIAS_2 ...
         """
@@ -274,7 +274,7 @@ class Dispatch:
             bot.private_message(author, "Usage: !add alias existingalias newalias")
 
     @staticmethod
-    def remove_alias(bot, author, channel, message, whisper, args):
+    def remove_alias(bot, author, channel, message, args):
         """Dispatch method for removing aliases from a command.
         Usage: !remove alias EXISTING_ALIAS_1 EXISTING_ALIAS_2"""
         if message:
@@ -324,7 +324,7 @@ class Dispatch:
             bot.private_message(author, "Usage: !remove alias EXISTINGALIAS")
 
     @staticmethod
-    def remove_command(bot, author, channel, message, whisper, args):
+    def remove_command(bot, author, channel, message, args):
         if message:
             id = None
             command = None

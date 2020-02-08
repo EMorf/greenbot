@@ -329,7 +329,7 @@ class Command(Base):
     def is_enabled(self):
         return self.enabled == 1 and self.action is not None
 
-    def run(self, bot, author, channel, message, whisper, args):
+    def run(self, bot, author, channel, message, args):
         if self.action is None:
             log.warning("This command is not available.")
             return False
@@ -339,7 +339,7 @@ class Command(Base):
             return False
 
         if (
-            whisper
+            args["whisper"]
             and self.can_execute_with_whisper is False
         ):
             # This user cannot execute the command through a whisper
@@ -368,18 +368,18 @@ class Command(Base):
             args.update(self.extra_args)
             if self.run_in_thread:
                 log.debug(f"Running {self} in a thread")
-                ScheduleManager.execute_now(self.run_action, args=[bot, author, channel, message, whisper, args])
+                ScheduleManager.execute_now(self.run_action, args=[bot, author, channel, message, args])
             else:
-                self.run_action(bot, author, channel, message, whisper, args)
+                self.run_action(bot, author, channel, message, args)
 
         return True
 
-    def run_action(self, bot, author, channel, message, whisper, args):
+    def run_action(self, bot, author, channel, message, args):
         cur_time = greenbot.utils.now().timestamp()
         with DBManager.create_session_scope() as db_session:
             user = User._create_or_get_by_discord_id(db_session, str(author.id), str(author))
             with user.spend_currency_context(self.cost):
-                ret = self.action.run(bot, author, channel, message, whisper, args)
+                ret = self.action.run(bot, author, channel, message, args)
                 if not ret:
                     raise FailedCommand("return currency")
 

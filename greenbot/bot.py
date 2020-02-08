@@ -151,12 +151,9 @@ class Bot:
                     "trigger": trigger,
                     "message_raw": message_raw,
                     "user_level": user_level,
+                    "whisper": whisper
                 }
-                command.run(bot=self, author=author, channel=channel, message=remaining_message, whisper=whisper, args=extra_args)
-
-    def test(self, args):
-        log.info("I RAN!")
-        log.info(args)
+                command.run(bot=self, author=author, channel=channel, message=remaining_message, args=extra_args)
 
     def get_role_id(self, role_name):
         return self.discord_bot.get_role_id(role_name)
@@ -180,9 +177,8 @@ class Bot:
         return_val = getattr(member, key) if member else None
         return return_val
 
-    def kick_member(self, key, extra={}):
+    def func_kick_member(self, args, extra={}):
         author = extra["author"]
-        args = extra["message"].split(" ")
         member = self.get_member(args[0][3:][:-1])
         if not member:
             return "Member not found"
@@ -196,8 +192,7 @@ class Bot:
         self.kick(member, " ".join(reason) if len(reason) > 0 else None)
         return message
 
-    def ban_member(self, key, extra={}):
-        args = extra["message"].split(" ")
+    def func_ban_member(self, args, extra={}):
         member = self.get_member(args[0][3:][:-1])
         author = extra["author"]
         if not member:
@@ -226,8 +221,7 @@ class Bot:
         self.ban(user=member, timeout_in_seconds=timeout_in_seconds, delete_message_days=delete_message_days, reason=" ".join(reason) if len(reason) > 0 else None)
         return message
 
-    def unban_member(self, key, extra={}):
-        args = extra["message"].split(" ")
+    def func_unban_member(self, args, extra={}):
         member_id = args[0][3:][:-1]
         reason = args[1:]
 
@@ -235,16 +229,7 @@ class Bot:
         self.unban(user_id=member_id, reason=" ".join(reason) if len(reason) > 0 else None)
         return message
 
-    def get_role_value(self, key, extra={}):
-        role_name = extra["message"]
-        role = self.get_role(self.get_role_id(role_name))
-        if not role:
-            return f"Role {role_name} not found"
-        return_val = getattr(role, key) if role else None
-        return return_val
-
-    def set_balance(self, key, extra={}):
-        args = extra["message"].split(" ")
+    def func_set_balance(self, args, extra={}):
         user_id = args[0][3:][:-1]
         try:
             amount = int(args[1])
@@ -256,8 +241,7 @@ class Bot:
         currency = self._get_currency().get("name").capitalize()
         return f"{currency} balance for <@!{user_id}> set to {amount}"
 
-    def adj_balance(self, key, extra={}):
-        args = extra["message"].split(" ")
+    def adj_balance(self, args, extra={}):
         user_id = args[0][3:][:-1]
         try:
             amount = int(args[1])
@@ -308,11 +292,17 @@ class Bot:
 
     def get_strictargs_value(self, key, extra={}):
         ret = self.get_args_value(key, extra)
-
         if not ret:
             return None
-
         return ret
+
+    def get_role_value(self, key, extra={}):
+        role_name = extra["message"]
+        role = self.get_role(self.get_role_id(role_name))
+        if not role:
+            return f"Role {role_name} not found"
+        return_val = getattr(role, key) if role else None
+        return return_val
 
     def get_user_info(self, key, extra={}):
         user = self.get_member(key[3:][:-1]) if key else None
