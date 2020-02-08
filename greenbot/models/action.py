@@ -47,8 +47,7 @@ def apply_substitutions(text, substitutions, bot, extra):
         elif sub.argument:
             param = MessageAction.get_argument_value(extra["message"], sub.argument - 1)
         else:
-            log.error("Unknown param for response.")
-            continue
+            param = None
         value = sub.cb(param, extra)
         if isinstance(value, discord.embeds.Embed):
             text = text.replace(needle, "")
@@ -526,7 +525,7 @@ def get_substitutions_array(array, bot, extra):
             param = MessageAction.get_argument_value(extra["message"], argument - 1)
         else:
             param = None
-        value = path(param, extra)
+        value = method_mapping[path](param, extra)
         try:
             for f in filters:
                 value = bot.apply_filter(value, f)
