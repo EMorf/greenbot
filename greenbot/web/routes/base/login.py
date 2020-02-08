@@ -24,7 +24,7 @@ def init(app):
 
     @app.route("/login")
     def discord_login():
-        session["state"] = request.args.get("n") or request.referrer or None
+        session["state"] = request.args.get("n") or request.referrer or "/"
         return discord.create_session()
 
     @app.route("/login/error")
@@ -58,7 +58,9 @@ def init(app):
     def logout():
         discord.revoke()
         session.pop("user_displayname", None)
-        next_url = request.args.get("n") or request.referrer or None
+        session.pop("DISCORD_OAUTH2_STATE", None)
+        session.pop("DISCORD_OAUTH2_TOKEN", None)
+        next_url = request.args.get("n") or request.referrer or "/"
         if next_url.startswith("/admin"):
             next_url = "/"
         return redirect(next_url)
