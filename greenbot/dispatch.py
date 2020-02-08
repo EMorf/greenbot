@@ -213,7 +213,7 @@ class Dispatch:
                 )
                 return False
 
-            action = {"type": type, "message": response, "functions": options["functions"]}
+            options["action"] = {"type": type, "message": response, "functions": options["functions"]}
             del options["functions"]
 
             command = bot.commands.get(alias, None)
