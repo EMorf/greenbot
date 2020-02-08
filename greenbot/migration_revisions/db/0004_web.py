@@ -2,7 +2,7 @@ def up(cursor, bot):
     cursor.execute("""
     CREATE TABLE "command_example" (
         id TEXT PRIMARY KEY NOT NULL,   
-        command_id INT NOT NULL REFERENCES "command"(id),,
+        command_id INT NOT NULL REFERENCES "command"(id),
         title TEXT NOT NULL,
         chat TEXT NOT NULL,
         description TEXT NOT NULL
