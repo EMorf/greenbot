@@ -287,7 +287,6 @@ class Dispatch:
         Usage: !remove alias EXISTING_ALIAS_1 EXISTING_ALIAS_2"""
         if message:
             aliases = re.split(r"\|| ", message.lower())
-            log.info(aliases)
             if len(aliases) < 1:
                 bot.private_message(author, "Usage: !remove alias EXISTINGALIAS")
                 return False

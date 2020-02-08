@@ -88,7 +88,6 @@ class APICommandUpdate(Resource):
 
     @greenbot.web.utils.requires_level(500)
     def post(self, command_id, **extra_args):
-        log.info("Yes")
         args = greenbot.utils.remove_none_values(self.post_parser.parse_args())
         if len(args) == 0:
             return {"error": "Missing parameter to edit."}, 400
@@ -106,7 +105,6 @@ class APICommandUpdate(Resource):
             )
             if command is None:
                 return {"error": "Invalid command ID"}, 404
-            log.info(extra_args["user"])
             if command.level > extra_args["user"].level:
                 return {"error": "Unauthorized"}, 403
             parsed_action = json.loads(command.action_json)
