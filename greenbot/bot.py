@@ -183,8 +183,8 @@ class Bot:
         if not member:
             return "Member not found"
         with DBManager.create_session_scope() as db_session:
-            author_user = User._create_or_get_by_discord_id(db_session, str(author.id))
-            member_user = User._create_or_get_by_discord_id(db_session, str(member.id))
+            author_user = User._create_or_get_by_discord_id(db_session, str(author.id), user_name=str(author))
+            member_user = User._create_or_get_by_discord_id(db_session, str(member.id), user_name=str(member))
             if author_user.level <= member_user.level:
                 return "You cannot kick someone who has the same level as you :)"
         reason = args[1:]
@@ -199,8 +199,8 @@ class Bot:
         if not member:
             return "Member not found"
         with DBManager.create_session_scope() as db_session:
-            author_user = User._create_or_get_by_discord_id(db_session, str(author.id))
-            member_user = User._create_or_get_by_discord_id(db_session, str(member.id))
+            author_user = User._create_or_get_by_discord_id(db_session, str(author.id), user_name=str(author))
+            member_user = User._create_or_get_by_discord_id(db_session, str(member.id), user_name=str(member))
             if author_user.level <= member_user.level:
                 return "You cannot ban someone who has the same level as you :)"
         reason = None

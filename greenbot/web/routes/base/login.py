@@ -36,8 +36,8 @@ def init(app):
         discord.callback()
         user = discord.fetch_user()
         with DBManager.create_session_scope(expire_on_commit=False) as db_session:
-            session["user"] = User._create_or_get_by_discord_id(db_session, str(user.id)).jsonify()
-        session["user_displayname"] = str(user) 
+            session["user"] = User._create_or_get_by_discord_id(db_session, str(user.id), str(user)).jsonify()
+        session["user_displayname"] = user.user_name
         next_url = session.get("state", "/")
         return redirect(next_url)
 
