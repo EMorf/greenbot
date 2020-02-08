@@ -505,6 +505,9 @@ def get_substitutions_array(array, bot, extra):
     except AttributeError:
         pass
     for string in array:
+        if not string:
+            return_array.append(string)
+            continue
         sub_key = Substitution.substitution_regex.search(string)
         if not sub_key:
             return_array.append(string)
@@ -540,8 +543,12 @@ def get_substitutions_array(array, bot, extra):
 def get_argument_substitutions_array(array, extra):
     return_array = []
     for string in array:
+        if not string:
+            return_array.append(string)
+            continue
         sub_key = Substitution.argument_substitution_regex.search(string)
         if not sub_key:
+            return_array.append(string)
             continue
         return_array.append(str(MessageAction.get_argument_value(extra["message"], int(sub_key.group(1)) - 1)))
     return return_array
