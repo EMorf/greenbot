@@ -175,7 +175,7 @@ class APICommandUpdate(Resource):
             else:
                 return {"error": "could not push update"}, 500
         except Exception as e:
-            return ("error": str(e))
+            return {"error": str(e)}
 
 
 class APICommandCheckAlias(Resource):
