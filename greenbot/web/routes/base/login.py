@@ -58,8 +58,7 @@ def init(app):
     def logout():
         discord.revoke()
         session.pop("user_displayname", None)
-        session.pop("DISCORD_OAUTH2_STATE", None)
-        session.pop("DISCORD_OAUTH2_TOKEN", None)
+        session.pop("user", None)
         next_url = request.args.get("n") or request.referrer or "/"
         if next_url.startswith("/admin"):
             next_url = "/"
