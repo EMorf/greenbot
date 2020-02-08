@@ -4,11 +4,8 @@ import greenbot.web.routes.api.banphrases
 import greenbot.web.routes.api.commands
 import greenbot.web.routes.api.common
 import greenbot.web.routes.api.modules
-import greenbot.web.routes.api.social
 import greenbot.web.routes.api.timers
-import greenbot.web.routes.api.twitter
 import greenbot.web.routes.api.users
-import greenbot.web.routes.api.playsound
 
 
 def init(app):
