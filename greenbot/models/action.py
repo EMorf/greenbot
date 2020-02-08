@@ -28,6 +28,8 @@ class ActionParser:
             log.info(action.functions)
         elif data["type"] == "privatemessage":
             action = PrivateMessageAction(data["message"], ActionParser.bot, functions=data.get("functions", []))
+            log.info(data.get("functions", []))
+            log.info(data)
             log.info(action.functions)
         elif data["type"] == "func":
             action = FuncAction(getattr(Dispatch, data["cb"]))
