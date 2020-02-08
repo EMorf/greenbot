@@ -23,9 +23,9 @@ class ActionParser:
             data = json.loads(raw_data)
 
         if data["type"] == "reply":
-            action = ReplyAction(data["message"], ActionParser.bot)
+            action = ReplyAction(data["message"], ActionParser.bot, functions=data.get("functions", []))
         elif data["type"] == "privatemessage":
-            action = PrivateMessageAction(data["message"], ActionParser.bot)
+            action = PrivateMessageAction(data["message"], ActionParser.bot, functions=data.get("functions", []))
         elif data["type"] == "func":
             action = FuncAction(getattr(Dispatch, data["cb"]))
         elif data["type"] == "multi":
@@ -289,7 +289,7 @@ class MultiAction(BaseAction):
 class MessageAction(BaseAction):
     type = "message"
 
-    def __init__(self, response, bot):
+    def __init__(self, response, bot, functions=[]):
         self.response = response
         if bot:
             self.argument_subs = get_argument_substitutions(self.response)

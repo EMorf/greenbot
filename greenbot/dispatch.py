@@ -157,11 +157,7 @@ class Dispatch:
                 )
                 return False
 
-            extra_agrs = {
-                "functions": options["functions"]
-            }
-
-            del options["functions"]
+           
 
             if options is False:
                 bot.private_message(author, "Invalid command")
@@ -173,9 +169,10 @@ class Dispatch:
                 type = "privatemessage"
             elif options["reply"] is True:
                 type = "reply"
-            action = {"type": type, "message": response}
+            action = {"type": type, "message": response, "functions": options["functions"]}
+            del options["functions"]
 
-            command, new_command, alias_matched = bot.commands.create_command(alias_str, extra_agrs=extra_agrs, action=action, **options)
+            command, new_command, alias_matched = bot.commands.create_command(alias_str, action=action, **options)
             if new_command is True:
                 bot.private_message(author, f"Added your command (ID: {command.id})")
                 return True
