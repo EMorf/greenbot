@@ -32,9 +32,9 @@ class CustomClient(discord.Client):
             return
         user_level = 50
         with DBManager.create_session_scope() as db_session:
-            User._create_or_get_by_discord_id(db_session, message.author.id, user_name=str(member) if member else str(message.author))
+            user = User._create_or_get_by_discord_id(db_session, message.author.id, user_name=str(member) if member else str(message.author))
             Message._create(db_session, message.id, message.author.id, message.channel.id if isinstance(message.author, discord.Member) else None, message.content)
-            HandlerManager.trigger("discord_message", message_raw=message, message=message.content, author=message.author, user_level=member.level, channel=message.channel if isinstance(message.author, discord.Member) else None, whisper=not isinstance(message.author, discord.Member))
+            HandlerManager.trigger("discord_message", message_raw=message, message=message.content, author=message.author, user_level=user.level, channel=message.channel if isinstance(message.author, discord.Member) else None, whisper=not isinstance(message.author, discord.Member))
 
     async def on_error(self, event, *args, **kwargs):
         log.error(traceback.format_exc())
