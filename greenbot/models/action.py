@@ -444,7 +444,7 @@ class MultiAction(BaseAction):
 
 
 class SayAction(MessageAction):
-    subtype = "say"
+    subtype = "Reply"
 
     def run(self, bot, author, channel, message, whisper, args):
         extra = self.get_extra_data(author, channel, message, args)
@@ -494,7 +494,7 @@ class SayAction(MessageAction):
 
 
 class WhisperAction(MessageAction):
-    subtype = "whisper"
+    subtype = "Private Message"
 
     def run(self, bot, author, channel, message, whisper, args):
         extra = self.get_extra_data(author, channel, message, args)
