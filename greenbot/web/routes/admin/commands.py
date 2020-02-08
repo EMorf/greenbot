@@ -183,7 +183,7 @@ def init(page):
         command = Command(command=alias_str, **options)
         command.data = CommandData(command.id, **options)
         log_msg = f"The !{command.command.split('|')[0]} command has been created"
-        AdminLogManager.add_entry("Command created", user, log_msg)
+        AdminLogManager.add_entry("Command created", user.discord_id, log_msg)
         with DBManager.create_session_scope(expire_on_commit=False) as db_session:
             db_session.add(command)
             db_session.add(command.data)

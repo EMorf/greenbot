@@ -69,7 +69,7 @@ class APICommandRemove(Resource):
             ):
                 return {"error": "Unauthorized"}, 403
             log_msg = f"The !{command.command.split('|')[0]} command has been removed"
-            AdminLogManager.add_entry("Command removed", options["user"], log_msg)
+            AdminLogManager.add_entry("Command removed", options["user"].discord_id, log_msg)
             db_session.delete(command.data)
             db_session.delete(command)
 
@@ -198,7 +198,7 @@ class APICommandUpdate(Resource):
 
             AdminLogManager.add_entry(
                 "Command edited",
-                extra_args["user"],
+                extra_args["user"].discord_id,
                 log_msg,
                 data={"old_message": old_message, "new_message": new_message},
             )
