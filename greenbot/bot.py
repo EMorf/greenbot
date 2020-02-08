@@ -186,11 +186,11 @@ class Bot:
             author_user = User._create_or_get_by_discord_id(db_session, str(author.id), user_name=str(author))
             member_user = User._create_or_get_by_discord_id(db_session, str(member.id), user_name=str(member))
             if author_user.level <= member_user.level:
-                return "You cannot kick someone who has the same level as you :)"
+                return "You cannot kick someone who has the same level as you :)", None
         reason = args[1:]
         message = f"Member {member} has been kicked!"
         self.kick(member, " ".join(reason) if len(reason) > 0 else None)
-        return message
+        return message, None
 
     def func_ban_member(self, args, extra={}):
         member = self.get_member(args[0][3:][:-1])
@@ -201,7 +201,7 @@ class Bot:
             author_user = User._create_or_get_by_discord_id(db_session, str(author.id), user_name=str(author))
             member_user = User._create_or_get_by_discord_id(db_session, str(member.id), user_name=str(member))
             if author_user.level <= member_user.level:
-                return "You cannot ban someone who has the same level as you :)"
+                return "You cannot ban someone who has the same level as you :)", None
         reason = None
         timeout_in_seconds = 0
         delete_message_days = 0
@@ -219,7 +219,7 @@ class Bot:
         
         message = f"Member <@!{member.id}> has been banned!"
         self.ban(user=member, timeout_in_seconds=timeout_in_seconds, delete_message_days=delete_message_days, reason=" ".join(reason) if len(reason) > 0 else None)
-        return message
+        return message, None
 
     def func_unban_member(self, args, extra={}):
         member_id = args[0][3:][:-1]
@@ -227,32 +227,32 @@ class Bot:
 
         message = f"Member <@!{member_id}> has been unbanned!"
         self.unban(user_id=member_id, reason=" ".join(reason) if len(reason) > 0 else None)
-        return message
+        return message, None
 
     def func_set_balance(self, args, extra={}):
         user_id = args[0][3:][:-1]
         try:
             amount = int(args[1])
         except:
-            return f"Invalid points amount, {args[1]}"
+            return f"Invalid points amount, {args[1]}", None
         with DBManager.create_session_scope() as db_session:
             user = User._create_or_get_by_discord_id(db_session, int(user_id))
             user.points = amount
         currency = self._get_currency().get("name").capitalize()
-        return f"{currency} balance for <@!{user_id}> set to {amount}"
+        return f"{currency} balance for <@!{user_id}> set to {amount}", None
 
     def func_adj_balance(self, args, extra={}):
         user_id = args[0][3:][:-1]
         try:
             amount = int(args[1])
         except:
-            return f"Invalid points amount, {args[1]}"
+            return f"Invalid points amount, {args[1]}", None
         with DBManager.create_session_scope() as db_session:
             user = User._create_or_get_by_discord_id(db_session, int(user_id))
             user.points += amount
         action = "added to" if amount > 0 else "removed from"
         currency = self._get_currency().get("name")
-        return f"{amount} {currency}s {action} <@!{user_id}> "
+        return f"{amount} {currency}s {action} <@!{user_id}> ", None
 
     def quit(self, bot, author, channel, message, whisper, args):
         self.quit_bot()
