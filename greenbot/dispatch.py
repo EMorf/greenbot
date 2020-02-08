@@ -168,7 +168,12 @@ class Dispatch:
                 return False
 
             alias_str = message_parts[0].replace("!", "").lower()
-            action = {"type": "func", "cb": response.strip()}
+            type = "reply"
+            if options["privatemessage"] is True:
+                type = "privatemessage"
+            elif options["reply"] is True:
+                type = "reply"
+            action = {"type": type, "message": response}
 
             command, new_command, alias_matched = bot.commands.create_command(alias_str, extra_agrs=extra_agrs, action=action, **options)
             if new_command is True:
