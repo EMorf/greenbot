@@ -85,6 +85,7 @@ class APICommandUpdate(Resource):
         self.post_parser.add_argument("data_sub_only", required=False)
         self.post_parser.add_argument("data_action_type", required=False)
         self.post_parser.add_argument("data_action_message", required=False)
+        self.post_parser.add_argument("data_action_functions", required=False)
 
     @greenbot.web.utils.requires_level(500)
     def post(self, command_id, **extra_args):
@@ -94,7 +95,7 @@ class APICommandUpdate(Resource):
 
         valid_names = ["enabled", "level", "delay_all", "delay_user", "cost", "can_execute_with_whisper", "sub_only"]
 
-        valid_action_names = ["type", "message"]
+        valid_action_names = ["type", "message", "functions"]
 
         with DBManager.create_session_scope() as db_session:
             command = (
@@ -130,6 +131,8 @@ class APICommandUpdate(Resource):
                                 parsed_value = value
                             if name == "type":
                                 parsed_value = "privatemessage" if parsed_value == "Private Message" else "reply"
+                            if name == "functions":
+                                parsed_value = parsed_value.split(" ")
                             parsed_action[name] = parsed_value
                         command.action_json = json.dumps(parsed_action)
                     else:
