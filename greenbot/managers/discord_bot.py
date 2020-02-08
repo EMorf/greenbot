@@ -31,13 +31,10 @@ class CustomClient(discord.Client):
         if isinstance(message.author, discord.Member) and (message.guild != self.bot.guild or not message.channel in self.bot.listening_channels):
             return
         user_level = 50
-        if member:
-            for role in member.roles:
-               user_level = max(int(self.bot.admin_roles.get(role, 100)), user_level)
         with DBManager.create_session_scope() as db_session:
             User._create_or_get_by_discord_id(db_session, message.author.id)
             Message._create(db_session, message.id, message.author.id, message.channel.id if isinstance(message.author, discord.Member) else None, message.content)
-            HandlerManager.trigger("discord_message", message_raw=message, message=message.content, author=message.author, user_level=user_level, channel=message.channel if isinstance(message.author, discord.Member) else None, whisper=not isinstance(message.author, discord.Member))
+            HandlerManager.trigger("discord_message", message_raw=message, message=message.content, author=message.author, user_level=member.level, channel=message.channel if isinstance(message.author, discord.Member) else None, whisper=not isinstance(message.author, discord.Member))
 
     async def on_error(self, event, *args, **kwargs):
         log.error(traceback.format_exc())
@@ -50,7 +47,6 @@ class DiscordBotManager:
         
         self.private_loop = private_loop
         self.redis = redis
-        self.admin_roles = {}
         self.listening_channels = []
 
         self.guild = None
@@ -60,17 +56,7 @@ class DiscordBotManager:
         self.private_loop.create_task(self._setup())
 
     async def _setup(self):
-        self.admin_roles = {}
         self.listening_channels = []
-        for role_level in self.settings["admin_roles"]:
-            role_id = role_level["role_id"]
-            level = role_level["level"]
-
-            role = self.guild.get_role(int(role_id))
-            if not role:
-                log.error(f"Cannot find role {role_id}")
-                continue
-            self.admin_roles[role] = level
         for channel_id in self.settings["channels"]:
             channel = self.guild.get_channel(int(channel_id))
             if not channel:
