@@ -116,7 +116,7 @@ def init(page):
         if user is None:
             abort(403)
 
-        options = {"delay_all": delay_all, "delay_user": delay_user, "level": level, "cost": cost, "added_by": user.id}
+        options = {"delay_all": delay_all, "delay_user": delay_user, "level": level, "cost": cost, "added_by": user.discord_id}
 
         valid_action_types = ["say", "me", "whisper", "reply"]
         action_type = request.form.get("reply", "say").lower()

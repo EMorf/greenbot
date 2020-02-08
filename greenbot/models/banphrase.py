@@ -175,13 +175,13 @@ class BanphraseData(Base):
 
     banphrase_id = Column(INT, ForeignKey("banphrase.id"), primary_key=True, autoincrement=False)
     num_uses = Column(INT, nullable=False, default=0)
-    added_by = Column(INT, ForeignKey("user.id", ondelete="SET NULL"), nullable=True)
-    edited_by = Column(INT, ForeignKey("user.id", ondelete="SET NULL"), nullable=True)
+    added_by = Column(INT, ForeignKey("user.discord_id", ondelete="SET NULL"), nullable=True)
+    edited_by = Column(INT, ForeignKey("user.discord_id", ondelete="SET NULL"), nullable=True)
 
     user = relationship(
         "User",
-        primaryjoin="User.id==BanphraseData.added_by",
-        foreign_keys="User.id",
+        primaryjoin="User.discord_id==BanphraseData.added_by",
+        foreign_keys="User.discord_id",
         uselist=False,
         cascade="",
         lazy="noload",
@@ -189,8 +189,8 @@ class BanphraseData(Base):
 
     user2 = relationship(
         "User",
-        primaryjoin="User.id==BanphraseData.edited_by",
-        foreign_keys="User.id",
+        primaryjoin="User.discord_id==BanphraseData.edited_by",
+        foreign_keys="User.discord_id",
         uselist=False,
         cascade="",
         lazy="noload",
