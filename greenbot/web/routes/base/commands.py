@@ -29,7 +29,7 @@ def init(app):
             custom_commands=sorted(custom_commands, key=lambda f: f["aliases"]),
             point_commands=sorted(point_commands, key=lambda a: (a["cost"], a["aliases"])),
             moderator_commands=sorted(
-                moderator_commands, key=lambda c: (c["level"] if c["mod_only"] is False else 500, c["aliases"])
+                moderator_commands, key=lambda c: (c["level"], c["aliases"])
             ),
         )
 
