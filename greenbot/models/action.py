@@ -17,6 +17,8 @@ class ActionParser:
 
     @staticmethod
     def parse(raw_data=None, data=None, command=""):
+        from greenbot.dispatch import Dispatch
+
         if not data:
             data = json.loads(raw_data)
 
@@ -24,6 +26,8 @@ class ActionParser:
             action = ReplyAction(data["message"], ActionParser.bot)
         elif data["type"] == "privatemessage":
             action = PrivateMessageAction(data["message"], ActionParser.bot)
+        elif data["type"] == "func":
+            action = FuncAction(getattr(Dispatch, data["cb"]))
         else:
             raise Exception(f"Unknown action type: {data['type']}")
 
