@@ -155,6 +155,7 @@ class APICommandUpdate(Resource):
             except:
                 pass
             options["action"]["type"] = "privatemessage" if options["action"]["type"] == "Private Message" else "reply"
+            log.info(options)
             command.set(**options)
             command.data.set(**options)
 
