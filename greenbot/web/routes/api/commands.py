@@ -110,7 +110,7 @@ class APICommandUpdate(Resource):
             if command.level > extra_args["user"].level:
                 return {"error": "Unauthorized"}, 403
             parsed_action = json.loads(command.action_json)
-            options = {"edited_by": extra_args["user"].id}
+            options = {"edited_by": extra_args["user"].discord_id}
 
             for key in args:
                 if key.startswith("data_"):

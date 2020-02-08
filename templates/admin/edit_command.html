@@ -11,7 +11,6 @@
     ('User CD', True, command.delay_user, 'delay_user', 'int', ' seconds'),
     ('Cost', True, command.cost, 'cost', 'int', ''),
     ('Whisperable', True, command.can_execute_with_whisper, 'can_execute_with_whisper', 'boolean', ''),
-    ('Sub only', True, command.sub_only, 'sub_only', 'boolean', ''),
 ] %}
 <p>Columns in yellow mark an unsaved change.</p>
 <p>Click the "Save Changes" button below to confirm your changes.</p>
@@ -68,7 +67,7 @@
 
 {% if command.action.type == 'message' %}
 {% set data_available = [
-    ('Reply Type', True, command.action.subtype, 'action_type', 'list(say:Say,whisper:Whisper,me:Me,reply:Reply)', ''),
+    ('Reply Type', True, command.action.subtype, 'action_type', 'list(Reply:Say,Private Message:Whisper)', ''),
     ('Response', True, command.action.response, 'action_message', 'string', ''),
 ] %}
 {% elif command.action.type == 'func' %}
