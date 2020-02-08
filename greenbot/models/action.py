@@ -483,6 +483,7 @@ class ReplyAction(MessageAction):
 
     def run(self, bot, author, channel, message, whisper, args):
         extra = self.get_extra_data(author, channel, message, args)
+        log.info(args)
         if "functions" in args:
             extra.pop("functions")
             functions = args["functions"]
