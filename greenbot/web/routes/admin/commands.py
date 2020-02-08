@@ -149,9 +149,10 @@ def init(page):
 
         alias_list = [alias for alias in alias_list if len(alias) > 0]
 
-        # if not alias_list:
-        #     return render_template("admin/create_command_fail.html")
-
+        if not alias_list:
+            return render_template("admin/create_command_fail.html")
+        log.info(command_aliases)
+        log.info(alias_list)
         for alias in alias_list:
             if alias in command_aliases:
                 return render_template("admin/create_command_fail.html")
