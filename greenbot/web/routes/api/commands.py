@@ -154,7 +154,7 @@ class APICommandUpdate(Resource):
                 new_message = aj["message"]
             except:
                 pass
-
+            options["action"]["type"] = "privatemessage" if options["action"]["type"] == "Private Message" else "reply"
             command.set(**options)
             command.data.set(**options)
 
