@@ -81,7 +81,7 @@ def init(args):
 
     default_variables = {
         "last_commit": last_commit,
-        "bot": {"name": config["main"]["nickname"]},
+        "bot": {"name": config["main"]["bot_name"]},
         "site": {
             "domain": config["web"]["domain"]
         },
