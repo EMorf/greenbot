@@ -539,16 +539,13 @@ def get_substitutions_array(array, bot, extra):
 
     return return_array
 
-def get_argument_substitutions_array(array):
+def get_argument_substitutions_array(array, extra):
     return_array = []
     for string in array:
         sub_key = Substitution.argument_substitution_regex.search(string)
         if not sub_key:
             continue
-        needle = sub_key.group(0)
-        argument_num = int(sub_key.group(1))
-        return_array.append(argument_num)
-
+        return_array.append(str(MessageAction.get_argument_value(extra["message"], int(sub_key.group(1)) - 1)))
     return return_array
 
 class ReplyAction(MessageAction):
@@ -558,7 +555,7 @@ class ReplyAction(MessageAction):
         extra = self.get_extra_data(author, channel, message, args)
         if self.functions:
             for func in self.functions:
-                final_args = get_argument_substitutions_array(get_substitutions_array(func.arguments, bot, extra))
+                final_args = get_argument_substitutions_array(get_substitutions_array(func.arguments, bot, extra), extra)
                 func.cb(final_args)
 
         resp, embed = self.get_response(bot, extra)
