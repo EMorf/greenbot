@@ -4,7 +4,6 @@ import logging
 from flask import render_template
 
 from greenbot.managers.redis import RedisManager
-from greenbot.streamhelper import StreamHelper
 
 log = logging.getLogger(__name__)
 
