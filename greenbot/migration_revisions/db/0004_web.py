@@ -32,8 +32,8 @@ def up(cursor, bot):
     CREATE TABLE banphrase_data (
         banphrase_id INT PRIMARY KEY NOT NULL REFERENCES banphrase(id),
         num_uses INT NOT NULL,
-        added_by INT DEFAULT NULL,
-        edited_by INT DEFAULT NULL
+        added_by TEXT DEFAULT NULL,
+        edited_by TEXT DEFAULT NULL
     )
     """
     )
