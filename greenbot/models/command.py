@@ -362,7 +362,7 @@ class Command(Base):
             log.debug(f"{author.name}#{author.discriminator} ran command {time_since_last_run_user:.2f} seconds ago, waiting...")
             return False
         with DBManager.create_session_scope() as db_session:
-            user = User._create_or_get_by_discord_id(db_session, str(author.id))
+            user = User._create_or_get_by_discord_id(db_session, str(author.id), str(author))
             if self.cost > 0 and not user.can_afford(self.cost):
                 # User does not have enough points to use the command
                 return False
@@ -379,7 +379,7 @@ class Command(Base):
     def run_action(self, bot, author, channel, message, whisper, args):
         cur_time = greenbot.utils.now().timestamp()
         with DBManager.create_session_scope() as db_session:
-            user = User._create_or_get_by_discord_id(db_session, str(author.id))
+            user = User._create_or_get_by_discord_id(db_session, str(author.id), str(author))
             with user.spend_currency_context(self.cost):
                 ret = self.action.run(bot, author, channel, message, whisper, args)
                 if not ret:
