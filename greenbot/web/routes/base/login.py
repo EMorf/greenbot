@@ -11,7 +11,6 @@ from flask_oauthlib.client import OAuthException
 from flask_openid import OpenID
 import re
 
-from greenbot.apiwrappers.authentication.access_token import UserAccessToken
 from greenbot.managers.db import DBManager
 from greenbot.managers.redis import RedisManager
 from greenbot.models.user import User, UserBasics
