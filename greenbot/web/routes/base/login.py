@@ -18,14 +18,13 @@ import time
 
 log = logging.getLogger(__name__)
 
-state = "/"
 
 def init(app):
     discord = DiscordOAuth2Session(app)
 
     @app.route("/login")
     def discord_login():
-        request.args["state"] = request.args.get("n") or request.referrer or None
+        session["state"] = request.args.get("n") or request.referrer or None
         return discord.create_session()
 
     @app.route("/login/error")
@@ -39,7 +38,7 @@ def init(app):
         with DBManager.create_session_scope(expire_on_commit=False) as db_session:
             session["user"] = User._create_or_get_by_discord_id(db_session, str(user.id)).jsonify()
         session["user_displayname"] = str(user) 
-        next_url = get_next_url(request, "state")
+        next_url = session.get("state", "/")
         return redirect(next_url)
 
     @app.route("/me/")
