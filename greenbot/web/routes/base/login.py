@@ -40,7 +40,7 @@ def init(app):
         return f"""
         <html>
             <head>
-                <title>{user.name}</title>
+                <title>{user}</title>
             </head>
             <body>
                 <img src='{user.avatar_url}' />
