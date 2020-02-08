@@ -97,7 +97,8 @@ def init(page):
             delay_user = int(delay_user)
             level = int(level)
             cost = int(cost)
-        except ValueError:
+        except ValueError as e:
+            log.info(e)
             abort(403)
 
         if not alias_str:
@@ -118,7 +119,7 @@ def init(page):
 
         options = {"delay_all": delay_all, "delay_user": delay_user, "level": level, "cost": cost, "added_by": user.discord_id}
 
-        valid_action_types = ["say", "me", "whisper", "reply"]
+        valid_action_types = ["channelmessage", "privatemessage"]
         action_type = request.form.get("reply", "say").lower()
         if action_type not in valid_action_types:
             abort(403)

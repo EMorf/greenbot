@@ -88,94 +88,92 @@ class APICommandUpdate(Resource):
 
     @greenbot.web.utils.requires_level(500)
     def post(self, command_id, **extra_args):
-        try:
-            args = greenbot.utils.remove_none_values(self.post_parser.parse_args())
-            if len(args) == 0:
-                return {"error": "Missing parameter to edit."}, 400
+        log.info("Yes")
+        args = greenbot.utils.remove_none_values(self.post_parser.parse_args())
+        if len(args) == 0:
+            return {"error": "Missing parameter to edit."}, 400
 
-            valid_names = ["enabled", "level", "delay_all", "delay_user", "cost", "can_execute_with_whisper", "sub_only"]
+        valid_names = ["enabled", "level", "delay_all", "delay_user", "cost", "can_execute_with_whisper", "sub_only"]
 
-            valid_action_names = ["type", "message"]
+        valid_action_names = ["type", "message"]
 
-            with DBManager.create_session_scope() as db_session:
-                command = (
-                    db_session.query(Command)
-                    .options(joinedload(Command.data).joinedload(CommandData.user))
-                    .filter_by(id=command_id)
-                    .one_or_none()
-                )
-                if command is None:
-                    return {"error": "Invalid command ID"}, 404
-                log.info(extra_args["user"])
-                if command.level > extra_args["user"].level:
-                    return {"error": "Unauthorized"}, 403
-                parsed_action = json.loads(command.action_json)
-                options = {"edited_by": extra_args["user"].id}
+        with DBManager.create_session_scope() as db_session:
+            command = (
+                db_session.query(Command)
+                .options(joinedload(Command.data).joinedload(CommandData.user))
+                .filter_by(id=command_id)
+                .one_or_none()
+            )
+            if command is None:
+                return {"error": "Invalid command ID"}, 404
+            log.info(extra_args["user"])
+            if command.level > extra_args["user"].level:
+                return {"error": "Unauthorized"}, 403
+            parsed_action = json.loads(command.action_json)
+            options = {"edited_by": extra_args["user"].id}
 
-                for key in args:
-                    if key.startswith("data_"):
-                        name = key[5:]
-                        value = args[key]
+            for key in args:
+                if key.startswith("data_"):
+                    name = key[5:]
+                    value = args[key]
 
-                        if name.startswith("action_"):
-                            name = name[7:]
-                            if name in valid_action_names and name in parsed_action and command.action.type == "message":
-                                value_type = type(parsed_action[name])
-                                if value_type is bool:
-                                    parsed_value = True if value == "1" else False
-                                elif value_type is int:
-                                    try:
-                                        parsed_value = int(value)
-                                    except ValueError:
-                                        continue
-                                else:
-                                    parsed_value = value
-                                parsed_action[name] = parsed_value
-                            command.action_json = json.dumps(parsed_action)
-                        else:
-                            if name in valid_names:
-                                value_type = type(getattr(command, name))
-                                if value_type is bool:
-                                    parsed_value = True if value == "1" else False
-                                elif value_type is int:
-                                    try:
-                                        parsed_value = int(value)
-                                    except ValueError:
-                                        continue
-                                else:
-                                    parsed_value = value
-                                options[name] = parsed_value
+                    if name.startswith("action_"):
+                        name = name[7:]
+                        if name in valid_action_names and name in parsed_action and command.action.type == "message":
+                            value_type = type(parsed_action[name])
+                            if value_type is bool:
+                                parsed_value = True if value == "1" else False
+                            elif value_type is int:
+                                try:
+                                    parsed_value = int(value)
+                                except ValueError:
+                                    continue
+                            else:
+                                parsed_value = value
+                            parsed_action[name] = parsed_value
+                        command.action_json = json.dumps(parsed_action)
+                    else:
+                        if name in valid_names:
+                            value_type = type(getattr(command, name))
+                            if value_type is bool:
+                                parsed_value = True if value == "1" else False
+                            elif value_type is int:
+                                try:
+                                    parsed_value = int(value)
+                                except ValueError:
+                                    continue
+                            else:
+                                parsed_value = value
+                            options[name] = parsed_value
 
-                aj = json.loads(command.action_json)
-                old_message = ""
-                new_message = ""
-                try:
-                    old_message = command.action.response
-                    new_message = aj["message"]
-                except:
-                    pass
+            aj = json.loads(command.action_json)
+            old_message = ""
+            new_message = ""
+            try:
+                old_message = command.action.response
+                new_message = aj["message"]
+            except:
+                pass
 
-                command.set(**options)
-                command.data.set(**options)
+            command.set(**options)
+            command.data.set(**options)
 
-                if len(old_message) > 0 and old_message != new_message:
-                    log_msg = f'The !{command.command.split("|")[0]} command has been updated from "{old_message}" to "{new_message}"'
-                else:
-                    log_msg = f"The !{command.command.split('|')[0]} command has been updated"
-
-                AdminLogManager.add_entry(
-                    "Command edited",
-                    extra_args["user"],
-                    log_msg,
-                    data={"old_message": old_message, "new_message": new_message},
-                )
-
-            if SocketClientManager.send("command.update", {"command_id": command_id}) is True:
-                return {"success": "good job"}, 200
+            if len(old_message) > 0 and old_message != new_message:
+                log_msg = f'The !{command.command.split("|")[0]} command has been updated from "{old_message}" to "{new_message}"'
             else:
-                return {"error": "could not push update"}, 500
-        except Exception as e:
-            return {"error": str(e)}
+                log_msg = f"The !{command.command.split('|')[0]} command has been updated"
+
+            AdminLogManager.add_entry(
+                "Command edited",
+                extra_args["user"],
+                log_msg,
+                data={"old_message": old_message, "new_message": new_message},
+            )
+
+        if SocketClientManager.send("command.update", {"command_id": command_id}) is True:
+            return {"success": "good job"}, 200
+        else:
+            return {"error": "could not push update"}, 500
 
 
 class APICommandCheckAlias(Resource):
