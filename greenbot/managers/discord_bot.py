@@ -24,7 +24,7 @@ class CustomClient(discord.Client):
         if not self.bot.guild:
             log.error("Discord Guild not found!")
             return
-        log.info(f"Discord Bot has started!")
+        log.info(f"Discord Bot has started with id {self.id}")
         HandlerManager.trigger("discord_ready")
 
     async def on_message(self, message):
@@ -33,7 +33,6 @@ class CustomClient(discord.Client):
             message.guild != self.bot.guild
         ):
             return
-        user_level = 50
         with DBManager.create_session_scope() as db_session:
             user = User._create_or_get_by_discord_id(
                 db_session,
@@ -49,12 +48,13 @@ class CustomClient(discord.Client):
                 else None,
                 message.content,
             )
+            db_session.commit()
             HandlerManager.trigger(
                 "discord_message",
                 message_raw=message,
                 message=message.content,
                 author=message.author,
-                user_level=user.level,
+                user_level=user.level if user else 50,
                 channel=message.channel
                 if isinstance(message.author, discord.Member)
                 else None,
