@@ -6,7 +6,7 @@
 <meta charset="utf-8">
 <style>
 .pui.badge.subscriber {
-    /* background-image: url('/static/images/badge_sub_{{ streamer.full_name }}.png'); */
+    /* background-image: url('/static/images/badge_sub_ streamer.full_name .png'); */
     background-size: 100%;
 }
 </style>
@@ -27,7 +27,7 @@
         {% for menuitem in nav_bar_header %}
         <a class="item{% if menuitem.id == active_page %} active{% endif %}" href="{{ menuitem.href }}">
             {% if menuitem.id == 'home' %}
-            <!-- <img class="logo" src="/static/images/logo_{{ streamer.full_name }}_tn.png" alt="{{ streamer.name }} logo"/> -->
+            <!-- <img class="logo" src="/static/images/logo_ streamer.full_name _tn.png" alt=" streamer.name  logo"/> -->
             {% endif %}
             {{ menuitem.caption }}</a>
         {% endfor %}
