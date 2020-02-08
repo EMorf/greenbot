@@ -22,7 +22,7 @@ class ActionParser:
         if not data:
             data = json.loads(raw_data)
 
-        if data["type"] == "channelmessage":
+        if data["type"] == "reply":
             action = SayAction(data["message"], ActionParser.bot)
         elif data["type"] == "privatemessage":
             action = WhisperAction(data["message"], ActionParser.bot)
@@ -471,17 +471,19 @@ class SayAction(MessageAction):
         resp, embed = self.get_response(bot, extra)
         if not resp and not embed:
             return False
-
+        
         if self.num_urlfetch_subs == 0:
+            if whisper:
+                return bot.private_message(author, resp, embed)
             return bot.say(channel, resp, embed)
 
         return ScheduleManager.execute_now(
             urlfetch_msg,
             args=[],
             kwargs={
-                "args": [channel],
+                "args": [author if whisper else channel],
                 "kwargs": {},
-                "method": bot.say,
+                "method": bot.private_message if whisper else bot.say,
                 "bot": bot,
                 "extra": extra,
                 "message": resp,
