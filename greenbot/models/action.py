@@ -472,7 +472,7 @@ def get_functions(_functions, bot):
     except AttributeError:
         pass
     for func in _functions:
-        func = Substitution.substitution_regex.finditer(func)
+        func = next(Substitution.substitution_regex.finditer(func))
         if not func:
             continue
         function, arguments = get_function_arguments(func)
