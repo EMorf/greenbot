@@ -502,7 +502,7 @@ def get_functions(_functions, bot):
     for func_name in _functions:
         func = Function.function_regex.search(func_name)
         if not func:
-            log.info(f"Function not found in {func_name}")
+            # log.info(f"Function not found in {func_name}")
             continue
         function, arguments = get_function_arguments(func)
         if function not in method_mapping:
