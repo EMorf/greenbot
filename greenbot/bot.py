@@ -74,7 +74,6 @@ class Bot:
         self.settings = {
             "discord_token": self.discord_token,
             "bot_name": self.bot_name,
-            "channels": self.config["discord"]["channels_to_listen_in"].split(" "),
             "command_prefix": self.command_prefix,
             "discord_guild_id": self.config["discord"]["discord_guild_id"],
         }
