@@ -21,6 +21,7 @@ from greenbot.models.module import ModuleManager
 from greenbot.models.user import User
 from greenbot.utils import time_method
 from greenbot.bothelper import BotHelper
+from greenbot.managers.command import CommandManager
 
 log = logging.getLogger(__name__)
 
@@ -71,7 +72,7 @@ def get_cached_commands():
     commands = redis.get(commands_key)
     if commands is None:
         log.debug("Updating commands...")
-        bot_commands = greenbot.managers.command.CommandManager(
+        bot_commands = CommandManager(
             socket_manager=None, module_manager=ModuleManager(None).load(), bot=None
         ).load(load_examples=True)
         bot_commands_list = bot_commands.parse_for_web()
