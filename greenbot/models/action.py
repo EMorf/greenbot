@@ -28,6 +28,8 @@ class ActionParser:
             action = PrivateMessageAction(data["message"], ActionParser.bot)
         elif data["type"] == "func":
             action = FuncAction(getattr(Dispatch, data["cb"]))
+        elif data["type"] == "multi":
+            action = MultiAction(data["args"], data["default"])
         else:
             raise Exception(f"Unknown action type: {data['type']}")
 
@@ -208,6 +210,80 @@ def get_urlfetch_substitutions(string, all=False):
         substitutions[sub_key.group(0)] = sub_key.group(1)
 
     return substitutions
+
+class MultiAction(BaseAction):
+    type = "multi"
+
+    def __init__(self, args, default=None, fallback=None):
+        from greenbot.models.command import Command
+
+        self.commands = {}
+        self.default = default
+        self.fallback = fallback
+
+        for command in args:
+            cmd = Command.from_json(command)
+            for alias in command["command"].split("|"):
+                if alias not in self.commands:
+                    self.commands[alias] = cmd
+                else:
+                    log.error(f"Alias {alias} for this multiaction is already in use.")
+
+        import copy
+
+        self.original_commands = copy.copy(self.commands)
+
+    def reset(self):
+        import copy
+
+        self.commands = copy.copy(self.original_commands)
+
+    def __iadd__(self, other):
+        if other is not None and other.type == "multi":
+            self.commands.update(other.commands)
+        return self
+
+    @classmethod
+    def ready_built(cls, commands, default=None, fallback=None):
+        """ Useful if you already have a dictionary
+        with commands pre-built.
+        """
+
+        multiaction = cls(args=[], default=default, fallback=fallback)
+        multiaction.commands = commands
+        import copy
+
+        multiaction.original_commands = copy.copy(commands)
+        return multiaction
+
+    def run(self, bot, author, channel, message, whisper, args):
+        """ If there is more text sent to the multicommand after the
+        initial alias, we _ALWAYS_ assume it's trying the subaction command.
+        If the extra text was not a valid command, we try to run the fallback command.
+        In case there's no extra text sent, we will try to run the default command.
+        """
+
+        cmd = None
+        if message:
+            msg_lower_parts = message.lower().split(" ")
+            command = msg_lower_parts[0]
+            cmd = self.commands.get(command, None)
+            extra_msg = " ".join(message.split(" ")[1:])
+            if cmd is None and self.fallback:
+                cmd = self.commands.get(self.fallback, None)
+                extra_msg = message
+        elif self.default:
+            command = self.default
+            cmd = self.commands.get(command, None)
+            extra_msg = None
+
+        if cmd:
+            if args["user_level"] >= cmd.level:
+                return cmd.run(bot, author, channel, extra_msg, whisper, args)
+
+            log.info(f"User {author} tried running a sub-command he had no access to ({command}).")
+
+        return None
 
 
 class MessageAction(BaseAction):
