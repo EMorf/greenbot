@@ -23,15 +23,16 @@ class ActionParser:
             data = json.loads(raw_data)
         if data["type"] == "reply":
             action = ReplyAction(data["message"], ActionParser.bot, functions=data.get("functions", []))
+            log.info(action.functions)
         elif data["type"] == "privatemessage":
             action = PrivateMessageAction(data["message"], ActionParser.bot, functions=data.get("functions", []))
+            log.info(action.functions)
         elif data["type"] == "func":
             action = FuncAction(getattr(Dispatch, data["cb"]))
         elif data["type"] == "multi":
             action = MultiAction(data["args"], data["default"])
         else:
             raise Exception(f"Unknown action type: {data['type']}")
-        log.info(action.functions)
         return action
 
 
@@ -441,7 +442,6 @@ def get_functions(_functions, bot):
     functions = []
     method_mapping = method_func(bot)
     for func in _functions:
-        log.info(func)
         func = Function.function_regex.finditer(func)
         if not func:
             continue
