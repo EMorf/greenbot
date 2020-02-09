@@ -193,6 +193,7 @@ class DiscordBotManager:
         timeouts = json.loads(self.redis.get("timeouts-discord"))
         if str(user_id) in timeouts:
             del timeouts[str(user_id)]
+            self.redis.set("timeouts-discord", json.dumps(timeouts))
         try:
             ban = await self.guild.fetch_ban(user)
             if ban:
