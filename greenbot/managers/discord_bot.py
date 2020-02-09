@@ -84,7 +84,9 @@ class DiscordBotManager:
 
     def initial_unbans(self):
         try:
-            for user in json.loads(self.redis.get("timeouts-discord")):
+            data = json.loads(self.redis.get("timeouts-discord"))
+            for user in data:
+                log.info(data)
                 unban_date = user["unban_date"]
                 if ":" in unban_date[-5:]:
                     unban_date = f"{unban_date[:-5]}{unban_date[-5:-3]}{unban_date[-2:]}"
