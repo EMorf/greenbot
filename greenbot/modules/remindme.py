@@ -85,7 +85,8 @@ class ActivityTracker(BaseModule):
             description="Creates a reminder",
         )
 
-    # def execute_reminder(self, salt, )
+    def execute_reminder(self, salt, reminder):
+        self.reminder_tasks.pop(salt)
 
     def enable(self, bot):
         if not bot:
@@ -117,7 +118,7 @@ class ActivityTracker(BaseModule):
                 if date_of_reminder < utils.now():
                     continue
                 new_user_reminders.append(reminder)
-                self.reminder_tasks[salt] = ScheduleManager.execute_delayed((date_of_reminder-utils.now()).seconds, )
+                self.reminder_tasks[salt] = ScheduleManager.execute_delayed((date_of_reminder-utils.now()).seconds, self.execute_reminder, args=[salt, reminder])
 
     def disable(self, bot):
         if not bot:
