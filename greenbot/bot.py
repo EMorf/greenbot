@@ -560,7 +560,9 @@ class Bot:
         log.info(extra)
 
     def rest(self, key, extra={}):
-        return " ".join(extra["message"].split(" ")[int(key):])
+        rest = " ".join(extra["message"].split(" ")[int(key):])
+        log.info(rest)
+        return rest
 
     @staticmethod
     def get_args_value(key, extra={}):
