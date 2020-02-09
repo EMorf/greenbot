@@ -78,7 +78,7 @@ class DiscordBotManager:
         self.guild = None
         if not self.redis.get("timeouts-discord") or not json.loads(self.redis.get("timeouts-discord")):
             self.redis.set("timeouts-discord", json.dumps([]))
-        self.unban_task = self.bot.schedule_task_periodically(300, self.unbaner_func)
+        self.unban_task = self.schedule_task_periodically(300, self.unbaner_func)
 
     def private_message(self, user, message, embed=None):
         self.private_loop.create_task(self._private_message(user, message, embed))
