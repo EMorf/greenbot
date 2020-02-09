@@ -91,10 +91,10 @@ class DiscordBotManager:
                 if ":" in unban_date[-5:]:
                     unban_date = f"{unban_date[:-5]}{unban_date[-5:-3]}{unban_date[-2:]}"
                 unban_date = datetime.strptime(unban_date, "%Y-%m-%d %H:%M:%S.%f%z")
-                reason = user["reason"] if "reason" in user else "None"
                 if unban_date < utils.now():
                     ScheduleManager.execute_now(method=self.unban, args=[data[user]["discord_id"], f"Unbanned by timer"])
                     continue
+                log.info((utils.now() - unban_date).seconds)
                 ScheduleManager.execute_delayed(delay=(utils.now() - unban_date).seconds, method=self.unban, args=[data[user]["discord_id"], f"Unbanned by timer"])
         except Exception as e:
             log.exception(e)
