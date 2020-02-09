@@ -559,6 +559,9 @@ class Bot:
         log.info(args)
         log.info(extra)
 
+    def rest(self, key, extra={}):
+        return " ".join(extra["message"].split(" ")[int(key):])
+
     @staticmethod
     def get_args_value(key, extra={}):
         r = None
@@ -584,11 +587,7 @@ class Bot:
             return ""
         except:
             log.exception("Caught exception in get_args_value")
-            return "" 
-
-    @staticmethod
-    def rest(key, extra={}):
-        return " ".join(extra["message"].split(" ")[int(key):])
+            return ""
 
     @staticmethod
     def get_command_value(key, extra={}):
