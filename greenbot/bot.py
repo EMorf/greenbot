@@ -252,8 +252,12 @@ class Bot:
             member_user = User._create_or_get_by_discord_id(
                 db_session, str(member.id), user_name=str(member)
             )
-            if author_user.level <= member_user.level:
+            if author.id == member.id:
+                return "You cannot ban yourself :)", None
+            if author_user.level == member_user.level:
                 return "You cannot ban someone who has the same level as you :)", None
+            elif author_user.level < member_user.level:
+                return "You cannot ban someone who is a higher level than you :)", None
         timeout_in_seconds = int(args[1] if len(args) > 2 and args[1] != "" else 0)
         delete_message_days = int(args[2] if len(args) > 3 and args[2] != "" else 0)
         reason = args[3] if len(args) == 4 else ""
@@ -279,6 +283,24 @@ class Bot:
             user_id=member_id, reason=f"{reason}\nUnbanned by {author}",
         )
         return message, None
+
+    def func_level(self, args, extra={}):
+        if len(args) == 0:
+            return "Invalid User", None
+        member_id = args[0][3:][:-1]
+        level = args[1] if len(args) >= 2 else None
+        try:
+            level = int(level)
+        except:
+            return "Invalid level (1-2000)", None
+        if level >= extra["user_level"]:
+            return "You cannot set a level higher then your own!", None
+        with DBManager.create_session_scope() as db_session:
+            user = User._create_or_get_by_discord_id(db_session, str(member_id))
+            if user.level >= extra["user_level"]:
+                return "You cannot set a level of a user with a higher then your own!", None
+            user.level = level
+        return f"Level, {level}, set for <@!{member_id}>", None
 
     def func_set_balance(self, args, extra={}):
         if len(args) == 0:

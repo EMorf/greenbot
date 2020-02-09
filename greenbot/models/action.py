@@ -520,6 +520,7 @@ def method_func(bot):
         method_mapping["adjpoints"] = bot.func_adj_balance if bot else None
         method_mapping["banmember"] = bot.func_ban_member if bot else None
         method_mapping["unbanmember"] = bot.func_unban_member if bot else None
+        method_mapping["level"] = bot.func_level if bot else None
         method_mapping["output"] = bot.func_output if bot else None
     except AttributeError:
         pass
