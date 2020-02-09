@@ -520,6 +520,7 @@ def method_func(bot):
         method_mapping["adjpoints"] = bot.func_adj_balance if bot else None
         method_mapping["banmember"] = bot.func_ban_member if bot else None
         method_mapping["unbanmember"] = bot.func_unban_member if bot else None
+        method_mapping["output"] = bot.func_output if bot else None
     except AttributeError:
         pass
     return method_mapping
@@ -542,6 +543,7 @@ def method_subs(bot):
         method_mapping["commandinfo"] = bot.get_command_info if bot else None
         method_mapping["user"] = bot.get_user if bot else None
         method_mapping["currency"] = bot.get_currency if bot else None
+        method_mapping["rest"] = bot.rest if bot else None
     except AttributeError:
         pass
     return method_mapping

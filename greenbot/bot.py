@@ -250,16 +250,16 @@ class Bot:
         timeout_in_seconds = 0
         delete_message_days = 0
         try:
-            timeout_in_seconds = int(args[0])
+            timeout_in_seconds = int(args[1])
         except:
-            reason = args[1:]
+            reason = args[2:]
         if not reason:
             try:
-                delete_message_days = int(args[1])
+                delete_message_days = int(args[2])
             except:
-                reason = args[2:]
+                reason = args[3:]
         if not reason:
-            reason = args[3:]
+            reason = args[4:]
 
         message = f"Member <@!{member.id}> has been banned!"
         self.ban(
@@ -555,6 +555,10 @@ class Bot:
             db_user = User._create_or_get_by_discord_id(db_session, user.id)
             return getattr(db_user, key) if db_user else None
 
+    def func_output(self, args, extra={}):
+        log.info(args)
+        log.info(extra)
+
     @staticmethod
     def get_args_value(key, extra={}):
         r = None
@@ -580,7 +584,11 @@ class Bot:
             return ""
         except:
             log.exception("Caught exception in get_args_value")
-            return ""
+            return "" 
+
+    @staticmethod
+    def rest(key, extra={}):
+        return " ".join(extra["message"].split(" ")[key:])
 
     @staticmethod
     def get_command_value(key, extra={}):

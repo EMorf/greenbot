@@ -21,12 +21,10 @@ For this reason, these installation instructions are split into two big parts: I
   - [Install nginx](#install-nginx)
   - [Install system services](#install-system-services)
 - [Single bot setup](#single-bot-setup)
-  - [Create an application with Twitch](#create-an-application-with-twitch)
   - [Create a database schema](#create-a-database-schema)
   - [Create a configuration file](#create-a-configuration-file)
   - [Set up the website with nginx](#set-up-the-website-with-nginx)
   - [Enable and start the service](#enable-and-start-the-service)
-  - [Authenticate the bot](#authenticate-the-bot)
   - [Further steps](#further-steps)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
@@ -219,4 +217,18 @@ Then, to finally make the bot come online, run:
 
 ```bash
 sudo systemctl restart greenbot@name
+```
+
+## Further Steps
+```
+  !add command points $(member;1:mention) has $(user;1:points) $(currency:name)
+  !add command commands $(member;1:mention), $(commands)
+  !add command ecount --reply @$(source:name), $(1) has been used $(ecount;1) times.
+  !add command epm --reply @$(source:name), $(1) is currently being used $(epm;1) times per minute.
+  !add command uptime|downtime --reply @$(source:name), $(tb:broadcaster) has been $(tb:stream_status) for $(tb:status_length)
+  !add command points|p --reply @$(source:name), $(usersource;1:name) has $(usersource;1:points|number_format) points
+  !add command lastseen --reply @$(source:name), $(user;1:name) was last seen $(user;1:last_seen|time_since_dt) ago, and last active $(user;1:last_active|time_since_dt) ago.
+  !add command epmrecord --reply @$(source:name), $(1) per minute record is $(epmrecord;1).
+  !add command profile --reply @$(source:name) https://$(tb:bot_domain)/user/$(usersource;1:username)
+  !add command playsounds --reply @$(source:name), available playsounds are listed here: https://$(tb:bot_domain)/playsounds
 ```
