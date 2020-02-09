@@ -189,7 +189,7 @@ class DiscordBotManager:
     async def _unban(self, user_id, reason=None):
         if not self.guild:
             return
-        user = await self.client.fetch_user(user_id)
+        user = await self.client.fetch_user(int(user_id))
         timeouts = json.loads(self.redis.get("timeouts-discord"))
         if str(user_id) in timeouts:
             del timeouts[str(user_id)]
