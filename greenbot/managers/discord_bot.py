@@ -9,6 +9,7 @@ from datetime import datetime, timedelta
 from greenbot.models.user import User
 from greenbot.models.message import Message
 from greenbot.managers.db import DBManager
+from greenbot.managers.schedule import ScheduleManager
 from greenbot.managers.handler import HandlerManager
 import greenbot.utils as utils
 
@@ -77,8 +78,19 @@ class DiscordBotManager:
 
         self.guild = None
         if not self.redis.get("timeouts-discord") or not json.loads(self.redis.get("timeouts-discord")):
-            self.redis.set("timeouts-discord", json.dumps([]))
+            self.redis.set("timeouts-discord", json.dumps({}))
         self.unban_task = self.schedule_task_periodically(300, self.unbaner_func)
+        
+        for user in json.loads(self.redis.get("timeouts-discord")):
+            unban_date = user["unban_date"]
+            if ":" in unban_date[-5:]:
+                unban_date = f"{unban_date[:-5]}{unban_date[-5:-3]}{unban_date[-2:]}"
+            unban_date = datetime.strptime(unban_date, "%Y-%m-%d %H:%M:%S.%f%z")
+            reason = user["reason"] if "reason" in user else "None"
+            if unban_date < utils.now():
+                ScheduleManager.execute_now((utils.now() - unban_date).seconds, self.unban(user_id=user["discord_id"], reason=f"Unbanned by timer Previously banned for {reason}"))
+                continue
+            ScheduleManager.execute_delayed((utils.now() - unban_date).seconds, self.unban(user_id=user["discord_id"], reason=f"Unbanned by timer Previously banned for {reason}"))
 
     def private_message(self, user, message, embed=None):
         self.private_loop.create_task(self._private_message(user, message, embed))
@@ -146,15 +158,22 @@ class DiscordBotManager:
             return
         if not user:
             return
+        try:
+            ban = await self.guild.fetch_ban(user)
+            if ban:
+                return
+        except:
+            pass
         if timeout_in_seconds > 0:
             reason = f"{reason}\nBanned for {timeout_in_seconds} seconds"
             timeouts = json.loads(self.redis.get("timeouts-discord"))
-            timeout = {
+            timeouts[str(user.id)] = {
                 "discord_id": str(user.id),
                 "unban_date": str(utils.now() + timedelta(seconds=timeout_in_seconds)),
                 "reason": str(reason)
             }
-            timeouts.append(json.dumps(timeout))
+            self.redis.set("timeouts-discord", json.dumps(timeouts))
+            ScheduleManager.execute_delayed(timeout_in_seconds, self.unban(user_id=user.id, reason=f"Unbanned by timer Previously banned for {reason}"))
         await self.guild.ban(
             user=user, reason=reason, delete_message_days=delete_message_days
         )
@@ -163,7 +182,15 @@ class DiscordBotManager:
         if not self.guild:
             return
         user = await self.client.fetch_user(user_id)
-        await self.guild.unban(user=user, reason=reason)
+        timeouts = json.loads(self.redis.get("timeouts-discord"))
+        if str(user_id) in timeouts:
+            del timeouts[str(user_id)]
+        try:
+            ban = await self.guild.fetch_ban(user)
+            if ban:
+                await self.guild.unban(user=user, reason=reason)
+        except:
+            pass
 
     async def _kick(self, user, reason=None):
         if not self.guild:
@@ -188,27 +215,6 @@ class DiscordBotManager:
         if not self.guild:
             return
         await user.add_roles(role)
-
-    async def unbaner_func(self):
-        if self.guild == None:
-            return
-        try:
-            users_to_unban = json.loads(self.redis.get("timeouts-discord"))
-        except:
-            self.redis.set("timeouts-discord", json.dumps([]))
-            return
-        return_users = []
-        for user in users_to_unban:
-            if "discord_id" not in users_to_unban or "unban_date" not in users_to_unban:
-                continue
-            unban_date = user["unban_date"]
-            if ":" in unban_date[-5:]:
-                unban_date = f"{unban_date[:-5]}{unban_date[-5:-3]}{unban_date[-2:]}"
-            if datetime.strptime(unban_date, "%Y-%m-%d %H:%M:%S.%f%z") < utils.now():
-                await self._unban(user_id=user["discord_id"], reason=f"Unbanned by timer Previously banned for {reason}")             
-            else:
-                return_users.append(user)
-        self.redis.set("timeouts-discord", json.dumps(return_users))
 
     async def run_periodically(self, wait_time, func, *args):
         while True:

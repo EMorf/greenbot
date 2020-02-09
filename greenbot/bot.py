@@ -223,7 +223,7 @@ class Bot:
             return "Invalid User", None
         member = self.get_member(args[0][3:][:-1])
         if not member:
-            return "Member not found"
+            return "Member not found", None
         with DBManager.create_session_scope() as db_session:
             author_user = User._create_or_get_by_discord_id(
                 db_session, str(author.id), user_name=str(author)
@@ -244,7 +244,7 @@ class Bot:
         member = self.get_member(args[0][3:][:-1])
         author = extra["author"]
         if not member:
-            return "Member not found"
+            return "Member not found", None
         with DBManager.create_session_scope() as db_session:
             author_user = User._create_or_get_by_discord_id(
                 db_session, str(author.id), user_name=str(author)
