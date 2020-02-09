@@ -96,7 +96,7 @@ class DiscordBotManager:
                 ScheduleManager.execute_delayed(delay=(utils.now() - unban_date).seconds, method=self.unban, args=[user["discord_id"], f"Unbanned by timer Previously banned for {reason}"])
         except Exception as e:
             log.exception(e)
-            self.redis.set("timeouts-discord", {})
+            self.redis.set("timeouts-discord", json.dumps({}))
 
     def private_message(self, user, message, embed=None):
         self.private_loop.create_task(self._private_message(user, message, embed))
