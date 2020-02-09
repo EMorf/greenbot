@@ -194,7 +194,6 @@ class Bot:
                 except Exception as e:
                     log.error(f"Error thrown on command {trigger}")
                     log.exception(e)
-                    raise Exception
 
     def get_role_id(self, role_name):
         return self.discord_bot.get_role_id(role_name)
@@ -255,8 +254,8 @@ class Bot:
             )
             if author_user.level <= member_user.level:
                 return "You cannot ban someone who has the same level as you :)", None
-        timeout_in_seconds = int(args[1] if len(args) > 2 else 0)
-        delete_message_days = int(args[2] if len(args) > 3 else 0)
+        timeout_in_seconds = int(args[1] if len(args) > 2 and args[1] != "" else 0)
+        delete_message_days = int(args[2] if len(args) > 3 and args[2] != "" else 0)
         reason = args[3] if len(args) == 4 else ""
 
         message = f"Member {member.mention} has been banned!"
@@ -302,7 +301,7 @@ class Bot:
         try:
             amount = int(args[1])
         except:
-            return f"Invalid points amount, {args[1]}", None
+            return f"Invalid points amount", None
         with DBManager.create_session_scope() as db_session:
             user = User._create_or_get_by_discord_id(db_session, str(user_id))
             user.points += amount
