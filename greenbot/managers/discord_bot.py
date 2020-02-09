@@ -125,7 +125,9 @@ class DiscordBotManager:
         self.private_loop.create_task(self._kick(user=user, reason=reason))
 
     def get_role_id(self, role_name):
+        log.info(role_name)
         for role in self.guild.roles:
+            log.info(role.name)
             if role.name == role_name:
                 return str(role.id)
         return None
