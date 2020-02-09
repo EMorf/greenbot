@@ -588,7 +588,7 @@ class Bot:
 
     @staticmethod
     def rest(key, extra={}):
-        return " ".join(extra["message"].split(" ")[key:])
+        return " ".join(extra["message"].split(" ")[int(key):])
 
     @staticmethod
     def get_command_value(key, extra={}):
