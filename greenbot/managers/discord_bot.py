@@ -135,13 +135,13 @@ class DiscordBotManager:
     def get_role(self, role_id):
         try:
             return self.guild.get_role(int(role_id))
-        except ValueError:
+        except:
             return None
 
     def get_member(self, member_id):
         try:
             return self.guild.get_member(int(member_id))
-        except ValueError:
+        except:
             return None
 
     def say(self, channel, message, embed=None):
