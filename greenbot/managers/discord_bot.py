@@ -86,19 +86,15 @@ class DiscordBotManager:
         try:
             data = json.loads(self.redis.get("timeouts-discord"))
             for user in data:
-                log.info(data)
                 unban_date = data[user]["unban_date"]
                 if ":" in unban_date[-5:]:
                     unban_date = f"{unban_date[:-5]}{unban_date[-5:-3]}{unban_date[-2:]}"
                 unban_date = datetime.strptime(unban_date, "%Y-%m-%d %H:%M:%S.%f%z")
                 time_now = utils.now()
-                log.info(unban_date < time_now)
                 if unban_date < time_now:
-                    ScheduleManager.execute_now(method=self.unban, args=[data[user]["discord_id"], f"Unbanned by timer"])
+                    ScheduleManager.execute_now(method=self.unban, args=[data[user]["discord_id"], "Unbanned by timer"])
                     continue
-                log.info(time_now)
-                log.info((time_now - unban_date).seconds)
-                ScheduleManager.execute_delayed(delay=(time_now - unban_date).seconds, method=self.unban, args=[data[user]["discord_id"], f"Unbanned by timer"])
+                ScheduleManager.execute_delayed(delay=(unban_date - time_now).seconds, method=self.unban, args=[data[user]["discord_id"], "Unbanned by timer"])
         except Exception as e:
             log.exception(e)
             self.redis.set("timeouts-discord", json.dumps({}))
@@ -183,9 +179,8 @@ class DiscordBotManager:
                 "unban_date": str(utils.now() + timedelta(seconds=timeout_in_seconds)),
                 "reason": str(reason)
             }
-            log.info(str(utils.now() + timedelta(seconds=timeout_in_seconds)))
             self.redis.set("timeouts-discord", json.dumps(timeouts))
-            ScheduleManager.execute_delayed(delay=timeout_in_seconds, method=self.unban, args=[user.id, f"Unbanned by timer"])
+            ScheduleManager.execute_delayed(delay=timeout_in_seconds, method=self.unban, args=[user.id, "Unbanned by timer"])
         await self.guild.ban(
             user=user, reason=reason, delete_message_days=delete_message_days
         )
