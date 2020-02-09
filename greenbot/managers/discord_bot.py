@@ -80,16 +80,23 @@ class DiscordBotManager:
         if not self.redis.get("timeouts-discord") or not json.loads(self.redis.get("timeouts-discord")):
             self.redis.set("timeouts-discord", json.dumps({}))
         
-        for user in json.loads(self.redis.get("timeouts-discord")):
-            unban_date = user["unban_date"]
-            if ":" in unban_date[-5:]:
-                unban_date = f"{unban_date[:-5]}{unban_date[-5:-3]}{unban_date[-2:]}"
-            unban_date = datetime.strptime(unban_date, "%Y-%m-%d %H:%M:%S.%f%z")
-            reason = user["reason"] if "reason" in user else "None"
-            if unban_date < utils.now():
-                ScheduleManager.execute_now(method=self.unban, args=[user["discord_id"], f"Unbanned by timer Previously banned for {reason}"])
-                continue
-            ScheduleManager.execute_delayed(delay=(utils.now() - unban_date).seconds, method=self.unban, args=[user["discord_id"], f"Unbanned by timer Previously banned for {reason}"])
+        HandlerManager.add_handler("discord_ready", self.initial_unbans)
+
+    def initial_unbans(self):
+        try:
+            for user in json.loads(self.redis.get("timeouts-discord")):
+                unban_date = user["unban_date"]
+                if ":" in unban_date[-5:]:
+                    unban_date = f"{unban_date[:-5]}{unban_date[-5:-3]}{unban_date[-2:]}"
+                unban_date = datetime.strptime(unban_date, "%Y-%m-%d %H:%M:%S.%f%z")
+                reason = user["reason"] if "reason" in user else "None"
+                if unban_date < utils.now():
+                    ScheduleManager.execute_now(method=self.unban, args=[user["discord_id"], f"Unbanned by timer Previously banned for {reason}"])
+                    continue
+                ScheduleManager.execute_delayed(delay=(utils.now() - unban_date).seconds, method=self.unban, args=[user["discord_id"], f"Unbanned by timer Previously banned for {reason}"])
+        except Exception as e:
+            log.exception(e)
+            self.redis.set("timeouts-discord", {})
 
     def private_message(self, user, message, embed=None):
         self.private_loop.create_task(self._private_message(user, message, embed))
