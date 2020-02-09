@@ -191,6 +191,8 @@ class DiscordBotManager:
             return
         user = await self.client.fetch_user(int(user_id))
         timeouts = json.loads(self.redis.get("timeouts-discord"))
+        log.info(user_id)
+        log.info(str(user_id) in timeouts)
         if str(user_id) in timeouts:
             del timeouts[str(user_id)]
             self.redis.set("timeouts-discord", json.dumps(timeouts))
