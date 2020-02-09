@@ -201,11 +201,11 @@ class Bot:
     def get_role(self, role_id):
         return self.discord_bot.get_role(role_id)
 
-    def add_role(self, user, role):
+    def add_role(self, user, role, reason=None):
         return self.discord_bot.add_role(user, role)
 
-    def remove_role(self, user, role):
-        return self.discord_bot.remove_role(user, role)
+    def remove_role(self, user, role, reason=None):
+        return self.discord_bot.remove_role(user, role, reason)
 
     def get_member(self, member_id):
         return self.discord_bot.get_member(member_id)
@@ -281,6 +281,42 @@ class Bot:
         message = f"Member <@!{member_id}> has been unbanned!"
         self.unban(
             user_id=member_id, reason=f"{reason}\nUnbanned by {author}",
+        )
+        return message, None
+
+    def func_add_role_member(self, args, extra={}):
+        if len(args) == 0:
+            return "Invalid User", None
+        member_id = args[0][3:][:-1]
+        member = self.get_member(member_id)
+        if not member:
+            return "Invalid User", None
+        author = extra["author"]
+        role = self.get_role(args[1])
+        if not role:
+            return "Invalid Role", None
+        reason = args[2]
+        message = f"Role {role.name} has been added to {member.mention}!"
+        self.add_role(
+            user=member, role=role, reason=f"{reason}\nAdded by {author}",
+        )
+        return message, None
+
+    def func_remove_role_member(self, args, extra={}):
+        if len(args) == 0:
+            return "Invalid User", None
+        member_id = args[0][3:][:-1]
+        member = self.get_member(member_id)
+        if not member:
+            return "Invalid User", None
+        author = extra["author"]
+        role = self.get_role(args[1])
+        if not role:
+            return "Invalid Role", None
+        reason = args[2]
+        message = f"Role {role.name} has been removed from {member.mention}!"
+        self.remove_role(
+            user=member, role=role, reason=f"{reason}\nRemoved by {author}",
         )
         return message, None
 

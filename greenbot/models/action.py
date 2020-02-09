@@ -522,6 +522,8 @@ def method_func(bot):
         method_mapping["unbanmember"] = bot.func_unban_member if bot else None
         method_mapping["level"] = bot.func_level if bot else None
         method_mapping["output"] = bot.func_output if bot else None
+        method_mapping["addrole"] = bot.func_add_role_member if bot else None
+        method_mapping["removerole"] = bot.func_remove_role_member if bot else None
     except AttributeError:
         pass
     return method_mapping

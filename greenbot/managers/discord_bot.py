@@ -102,11 +102,11 @@ class DiscordBotManager:
     def private_message(self, user, message, embed=None):
         self.private_loop.create_task(self._private_message(user, message, embed))
 
-    def remove_role(self, user, role):
-        self.private_loop.create_task(self._remove_role(user, role))
+    def remove_role(self, user, role, reason=None):
+        self.private_loop.create_task(self._remove_role(user, role, reason))
 
-    def add_role(self, user, role):
-        self.private_loop.create_task(self._add_role(user, role))
+    def add_role(self, user, role, reason=None):
+        self.private_loop.create_task(self._add_role(user, role, reason))
 
     def ban(self, user, timeout_in_seconds=0, reason=None, delete_message_days=0):
         self.private_loop.create_task(
@@ -214,15 +214,15 @@ class DiscordBotManager:
             return
         await user.dm_channel.send(content=message, embed=embed)
 
-    async def _remove_role(self, user, role):
+    async def _remove_role(self, user, role, reason=None):
         if not self.guild:
             return
-        await user.remove_roles(role)
+        await user.remove_roles(role, reason=reason)
 
-    async def _add_role(self, user, role):
+    async def _add_role(self, user, role, reason=None):
         if not self.guild:
             return
-        await user.add_roles(role)
+        await user.add_roles(role, reason=reason)
 
     async def run_periodically(self, wait_time, func, *args):
         while True:
