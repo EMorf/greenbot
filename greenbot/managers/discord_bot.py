@@ -180,6 +180,7 @@ class DiscordBotManager:
                 "unban_date": str(utils.now() + timedelta(seconds=timeout_in_seconds)),
                 "reason": str(reason)
             }
+            log.info(str(utils.now() + timedelta(seconds=timeout_in_seconds)))
             self.redis.set("timeouts-discord", json.dumps(timeouts))
             ScheduleManager.execute_delayed(delay=timeout_in_seconds, method=self.unban, args=[user.id, f"Unbanned by timer"])
         await self.guild.ban(
