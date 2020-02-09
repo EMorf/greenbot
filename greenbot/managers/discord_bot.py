@@ -75,8 +75,7 @@ class DiscordBotManager:
         self.redis = redis
 
         self.guild = None
-
-        if not self.redis.get("timeouts-discord"):
+        if not self.redis.get("timeouts-discord") or not json.loads(self.redis.get("timeouts-discord")):
             self.redis.set("timeouts-discord", json.dumps({}))
 
     def private_message(self, user, message, embed=None):
