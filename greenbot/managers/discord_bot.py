@@ -151,8 +151,8 @@ class DiscordBotManager:
             timeouts = json.loads(self.redis.get("timeouts-discord"))
             timeout = {
                 "discord_id": str(user.id),
-                "unban_date": utils.now() + timedelta(seconds=timeout_in_seconds),
-                "reason": reason
+                "unban_date": str(utils.now() + timedelta(seconds=timeout_in_seconds)),
+                "reason": str(reason)
             }
             timeouts.append(json.dumps(timeout))
         await self.guild.ban(
