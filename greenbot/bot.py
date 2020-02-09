@@ -183,13 +183,17 @@ class Bot:
                     "user_level": user_level,
                     "whisper": whisper,
                 }
-                command.run(
-                    bot=self,
-                    author=author,
-                    channel=channel,
-                    message=remaining_message,
-                    args=extra_args,
-                )
+                try:
+                    command.run(
+                        bot=self,
+                        author=author,
+                        channel=channel,
+                        message=remaining_message,
+                        args=extra_args,
+                    )
+                except Exception as e:
+                    log.error(f"Error thrown on command {trigger}")
+                    log.error(e)
 
     def get_role_id(self, role_name):
         return self.discord_bot.get_role_id(role_name)
@@ -215,6 +219,8 @@ class Bot:
 
     def func_kick_member(self, args, extra={}):
         author = extra["author"]
+        if len(args) == 0:
+            return "Invalid User", None
         member = self.get_member(args[0][3:][:-1])
         if not member:
             return "Member not found"
@@ -227,12 +233,14 @@ class Bot:
             )
             if author_user.level <= member_user.level:
                 return "You cannot kick someone who has the same level as you :)", None
-        reason = args[1]
+        reason = args[1] if len(args) > 1 else ""
         message = f"Member {member} has been kicked!"
         self.kick(member, f"{reason}\nKicked by {author}")
         return message, None
 
     def func_ban_member(self, args, extra={}):
+        if len(args) == 0:
+            return "Invalid User", None
         member = self.get_member(args[0][3:][:-1])
         author = extra["author"]
         if not member:
@@ -246,11 +254,11 @@ class Bot:
             )
             if author_user.level <= member_user.level:
                 return "You cannot ban someone who has the same level as you :)", None
-        timeout_in_seconds = int(args[1])
-        delete_message_days = int(args[2])
-        reason = args[3]
+        timeout_in_seconds = int(args[1] if len(args) > 2 else 0)
+        delete_message_days = int(args[2] if len(args) > 3 else 0)
+        reason = args[3] if len(args) == 4 else ""
 
-        message = f"Member <@!{member.id}> has been banned!"
+        message = f"Member {member.mention} has been banned!"
         self.ban(
             user=member,
             timeout_in_seconds=timeout_in_seconds,
@@ -260,6 +268,8 @@ class Bot:
         return message, None
 
     def func_unban_member(self, args, extra={}):
+        if len(args) == 0:
+            return "Invalid User", None
         member_id = args[0][3:][:-1]
         author = extra["author"]
         reason = args[1]
@@ -271,11 +281,13 @@ class Bot:
         return message, None
 
     def func_set_balance(self, args, extra={}):
+        if len(args) == 0:
+            return "Invalid User", None
         user_id = args[0][3:][:-1]
         try:
             amount = int(args[1])
         except:
-            return f"Invalid points amount, {args[1]}", None
+            return f"Invalid points amount", None
         with DBManager.create_session_scope() as db_session:
             user = User._create_or_get_by_discord_id(db_session, str(user_id))
             user.points = amount
@@ -283,6 +295,8 @@ class Bot:
         return f"{currency} balance for <@!{user_id}> set to {amount}", None
 
     def func_adj_balance(self, args, extra={}):
+        if len(args) == 0:
+            return "Invalid User", None
         user_id = args[0][3:][:-1]
         try:
             amount = int(args[1])
