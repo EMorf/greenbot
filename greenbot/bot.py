@@ -246,8 +246,6 @@ class Bot:
             )
             if author_user.level <= member_user.level:
                 return "You cannot ban someone who has the same level as you :)", None
-        timeout_in_seconds = 0
-        delete_message_days = 0
         timeout_in_seconds = int(args[1])
         delete_message_days = int(args[2])
         reason = args[3]
@@ -263,6 +261,7 @@ class Bot:
 
     def func_unban_member(self, args, extra={}):
         member_id = args[0][3:][:-1]
+        author = extra["author"]
         reason = args[1]
 
         message = f"Member <@!{member_id}> has been unbanned!"
