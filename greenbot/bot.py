@@ -193,7 +193,8 @@ class Bot:
                     )
                 except Exception as e:
                     log.error(f"Error thrown on command {trigger}")
-                    log.error(e)
+                    log.exception(e)
+                    raise Exception
 
     def get_role_id(self, role_name):
         return self.discord_bot.get_role_id(role_name)
