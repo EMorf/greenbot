@@ -227,9 +227,9 @@ class Bot:
             )
             if author_user.level <= member_user.level:
                 return "You cannot kick someone who has the same level as you :)", None
-        reason = args[1:]
+        reason = args[1]
         message = f"Member {member} has been kicked!"
-        self.kick(member, " ".join(reason) if len(reason) > 0 else None)
+        self.kick(member, f"{reason}\nKicked by {author}")
         return message, None
 
     def func_ban_member(self, args, extra={}):
@@ -246,37 +246,28 @@ class Bot:
             )
             if author_user.level <= member_user.level:
                 return "You cannot ban someone who has the same level as you :)", None
-        reason = None
         timeout_in_seconds = 0
         delete_message_days = 0
-        try:
-            timeout_in_seconds = int(args[1])
-        except:
-            reason = args[2:]
-        if not reason:
-            try:
-                delete_message_days = int(args[2])
-            except:
-                reason = args[3:]
-        if not reason:
-            reason = args[4:]
+        timeout_in_seconds = int(args[1])
+        delete_message_days = int(args[2])
+        reason = args[3]
 
         message = f"Member <@!{member.id}> has been banned!"
         self.ban(
             user=member,
             timeout_in_seconds=timeout_in_seconds,
             delete_message_days=delete_message_days,
-            reason=" ".join(reason) if len(reason) > 0 else None,
+            reason=f"{reason}\nBanned by {author}",
         )
         return message, None
 
     def func_unban_member(self, args, extra={}):
         member_id = args[0][3:][:-1]
-        reason = args[1:]
+        reason = args[1]
 
         message = f"Member <@!{member_id}> has been unbanned!"
         self.unban(
-            user_id=member_id, reason=" ".join(reason) if len(reason) > 0 else None
+            user_id=member_id, reason=f"{reason}\nUnbanned by {author}",
         )
         return message, None
 
