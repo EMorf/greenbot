@@ -556,13 +556,10 @@ class Bot:
             return getattr(db_user, key) if db_user else None
 
     def func_output(self, args, extra={}):
-        log.info(args)
-        log.info(extra)
+        return f"args: {args}\nextra: {extra}", None
 
     def rest(self, key, extra={}):
-        rest = " ".join(extra["message"].split(" ")[int(key):])
-        log.info(rest)
-        return rest
+        return " ".join(extra["message"].split(" ")[int(key):])
 
     @staticmethod
     def get_args_value(key, extra={}):
