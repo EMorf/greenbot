@@ -412,7 +412,7 @@ class Bot:
         return ret
 
     def get_role_value(self, key, extra={}):
-        role_name = extra["message"]
+        role_name = extra["argument"]
         role = self.get_role(self.get_role_id(role_name))
         if not role:
             return f"Role {role_name} not found"
