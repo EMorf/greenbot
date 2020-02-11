@@ -47,6 +47,10 @@ class Dispatch:
         elif options["reply"] is True:
             type = "reply"
 
+        options["extra_extra_args"] = {"channels": " ".join(options["channels"] if "channels" in options else [])}
+        if "channels" in options:
+            del options["channels"]
+
         action = {"type": type, "message": response}
 
         command, new_command, alias_matched = bot.commands.create_command(
@@ -119,6 +123,11 @@ class Dispatch:
                 new_message = action["message"]
             elif not type == command.action.subtype:
                 options["action"] = {"type": type, "message": command.action.response}
+
+            options["extra_extra_args"] = {"channels": " ".join(options["channels"] if "channels" in options else [])}
+            if "channels" in options:
+                del options["channels"]
+
             bot.commands.edit_command(command, **options)
             bot.private_message(author, f"Updated the command (ID: {command.id})")
 
@@ -180,6 +189,10 @@ class Dispatch:
             }
             del options["functions"]
 
+            options["extra_extra_args"] = {"channels": " ".join(options["channels"] if "channels" in options else [])}
+            if "channels" in options:
+                del options["channels"]
+
             command, new_command, alias_matched = bot.commands.create_command(
                 alias_str, action=action, **options
             )
@@ -238,6 +251,10 @@ class Dispatch:
                 "functions": options["functions"],
             }
             del options["functions"]
+
+            options["extra_extra_args"] = {"channels": " ".join(options["channels"] if "channels" in options else [])}
+            if "channels" in options:
+                del options["channels"]
 
             command = bot.commands.get(alias, None)
 
