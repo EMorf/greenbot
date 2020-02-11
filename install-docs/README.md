@@ -95,7 +95,7 @@ sudo -u postgres createuser greenbot
 We will now create a database named `greenbot`, owned by the `greenbot` database user:
 
 ```bash
-sudo -u greenbot createdb --owner=greenbot greenbot
+sudo -u postgres createdb --owner=greenbot greenbot
 ```
 
 ## Install Redis
