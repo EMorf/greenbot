@@ -2,6 +2,7 @@ import logging
 
 import json
 import random
+import discord
 from datetime import datetime
 
 from sqlalchemy.orm import joinedload
@@ -19,6 +20,55 @@ from greenbot.modules import ModuleSetting
 
 log = logging.getLogger(__name__)
 
+TIME_RE_STRING = r"\s?".join(
+    [
+        r"((?P<weeks>\d+?)\s?(weeks?|w))?",
+        r"((?P<days>\d+?)\s?(days?|d))?",
+        r"((?P<hours>\d+?)\s?(hours?|hrs|hr?))?",
+        r"((?P<minutes>\d+?)\s?(minutes?|mins?|m(?!o)))?",  # prevent matching "months"
+        r"((?P<seconds>\d+?)\s?(seconds?|secs?|s))?",
+    ]
+)
+
+TIME_RE = re.compile(TIME_RE_STRING, re.I)
+
+def parse_timedelta(
+    argument,
+    maximum = None,
+    minimum = None,
+    allowed_units = None,
+):
+    matches = TIME_RE.match(argument)
+    allowed_units = allowed_units or ["weeks", "days", "hours", "minutes", "seconds"]
+    if matches:
+        params = {k: int(v) for k, v in matches.groupdict().items() if v is not None}
+        for k in params.keys():
+            if k not in allowed_units:
+                return None
+        if params:
+            delta = timedelta(**params)
+            if maximum and maximum < delta:
+                return None
+            if minimum and delta < minimum:
+                return None
+            return delta
+    return None
+
+def seconds_to_resp(seconds):
+    time_data = {
+        "week": int(seconds // 604800),
+        "day": int((seconds % 604800) // 86400),
+        "hour": int((seconds % 86400) // 3600),
+        "minute": int((seconds % 3600) // 60),
+        "second": int(seconds % 60)
+    }
+    response = []
+    for item in time_data:
+        if time_data[item] > 0:
+            response.append(f"{time_data[item]} {item}{'s' if time_data[item] > 1 else ''}")
+    response_str = ", ".join(response[:-1])
+    return response_str + f"{'and ' if response_str != '' else ''}{response[-1]}"
+
 def random_string(length=10):
     return ''.join(random.choice(str.ascii_lowercase) for i in range(length))
 
@@ -27,7 +77,7 @@ def parse_date(string):
         string = f"{string[:-5]}{string[-5:-3]}{string[-2:]}"
     return datetime.strptime(string, "%Y-%m-%d %H:%M:%S.%f%z")
 
-class ActivityTracker(BaseModule):
+class RemindMe(BaseModule):
     ID = __name__.split(".")[-1]
     NAME = "RemindMe"
     DESCRIPTION = "Allows users to create reminders"
@@ -56,7 +106,21 @@ class ActivityTracker(BaseModule):
         self.redis = RedisManager.get()
         self.reminder_tasks = {}
 
-    def create_reminder(self, bot, author, channel, message, args):
+    @property
+    def help(self):
+        help_desc = f"""
+        `Syntax: {self.bot.command_prefix}remindme <time> <text>`
+        Send you <text> when the time is up.
+        Accepts: seconds, minutes, hours, days, weeks
+        Examples:
+        - {self.bot.command_prefix}remindme 2min Do that thing in 2 minutes
+        - {self.bot.command_prefix}remindme 3h40m Do that thing in 3 hours and 40 minutes
+        """
+        data = discord.Embed(title="RemindMe help Menu", description=help_desc, colour=discord.color.red())
+        data.set_thumbnail(self.bot.discord_bot.client.user.avatar_url)
+
+
+    async def create_reminder(self, bot, author, channel, message, args):
         try:
             reminders_list = json.loads(self.redis.get("remind-me-reminders"))
             """
@@ -77,15 +141,23 @@ class ActivityTracker(BaseModule):
             reminders_list = {}
         user_reminders = reminders_list[str(author.id)] if str(author.id) in reminders_list else []
         if len(user_reminders) >= int(self.settings["max_reminders_per_user"]):
-            self.bot.say(channel, f"{author.mention} you already have {len(user_reminders)} reminders!")
+            await self.bot.say(channel, f"{author.mention} you already have {len(user_reminders)} reminders!")
             return False
-        
+        if len(args) == 0:
+            await self.bot.say(channel, embed=self.help)
+        time_delta = parse_timedelta(args[0])
+        if not time_delta:
+            await self.bot.say(channel, f"{author.mention} invalid time: {args[0]}")
+            return False
+        await self.bot.say(channel, f"{author.mention} ill remind you that in {seconds_to_resp(time_delta.total_seconds())}")
+        # reminder = {
+        #     "message_id": 
+        # }
 
-
-    def myreminders(self, bot, author, channel, message, args):
+    async def myreminders(self, bot, author, channel, message, args):
         pass
 
-    def forgetme(self, bot, author, channel, message, args):
+    async def forgetme(self, bot, author, channel, message, args):
         pass
 
     def load_commands(self, **options):
@@ -101,7 +173,6 @@ class ActivityTracker(BaseModule):
             self.myreminders,
             delay_all=0,
             delay_user=0,
-            cost=self.settings["cost"],
             description="Creates a reminder",
         )
         self.commands["forgetme"] = Command.raw_command(
@@ -112,38 +183,28 @@ class ActivityTracker(BaseModule):
             description="Creates a reminder",
         )
 
-
-    def execute_reminder(self, salt, user_id, reminder):
+    async def execute_reminder(self, salt, user_id, reminder):
         self.reminder_tasks.pop(salt)
-        channel = self.bot.private_loop.run_until_complete(self.bot.discord_bot.guild.get_channel(int(reminder["channel_id"])))
+        channel = await self.bot.discord_bot.guild.get_channel(int(reminder["channel_id"]))
         bot_message = channel.fetch_message(int(reminder["message_id"]))
         message = reminder["message"]
         for reaction in bot_message.reactions:
             if reaction.emoji == self.settings["reaction_emoji"]:
-                users = self.bot.private_loop.run_until_complete(reaction.users().flatten())
-                sender = self.bot.private_loop.run_until_complete(self.bot.discord_bot.get_user(user_id))
+                users = await reaction.users().flatten()
+                sender = await self.bot.discord_bot.get_user(user_id)
                 if sender:
                     users.append(sender)
                 for user in users:
                     date_of_reminder = parse_date(reminder["date_of_reminder"])
                     date_reminder_set = parse_date(reminder["date_reminder_set"])
                     seconds = (date_of_reminder - date_reminder_set).total_seconds()
-                    time_data = {
-                        "week": int(seconds // 604800),
-                        "day": int((seconds % 604800) // 86400),
-                        "hour": int((seconds % 86400) // 3600),
-                        "minute": int((seconds % 3600) // 60),
-                        "second": int(seconds % 60)
-                    }
-                    response = []
-                    for item in time_data:
-                        if time_data[item] > 0:
-                            response.append(f"{time_data[item]} {item}{'s' if time_data[item] > 1 else ''}")
-                    "5 weeks, 2 days, 3 hours, 5 minutes and 30 seconds"
-                    response_str = ", ".join(response[:-1])
-                    response_str += f"{'and ' if response_str != '' else ''}{response[-1]}"
-                    self.bot.private_message(user, f"Hello! You asked me to remind you this {response_str} ago:\n{message}")
+                    
+                    await self.bot.private_message(user, f"Hello! You asked me to remind you {response_str} ago:\n{message}")
                 break
+        try:
+            await bot_message.delete()
+        except Exception as e:
+            log.error(f"Failed to delete message from bot: {e}")
 
     def enable(self, bot):
         if not bot:
