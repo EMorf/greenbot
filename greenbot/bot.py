@@ -41,6 +41,9 @@ class Bot:
         self.private_loop = asyncio.get_event_loop()
         self.private_loop.set_exception_handler(custom_exception_handler)
 
+        self.filters = Filters(self, self.discord_bot)
+        self.functions = Functions(self, self.filters)
+
         self.discord_token = self.config["main"]["discord_token"]
 
         ScheduleManager.init(self)
@@ -91,6 +94,7 @@ class Bot:
         return self.discord_bot.client.user.id
 
     async def wait_discord_load(self):
+
         self.socket_manager = SocketManager(self.bot_name, self.execute_now)
         self.module_manager = ModuleManager(self.socket_manager, bot=self).load()
 
@@ -117,8 +121,6 @@ class Bot:
                     )
                 else:
                     owner.level = 2000
-        self.filters = Filters(self, self.discord_bot)
-        self.functions = Functions(self, self.filters)
 
     def execute_now(self, function, *args, **kwargs):
         self.execute_delayed(0, function, *args, **kwargs)
