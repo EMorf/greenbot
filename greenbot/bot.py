@@ -41,9 +41,6 @@ class Bot:
         self.private_loop = asyncio.get_event_loop()
         self.private_loop.set_exception_handler(custom_exception_handler)
 
-        self.filters = Filters(self, self.discord_bot)
-        self.functions = Functions(self, self.filters)
-
         self.discord_token = self.config["main"]["discord_token"]
 
         ScheduleManager.init(self)
@@ -87,7 +84,9 @@ class Bot:
             settings=self.settings,
             redis=RedisManager.get(),
             private_loop=self.private_loop,
-        )        
+        )
+        self.filters = Filters(self, self.discord_bot)
+        self.functions = Functions(self, self.filters)    
 
     @property
     def bot_id(self):
