@@ -51,7 +51,7 @@ class CustomClient(discord.Client):
                 message.content,
             )
             db_session.commit()
-            HandlerManager.trigger(
+            await HandlerManager.trigger(
                 "discord_message",
                 message_raw=message,
                 message=message.content,
@@ -99,31 +99,6 @@ class DiscordBotManager:
             log.exception(e)
             self.redis.set("timeouts-discord", json.dumps({}))
 
-    def private_message(self, user, message, embed=None):
-        return self.private_loop.run_until_complete(self._private_message(user, message, embed))
-
-    def remove_role(self, user, role, reason=None):
-        return self.private_loop.run_until_complete(self._remove_role(user, role, reason))
-
-    def add_role(self, user, role, reason=None):
-        return self.private_loop.run_until_complete(self._add_role(user, role, reason))
-
-    def ban(self, user, timeout_in_seconds=0, reason=None, delete_message_days=0):
-        return self.private_loop.run_until_complete(
-            self._ban(
-                user=user,
-                timeout_in_seconds=timeout_in_seconds,
-                reason=reason,
-                delete_message_days=delete_message_days,
-            )
-        )
-
-    def unban(self, user_id, reason=None):
-        return self.private_loop.run_until_complete(self._unban(user_id=user_id, reason=reason))
-
-    def kick(self, user, reason=None):
-        return self.private_loop.run_until_complete(self._kick(user=user, reason=reason))
-
     def get_role_id(self, role_name):
         for role in self.guild.roles:
             if role.name == role_name:
@@ -142,17 +117,12 @@ class DiscordBotManager:
         except:
             return None
 
-    def say(self, channel, message, embed=None):
-        return self.private_loop.run_until_complete(
-            self._say(channel=channel, message=message, embed=embed)
-        )
-
-    async def _say(self, channel, message, embed=None):
+    async def say(self, channel, message, embed=None):
         message = discord.utils.escape_markdown(message)
         if channel and (message or embed):
             return await channel.send(content=message, embed=embed)
 
-    async def _ban(
+    async def ban(
         self, user, timeout_in_seconds=0, reason=None, delete_message_days=0
     ):
         delete_message_days = (
@@ -189,7 +159,7 @@ class DiscordBotManager:
             return False
         return True
 
-    async def _unban(self, user_id, reason=None):
+    async def unban(self, user_id, reason=None):
         if not self.guild:
             return False
         try:
@@ -214,7 +184,7 @@ class DiscordBotManager:
         except:
             return None
 
-    async def _kick(self, user, reason=None):
+    async def kick(self, user, reason=None):
         try:
             if not self.guild:
                 return
@@ -223,7 +193,7 @@ class DiscordBotManager:
             return False
         return True
 
-    async def _private_message(self, user, message, embed=None):
+    async def private_message(self, user, message, embed=None):
         try:
             message = discord.utils.escape_markdown(message)
             await user.create_dm()
@@ -235,7 +205,7 @@ class DiscordBotManager:
         except:
             return None
 
-    async def _remove_role(self, user, role, reason=None):
+    async def remove_role(self, user, role, reason=None):
         if not self.guild:
             return False
         try:
@@ -244,7 +214,7 @@ class DiscordBotManager:
             return False
         return True
 
-    async def _add_role(self, user, role, reason=None):
+    async def add_role(self, user, role, reason=None):
         if not self.guild:
             return
         try:

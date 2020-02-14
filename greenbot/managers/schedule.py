@@ -27,12 +27,15 @@ class ScheduledJob:
 
 class ScheduleManager:
     base_scheduler = None
+    bot = None
 
     @staticmethod
-    def init():
+    def init(bot):
         if not ScheduleManager.base_scheduler:
             ScheduleManager.base_scheduler = BackgroundScheduler(daemon=True)
             ScheduleManager.base_scheduler.start()
+        if not ScheduleManager.bot:
+            ScheduleManager.bot = bot
 
     @staticmethod
     def execute_now(method, args=[], kwargs={}, scheduler=None):
@@ -43,7 +46,7 @@ class ScheduleManager:
             raise ValueError("No scheduler available")
 
         job = scheduler.add_job(
-            method, "date", run_date=utils.now(), args=args, kwargs=kwargs
+            ScheduleManager.bot.private_loop.create_task, "date", run_date=utils.now(), args=method(*args, **kwargs), kwargs={}
         )
         return ScheduledJob(job)
 
@@ -56,11 +59,11 @@ class ScheduleManager:
             raise ValueError("No scheduler available")
 
         job = scheduler.add_job(
-            method,
+            ScheduleManager.bot.private_loop.create_task,
             "date",
             run_date=utils.now() + datetime.timedelta(seconds=delay),
-            args=args,
-            kwargs=kwargs,
+            args=method(*args, **kwargs),
+            kwargs={},
         )
         return ScheduledJob(job)
 
@@ -75,11 +78,11 @@ class ScheduleManager:
             raise ValueError("No scheduler available")
 
         job = scheduler.add_job(
-            method,
+            ScheduleManager.bot.private_loop.create_task,
             "interval",
             seconds=interval,
-            args=args,
-            kwargs=kwargs,
+            args=method(*args, **kwargs),
+            kwargs={},
             jitter=jitter,
         )
         return ScheduledJob(job)

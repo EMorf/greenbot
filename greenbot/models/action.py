@@ -119,9 +119,9 @@ class FuncAction(BaseAction):
     def __init__(self, cb):
         self.cb = cb
 
-    def run(self, bot, author, channel, message, args):
+    async def run(self, bot, author, channel, message, args):
         try:
-            return self.cb(
+            return await self.cb(
                 bot=bot, author=author, channel=channel, message=message, args=args
             )
         except:
@@ -134,8 +134,8 @@ class RawFuncAction(BaseAction):
     def __init__(self, cb):
         self.cb = cb
 
-    def run(self, bot, author, channel, message, args):
-        return self.cb(
+    async def run(self, bot, author, channel, message, args):
+        return await self.cb(
             bot=bot, author=author, channel=channel, message=message, args=args
         )
 
@@ -265,7 +265,7 @@ class MultiAction(BaseAction):
         multiaction.original_commands = copy.copy(commands)
         return multiaction
 
-    def run(self, bot, author, channel, message, args):
+    async def run(self, bot, author, channel, message, args):
         """ If there is more text sent to the multicommand after the
         initial alias, we _ALWAYS_ assume it's trying the subaction command.
         If the extra text was not a valid command, we try to run the fallback command.
@@ -288,7 +288,7 @@ class MultiAction(BaseAction):
 
         if cmd:
             if args["user_level"] >= cmd.level:
-                return cmd.run(bot, author, channel, extra_msg, args)
+                return await cmd.run(bot, author, channel, extra_msg, args)
 
             log.info(
                 f"User {author} tried running a sub-command he had no access to ({command})."
@@ -354,7 +354,7 @@ class MessageAction(BaseAction):
     def get_extra_data(author, channel, message, args):
         return {"author": author, "channel": channel, "message": message, **args}
 
-    def run(self, bot, author, channel, message, args):
+    async def run(self, bot, author, channel, message, args):
         raise NotImplementedError("Please implement the run method.")
 
 
@@ -515,15 +515,15 @@ def get_functions(_functions, bot):
 def method_func(bot):
     method_mapping = {}
     try:
-        method_mapping["kick"] = bot.func_kick_member if bot else None
-        method_mapping["setpoints"] = bot.func_set_balance if bot else None
-        method_mapping["adjpoints"] = bot.func_adj_balance if bot else None
-        method_mapping["banmember"] = bot.func_ban_member if bot else None
-        method_mapping["unbanmember"] = bot.func_unban_member if bot else None
-        method_mapping["level"] = bot.func_level if bot else None
-        method_mapping["output"] = bot.func_output if bot else None
-        method_mapping["addrole"] = bot.func_add_role_member if bot else None
-        method_mapping["removerole"] = bot.func_remove_role_member if bot else None
+        method_mapping["kick"] = bot.functions.func_kick_member if bot else None
+        method_mapping["setpoints"] = bot.functions.func_set_balance if bot else None
+        method_mapping["adjpoints"] = bot.functions.func_adj_balance if bot else None
+        method_mapping["banmember"] = bot.functions.func_ban_member if bot else None
+        method_mapping["unbanmember"] = bot.functions.func_unban_member if bot else None
+        method_mapping["level"] = bot.functions.func_level if bot else None
+        method_mapping["output"] = bot.functions.func_output if bot else None
+        method_mapping["addrole"] = bot.functions.func_add_role_member if bot else None
+        method_mapping["removerole"] = bot.functions.func_remove_role_member if bot else None
     except AttributeError:
         pass
     return method_mapping
@@ -532,21 +532,21 @@ def method_func(bot):
 def method_subs(bot):
     method_mapping = {}
     try:
-        method_mapping["author"] = bot.get_author_value if bot else None
-        method_mapping["channel"] = bot.get_channel_value if bot else None
-        method_mapping["time"] = bot.get_time_value if bot else None
-        method_mapping["args"] = bot.get_args_value if bot else None
-        method_mapping["strictargs"] = bot.get_strictargs_value if bot else None
-        method_mapping["command"] = bot.get_command_value if bot else None
-        method_mapping["member"] = bot.get_member_value if bot else None
-        method_mapping["role"] = bot.get_role_value if bot else None
-        method_mapping["userinfo"] = bot.get_user_info if bot else None
-        method_mapping["roleinfo"] = bot.get_role_info if bot else None
-        method_mapping["commands"] = bot.get_commands if bot else None
-        method_mapping["commandinfo"] = bot.get_command_info if bot else None
-        method_mapping["user"] = bot.get_user if bot else None
-        method_mapping["currency"] = bot.get_currency if bot else None
-        method_mapping["rest"] = bot.rest if bot else None
+        method_mapping["author"] = bot.filters.get_author_value if bot else None
+        method_mapping["channel"] = bot.filters.get_channel_value if bot else None
+        method_mapping["time"] = bot.filters.get_time_value if bot else None
+        method_mapping["args"] = bot.filters.get_args_value if bot else None
+        method_mapping["strictargs"] = bot.filters.get_strictargs_value if bot else None
+        method_mapping["command"] = bot.filters.get_command_value if bot else None
+        method_mapping["member"] = bot.filters.get_member_value if bot else None
+        method_mapping["role"] = bot.filters.get_role_value if bot else None
+        method_mapping["userinfo"] = bot.filters.get_user_info if bot else None
+        method_mapping["roleinfo"] = bot.filters.get_role_info if bot else None
+        method_mapping["commands"] = bot.filters.get_commands if bot else None
+        method_mapping["commandinfo"] = bot.filters.get_command_info if bot else None
+        method_mapping["user"] = bot.filters.get_user if bot else None
+        method_mapping["currency"] = bot.filters.get_currency if bot else None
+        method_mapping["rest"] = bot.filters.rest if bot else None
     except AttributeError:
         pass
     return method_mapping
@@ -628,14 +628,14 @@ def get_argument_substitutions_array(array, extra):
     return return_array
 
 
-def run_functions(
+async def run_functions(
     functions, bot, extra, author, channel, args, num_urlfetch_subs, private_message
 ):
     for func in functions:
         final_args = get_argument_substitutions_array(
             get_substitutions_array(func.arguments, bot, extra), extra
         )
-        resp, embed = func.cb(final_args, extra)
+        resp, embed = await func.cb(final_args, extra)
         if num_urlfetch_subs == 0:
 
             return (
@@ -663,10 +663,10 @@ def run_functions(
 class ReplyAction(MessageAction):
     subtype = "Reply"
 
-    def run(self, bot, author, channel, message, args):
+    async def run(self, bot, author, channel, message, args):
         extra = self.get_extra_data(author, channel, message, args)
         if self.functions:
-            run_functions(
+            await run_functions(
                 self.functions,
                 bot,
                 extra,
@@ -683,8 +683,8 @@ class ReplyAction(MessageAction):
 
         if self.num_urlfetch_subs == 0:
             if args["whisper"]:
-                return bot.private_message(author, resp, embed)
-            return bot.say(channel, resp, embed)
+                return await bot.private_message(author, resp, embed)
+            return await bot.say(channel, resp, embed)
 
         return ScheduleManager.execute_now(
             urlfetch_msg,
@@ -705,11 +705,11 @@ class ReplyAction(MessageAction):
 class PrivateMessageAction(MessageAction):
     subtype = "Private Message"
 
-    def run(self, bot, author, channel, message, args):
+    async def run(self, bot, author, channel, message, args):
         extra = self.get_extra_data(author, channel, message, args)
         resp, embed = self.get_response(bot, extra)
         if self.functions:
-            run_functions(
+            await run_functions(
                 self.functions,
                 bot,
                 extra,
@@ -724,7 +724,7 @@ class PrivateMessageAction(MessageAction):
             return False
 
         if self.num_urlfetch_subs == 0:
-            return bot.private_message(author, resp, embed)
+            return await bot.private_message(author, resp, embed)
 
         return ScheduleManager.execute_now(
             urlfetch_msg,
