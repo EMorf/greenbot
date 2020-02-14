@@ -88,8 +88,8 @@ class ActivityTracker(BaseModule):
 
     def process_messages(self):
         with DBManager.create_session_scope() as db_session:
-            regular_role = self.bot.get_role(self.settings["regular_role_id"])
-            sub_role = self.bot.get_role(self.settings["sub_role_id"])
+            regular_role = self.bot.filters.get_role(self.settings["regular_role_id"])
+            sub_role = self.bot.filters.get_role(self.settings["sub_role_id"])
             for member in regular_role.members:
                 count = Message._get_week_count_user(db_session, str(member.id))
                 if (
