@@ -86,7 +86,7 @@ class ActivityTracker(BaseModule):
         self.bot = bot
         self.process_messages_job = None
 
-    def process_messages(self):
+    async def process_messages(self):
         with DBManager.create_session_scope() as db_session:
             regular_role = self.bot.filters.get_role(self.settings["regular_role_id"])
             sub_role = self.bot.filters.get_role(self.settings["sub_role_id"])
@@ -96,7 +96,7 @@ class ActivityTracker(BaseModule):
                     count < self.settings["min_msgs_per_week"]
                     or sub_role not in member.roles
                 ):
-                    self.bot.remove_role(member, regular_role)
+                    await self.bot.remove_role(member, regular_role)
             db_session.commit()
             messages = Message._get_last_hour(db_session)
             channels_to_listen_in = self.settings["channels_to_listen_in"].split(" ") if len(self.settings["channels_to_listen_in"]) != 0 else []
@@ -114,14 +114,14 @@ class ActivityTracker(BaseModule):
             for user in User._get_users_with_points(
                 db_session, self.settings["min_regular_points"]
             ):
-                member = self.bot.get_member(user.discord_id)
+                member = self.bot.filters.get_member(user.discord_id)
                 if (
                     not member
                     or sub_role not in member.roles
                     or regular_role in member.roles
                 ):
                     continue
-                self.bot.add_role(member, regular_role)
+                await self.bot.add_role(member, regular_role)
 
     def enable(self, bot):
         if not bot:
