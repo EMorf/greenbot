@@ -3,6 +3,7 @@ import logging
 import json
 import random
 import discord
+from datetime import timedelta
 import regex as re
 from datetime import datetime
 
