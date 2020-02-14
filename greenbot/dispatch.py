@@ -14,7 +14,7 @@ class Dispatch:
     """
 
     @staticmethod
-    def add_command(bot, author, channel, message, args):
+    async def add_command(bot, author, channel, message, args):
         """Dispatch method for creating commands.
         Usage: !add command ALIAS [options] RESPONSE
         See greenbot/managers/command.py parse_command_arguments for available options
@@ -26,13 +26,13 @@ class Dispatch:
         # Make sure we got both an alias and a response
         message_parts = message.split()
         if len(message_parts) < 2:
-            bot.private_message(author, "Usage: !add command ALIAS [options] RESPONSE")
+            await bot.private_message(author, "Usage: !add command ALIAS [options] RESPONSE")
             return False
 
         options, response = bot.commands.parse_command_arguments(message_parts[1:])
 
         if options is False:
-            bot.private_message(author, "Invalid command")
+            await bot.private_message(author, "Invalid command")
             return False
 
         options["added_by"] = str(author.id)
@@ -57,21 +57,21 @@ class Dispatch:
             alias_str, action=action, **options
         )
         if new_command is True:
-            bot.private_message(author, f"Added your command (ID: {command.id})")
+            await bot.private_message(author, f"Added your command (ID: {command.id})")
 
             log_msg = f"The !{command.command.split('|')[0]} command has been created"
             AdminLogManager.add_entry("Command created", str(author.id), log_msg)
             return True
 
         # At least one alias is already in use, notify the user to use !edit command instead
-        bot.private_message(
+        await bot.private_message(
             author,
             f"The alias {alias_matched} is already in use. To edit that command, use !edit command instead of !add command.",
         )
         return False
 
     @staticmethod
-    def edit_command(bot, author, channel, message, args):
+    async def edit_command(bot, author, channel, message, args):
         """Dispatch method for editing commands.
         Usage: !edit command ALIAS [options] RESPONSE
         See greenbot/managers/command.py parse_command_arguments for available options
@@ -81,7 +81,7 @@ class Dispatch:
             # Make sure we got both an alias and a response
             message_parts = message.split()
             if len(message_parts) < 2:
-                bot.private_message(
+                await bot.private_message(
                     author, "Usage: !add command ALIAS [options] RESPONSE"
                 )
                 return False
@@ -94,7 +94,7 @@ class Dispatch:
                 del options["functions"]
 
             if options is False:
-                bot.private_message(author, "Invalid command")
+                await bot.private_message(author, "Invalid command")
                 return False
 
             alias = message_parts[0].replace("!", "").lower()
@@ -108,7 +108,7 @@ class Dispatch:
             command = bot.commands.get(alias, None)
 
             if command is None:
-                bot.private_message(
+                await bot.private_message(
                     author,
                     f"No command found with the alias {alias}. Did you mean to create the command? If so, use !add command instead.",
                 )
@@ -129,7 +129,7 @@ class Dispatch:
                 del options["channels"]
 
             bot.commands.edit_command(command, **options)
-            bot.private_message(author, f"Updated the command (ID: {command.id})")
+            await bot.private_message(author, f"Updated the command (ID: {command.id})")
 
             if len(new_message) > 0:
                 log_msg = f'The !{command.command.split("|")[0]} command has been updated from "{old_message}" to "{new_message}"'
@@ -146,7 +146,7 @@ class Dispatch:
             )
 
     @staticmethod
-    def add_funccommand(bot, author, channel, message, args):
+    async def add_funccommand(bot, author, channel, message, args):
         """Dispatch method for creating function commands.
         Usage: !add funccommand ALIAS [options] CALLBACK
         See greenbot/managers/command.py parse_command_arguments for available options
@@ -156,7 +156,7 @@ class Dispatch:
             # Make sure we got both an alias and a response
             message_parts = message.split(" ")
             if len(message_parts) < 2:
-                bot.private_message(
+                await bot.private_message(
                     author, "Usage: !add funccommand ALIAS [options] CALLBACK"
                 )
                 return False
@@ -166,14 +166,14 @@ class Dispatch:
             options["added_by"] = str(author.id)
 
             if "functions" not in options:
-                bot.private_message(
+                await bot.private_message(
                     author,
                     f"You didnt specify any functions --function abc --function xyz",
                 )
                 return False
 
             if options is False:
-                bot.private_message(author, "Invalid command")
+                await bot.private_message(author, "Invalid command")
                 return False
 
             alias_str = message_parts[0].replace("!", "").lower()
@@ -197,18 +197,18 @@ class Dispatch:
                 alias_str, action=action, **options
             )
             if new_command is True:
-                bot.private_message(author, f"Added your command (ID: {command.id})")
+                await bot.private_message(author, f"Added your command (ID: {command.id})")
                 return True
 
             # At least one alias is already in use, notify the user to use !edit command instead
-            bot.private_message(
+            await bot.private_message(
                 author,
                 f"The alias {alias_matched} is already in use. To edit that command, use !edit command instead of !add funccommand.",
             )
             return False
 
     @staticmethod
-    def edit_funccommand(bot, author, channel, message, args):
+    async def edit_funccommand(bot, author, channel, message, args):
         """Dispatch method for editing function commands.
         Usage: !edit funccommand ALIAS [options] CALLBACK
         See greenbot/managers/command.py parse_command_arguments for available options
@@ -218,7 +218,7 @@ class Dispatch:
             # Make sure we got both an alias and a response
             message_parts = message.split(" ")
             if len(message_parts) < 2:
-                bot.private_message(
+                await bot.private_message(
                     author, "Usage: !edit funccommand ALIAS [options] [CALLBACK]"
                 )
                 return False
@@ -228,7 +228,7 @@ class Dispatch:
             options["edited_by"] = str(author.id)
 
             if options is False:
-                bot.private_message(author, "Invalid command")
+                await bot.private_message(author, "Invalid command")
                 return False
 
             alias = message_parts[0].replace("!", "").lower()
@@ -239,7 +239,7 @@ class Dispatch:
                 type = "reply"
 
             if "functions" not in options:
-                bot.private_message(
+                await bot.private_message(
                     author,
                     f"You didnt specify any functions --function abc --function xyz",
                 )
@@ -259,17 +259,17 @@ class Dispatch:
             command = bot.commands.get(alias, None)
 
             if command is None:
-                bot.private_message(
+                await bot.private_message(
                     author,
                     f"No command found with the alias {alias}. Did you mean to create the command? If so, use !add funccommand instead.",
                 )
                 return False
 
             bot.commands.edit_command(command, **options)
-            bot.private_message(author, f"Updated the command (ID: {command.id})")
+            await bot.private_message(author, f"Updated the command (ID: {command.id})")
 
     @staticmethod
-    def add_alias(bot, author, channel, message, args):
+    async def add_alias(bot, author, channel, message, args):
         """Dispatch method for adding aliases to already-existing commands.
         Usage: !add alias EXISTING_ALIAS NEW_ALIAS_1 NEW_ALIAS_2 ...
         """
@@ -279,7 +279,7 @@ class Dispatch:
             # Make sure we got both an existing alias and at least one new alias
             message_parts = message.split()
             if len(message_parts) < 2:
-                bot.private_message(author, "Usage: !add alias existingalias newalias")
+                await bot.private_message(author, "Usage: !add alias existingalias newalias")
                 return False
 
             existing_alias = message_parts[0]
@@ -288,7 +288,7 @@ class Dispatch:
             already_used_aliases = []
 
             if existing_alias not in bot.commands:
-                bot.private_message(
+                await bot.private_message(
                     author, f'No command called "{existing_alias}" found'
                 )
                 return False
@@ -298,7 +298,7 @@ class Dispatch:
             # error out on commands that are not from the DB, e.g. module commands like !8ball that cannot have
             # aliases registered. (command.command and command.data are None on those commands)
             if command.data is None or command.command is None:
-                bot.private_message(
+                await bot.private_message(
                     author, "That command cannot have aliases added to."
                 )
                 return False
@@ -314,28 +314,28 @@ class Dispatch:
                 new_aliases = f"{command.command}|{'|'.join(added_aliases)}"
                 bot.commands.edit_command(command, command=new_aliases)
 
-                bot.private_message(
+                await bot.private_message(
                     author,
                     f"Successfully added the aliases {', '.join(added_aliases)} to {existing_alias}",
                 )
                 log_msg = f"The aliases {', '.join(added_aliases)} has been added to {existing_alias}"
                 AdminLogManager.add_entry("Alias added", str(author.id), log_msg)
             if len(already_used_aliases) > 0:
-                bot.private_message(
+                await bot.private_message(
                     author,
                     f"The following aliases were already in use: {', '.join(already_used_aliases)}",
                 )
         else:
-            bot.private_message(author, "Usage: !add alias existingalias newalias")
+            await bot.private_message(author, "Usage: !add alias existingalias newalias")
 
     @staticmethod
-    def remove_alias(bot, author, channel, message, args):
+    async def remove_alias(bot, author, channel, message, args):
         """Dispatch method for removing aliases from a command.
         Usage: !remove alias EXISTING_ALIAS_1 EXISTING_ALIAS_2"""
         if message:
             aliases = re.split(r"\|| ", message.lower())
             if len(aliases) < 1:
-                bot.private_message(author, "Usage: !remove alias EXISTINGALIAS")
+                await bot.private_message(author, "Usage: !remove alias EXISTINGALIAS")
                 return False
 
             num_removed = 0
@@ -350,7 +350,7 @@ class Dispatch:
                 # error out on commands that are not from the DB, e.g. module commands like !8ball that cannot have
                 # aliases registered. (command.command and command.data are None on those commands)
                 if command.data is None or command.command is None:
-                    bot.private_message(
+                    await bot.private_message(
                         author, "That command cannot have aliases removed from."
                     )
                     return False
@@ -359,7 +359,7 @@ class Dispatch:
                 current_aliases.remove(alias)
 
                 if len(current_aliases) == 0:
-                    bot.private_message(
+                    await bot.private_message(
                         author,
                         f"{alias} is the only remaining alias for this command and can't be removed.",
                     )
@@ -379,12 +379,12 @@ class Dispatch:
             if len(commands_not_found) > 0:
                 whisper_str += f" Aliases {', '.join(commands_not_found)} not found"
             if len(whisper_str) > 0:
-                bot.private_message(author, whisper_str)
+                await bot.private_message(author, whisper_str)
         else:
-            bot.private_message(author, "Usage: !remove alias EXISTINGALIAS")
+            await bot.private_message(author, "Usage: !remove alias EXISTINGALIAS")
 
     @staticmethod
-    def remove_command(bot, author, channel, message, args):
+    async def remove_command(bot, author, channel, message, args):
         if message:
             id = None
             command = None
@@ -404,32 +404,32 @@ class Dispatch:
                         break
 
             if command is None:
-                bot.private_message(
+                await bot.private_message(
                     author, "No command with the given parameters found"
                 )
                 return False
 
             if command.id == -1:
-                bot.private_message(
+                await bot.private_message(
                     author, "That command is an internal command, it cannot be removed."
                 )
                 return False
 
             if args["user_level"] < 2000:
                 if command.action is not None and not command.action.type == "message":
-                    bot.private_message(
+                    await bot.private_message(
                         author,
                         "That command is not a normal command, it cannot be removed by you.",
                     )
                     return False
 
-            bot.private_message(
+            await bot.private_message(
                 author, f"Successfully removed command with id {command.id}"
             )
             log_msg = f"The !{command.command.split('|')[0]} command has been removed"
             AdminLogManager.add_entry("Command removed", str(author.id), log_msg)
             bot.commands.remove_command(command)
         else:
-            bot.private_message(
+            await bot.private_message(
                 author, "Usage: !remove command (COMMAND_ID|COMMAND_ALIAS)"
             )
