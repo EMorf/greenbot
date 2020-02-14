@@ -23,7 +23,7 @@ class Functions:
             if author_user.level <= member_user.level:
                 return "You cannot kick someone who has the same level as you :)", None
         reason = args[1] if len(args) > 1 else ""
-        resp = await self.bot.kick(member, f"{reason}\nKicked by {author}"):
+        resp = await self.bot.kick(member, f"{reason}\nKicked by {author}")
         if not resp:
             return f"Failed to kick member {member}!", None
         return f"Member {member.mention} has been kicked!", None
@@ -143,7 +143,7 @@ class Functions:
         with DBManager.create_session_scope() as db_session:
             user = User._create_or_get_by_discord_id(db_session, str(user_id))
             user.points = amount
-        currency = self._get_currency().get("name").capitalize()
+        currency = self.bot.get_currency().get("name").capitalize()
         return f"{currency} balance for <@!{user_id}> set to {amount}", None
 
     async def func_adj_balance(self, args, extra={}):
@@ -158,7 +158,7 @@ class Functions:
             user = User._create_or_get_by_discord_id(db_session, str(user_id))
             user.points += amount
         action = "added to" if amount > 0 else "removed from"
-        currency = self._get_currency().get("name")
+        currency = self.bot.get_currency().get("name")
         return f"{amount} {currency} {action} <@!{user_id}> ", None
 
     async def func_output(self, args, extra={}):
