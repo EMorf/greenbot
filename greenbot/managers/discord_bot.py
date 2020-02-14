@@ -100,16 +100,16 @@ class DiscordBotManager:
             self.redis.set("timeouts-discord", json.dumps({}))
 
     def private_message(self, user, message, embed=None):
-        self.private_loop.create_task(self._private_message(user, message, embed))
+        return self.private_loop.run_until_complete(self._private_message(user, message, embed))
 
     def remove_role(self, user, role, reason=None):
-        self.private_loop.create_task(self._remove_role(user, role, reason))
+        return self.private_loop.run_until_complete(self._remove_role(user, role, reason))
 
     def add_role(self, user, role, reason=None):
-        self.private_loop.create_task(self._add_role(user, role, reason))
+        return self.private_loop.run_until_complete(self._add_role(user, role, reason))
 
     def ban(self, user, timeout_in_seconds=0, reason=None, delete_message_days=0):
-        self.private_loop.create_task(
+        return self.private_loop.run_until_complete(
             self._ban(
                 user=user,
                 timeout_in_seconds=timeout_in_seconds,
@@ -119,10 +119,10 @@ class DiscordBotManager:
         )
 
     def unban(self, user_id, reason=None):
-        self.private_loop.create_task(self._unban(user_id=user_id, reason=reason))
+        return self.private_loop.run_until_complete(self._unban(user_id=user_id, reason=reason))
 
     def kick(self, user, reason=None):
-        self.private_loop.create_task(self._kick(user=user, reason=reason))
+        return self.private_loop.run_until_complete(self._kick(user=user, reason=reason))
 
     def get_role_id(self, role_name):
         for role in self.guild.roles:
@@ -143,14 +143,14 @@ class DiscordBotManager:
             return None
 
     def say(self, channel, message, embed=None):
-        self.private_loop.create_task(
+        return self.private_loop.run_until_complete(
             self._say(channel=channel, message=message, embed=embed)
         )
 
     async def _say(self, channel, message, embed=None):
         message = discord.utils.escape_markdown(message)
         if channel and (message or embed):
-            await channel.send(content=message, embed=embed)
+            return await channel.send(content=message, embed=embed)
 
     async def _ban(
         self, user, timeout_in_seconds=0, reason=None, delete_message_days=0
@@ -162,33 +162,40 @@ class DiscordBotManager:
         )
 
         if not self.guild:
-            return
+            return False
         if not user:
-            return
+            return False
         try:
             ban = await self.guild.fetch_ban(user)
             if ban:
-                return
+                return False
         except:
-            pass
-        if timeout_in_seconds > 0:
-            reason = f"{reason} for {timeout_in_seconds} seconds"
-            timeouts = json.loads(self.redis.get("timeouts-discord"))
-            timeouts[str(user.id)] = {
-                "discord_id": str(user.id),
-                "unban_date": str(utils.now() + timedelta(seconds=timeout_in_seconds)),
-                "reason": str(reason)
-            }
-            self.redis.set("timeouts-discord", json.dumps(timeouts))
-            ScheduleManager.execute_delayed(delay=timeout_in_seconds, method=self.unban, args=[user.id, "Unbanned by timer"])
-        await self.guild.ban(
-            user=user, reason=reason, delete_message_days=delete_message_days
-        )
+            return False
+        try:
+            await self.guild.ban(
+                user=user, reason=reason, delete_message_days=delete_message_days
+            )
+            if timeout_in_seconds > 0:
+                reason = f"{reason} for {timeout_in_seconds} seconds"
+                timeouts = json.loads(self.redis.get("timeouts-discord"))
+                timeouts[str(user.id)] = {
+                    "discord_id": str(user.id),
+                    "unban_date": str(utils.now() + timedelta(seconds=timeout_in_seconds)),
+                    "reason": str(reason)
+                }
+                self.redis.set("timeouts-discord", json.dumps(timeouts))
+                ScheduleManager.execute_delayed(delay=timeout_in_seconds, method=self.unban, args=[user.id, "Unbanned by timer"])
+        except:
+            return False
+        return True
 
     async def _unban(self, user_id, reason=None):
         if not self.guild:
-            return
-        user = await self.client.fetch_user(int(user_id))
+            return False
+        try:
+            user = await self.client.fetch_user(int(user_id))
+        except:
+            return False
         timeouts = json.loads(self.redis.get("timeouts-discord"))
         if str(user_id) in timeouts:
             del timeouts[str(user_id)]
@@ -198,31 +205,53 @@ class DiscordBotManager:
             if ban:
                 await self.guild.unban(user=user, reason=reason)
         except:
-            pass
+            return False
+        return True
+
+    async def get_user(self, user_id):
+        try:
+            return await self.client.fetch_user(int(user_id))
+        except:
+            return None
 
     async def _kick(self, user, reason=None):
-        if not self.guild:
-            return
-        await self.guild.kick(user=user, reason=reason)
+        try:
+            if not self.guild:
+                return
+            await self.guild.kick(user=user, reason=reason)
+        except:
+            return False
+        return True
 
     async def _private_message(self, user, message, embed=None):
-        message = discord.utils.escape_markdown(message)
-        await user.create_dm()
-        if embed:
-            message = None
-        if not message and not embed:
-            return
-        await user.dm_channel.send(content=message, embed=embed)
+        try:
+            message = discord.utils.escape_markdown(message)
+            await user.create_dm()
+            if embed:
+                message = None
+            if not message and not embed:
+                return None
+            return await user.dm_channel.send(content=message, embed=embed)
+        except:
+            return None
 
     async def _remove_role(self, user, role, reason=None):
         if not self.guild:
-            return
-        await user.remove_roles(role, reason=reason)
+            return False
+        try:
+            await user.remove_roles(role, reason=reason)
+        except:
+            return False
+        return True
 
     async def _add_role(self, user, role, reason=None):
         if not self.guild:
             return
-        await user.add_roles(role, reason=reason)
+        try:
+            await user.add_roles(role, reason=reason)
+        except:
+            return False
+        return True
 
     async def run_periodically(self, wait_time, func, *args):
         while True:

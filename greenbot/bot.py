@@ -145,7 +145,7 @@ class Bot:
         self.private_loop.run_forever()
 
     def ban(self, user, timeout_in_seconds=0, delete_message_days=0, reason=None):
-        self.discord_bot.ban(
+        return self.discord_bot.ban(
             user=user,
             timeout_in_seconds=timeout_in_seconds,
             delete_message_days=delete_message_days,
@@ -153,16 +153,16 @@ class Bot:
         )
 
     def unban(self, user_id, reason=None):
-        self.discord_bot.unban(user_id=user_id, reason=reason)
+        return self.discord_bot.unban(user_id=user_id, reason=reason)
 
     def kick(self, user, reason=None):
-        self.discord_bot.kick(user=user, reason=reason)
+        return self.discord_bot.kick(user=user, reason=reason)
 
     def private_message(self, user, message, embed=None):
-        self.discord_bot.private_message(user, message, embed)
+        return self.discord_bot.private_message(user, message, embed)
 
     def say(self, channel, message, embed=None):
-        self.discord_bot.say(channel, message, embed)
+        return self.discord_bot.say(channel, message, embed)
 
     def discord_message(
         self, message_raw, message, author, channel, user_level, whisper
