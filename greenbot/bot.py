@@ -130,7 +130,7 @@ class Bot:
     def execute_every(self, period, function, *args, **kwargs):
         ScheduleManager.execute_every(period, lambda: function(*args, **kwargs))
 
-    async def quit_bot(self):
+    async def _quit_bot(self):
         await HandlerManager.trigger("on_quit")
         try:
             ScheduleManager.base_scheduler.print_jobs()
@@ -204,7 +204,10 @@ class Bot:
         return self.discord_bot.remove_role(user, role, reason)
 
     def quit(self, bot, author, channel, message, whisper, args):
-        self.private_loop.create_task(self.quit_bot())
+        self.quit_bot()
+
+    def quit_bot(self):
+        self.private_loop.create_task(self._quit_bot())
 
     def apply_filter(self, resp, f):
         available_filters = {
