@@ -82,7 +82,7 @@ class DiscordBotManager:
         
         HandlerManager.add_handler("discord_ready", self.initial_unbans)
 
-    def initial_unbans(self):
+    async def initial_unbans(self):
         try:
             data = json.loads(self.redis.get("timeouts-discord"))
             for user in data:
