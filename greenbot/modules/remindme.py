@@ -3,6 +3,7 @@ import logging
 import json
 import random
 import discord
+import regex as re
 from datetime import datetime
 
 from sqlalchemy.orm import joinedload
