@@ -44,7 +44,11 @@ class ScheduleManager:
 
         if scheduler is None:
             raise ValueError("No scheduler available")
-
+        if not ScheduleManager.bot:
+            job = scheduler.add_job(
+                method, "date", run_date=utils.now(), args=args, kwargs=kwargs
+            )
+            return ScheduledJob(job)
         job = scheduler.add_job(
             ScheduleManager.bot.private_loop.create_task, "date", run_date=utils.now(), args=[method(*args, **kwargs)], kwargs={}
         )
@@ -57,6 +61,12 @@ class ScheduleManager:
 
         if scheduler is None:
             raise ValueError("No scheduler available")
+
+        if not ScheduleManager.bot:
+            job = scheduler.add_job(
+                method, "date", run_date=utils.now() + datetime.timedelta(seconds=delay), args=args, kwargs=kwargs
+            )
+            return ScheduledJob(job)
 
         job = scheduler.add_job(
             ScheduleManager.bot.private_loop.create_task,
@@ -76,6 +86,12 @@ class ScheduleManager:
 
         if scheduler is None:
             raise ValueError("No scheduler available")
+
+        if not ScheduleManager.bot:
+            job = scheduler.add_job(
+                method, "interval", seconds=interval, args=args, kwargs=kwargs,jitter=jitter
+            )
+            return ScheduledJob(job)
 
         job = scheduler.add_job(
             ScheduleManager.bot.private_loop.create_task,

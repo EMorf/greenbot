@@ -39,7 +39,7 @@ def init(args):
     from greenbot.web.models import errors
     from greenbot.bothelper import BotHelper
 
-    ScheduleManager.init()
+    ScheduleManager.init(None)
 
     config = load_config(args.config)
 
