@@ -160,10 +160,10 @@ class Bot:
     async def kick(self, user, reason=None):
         return await self.discord_bot.kick(user=user, reason=reason)
 
-    async def private_message(self, user, message, embed=None):
+    async def private_message(self, user, message=None, embed=None):
         return await self.discord_bot.private_message(user, message, embed)
 
-    async def say(self, channel, message, embed=None):
+    async def say(self, channel, message=None, embed=None):
         return await self.discord_bot.say(channel, message, embed)
 
     async def discord_message(
