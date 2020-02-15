@@ -145,6 +145,7 @@ class RemindMe(BaseModule):
         if len(user_reminders) >= int(self.settings["max_reminders_per_user"]):
             await self.bot.say(channel, f"{author.mention} you already have {len(user_reminders)} reminders!")
             return False
+        log.info(len(args))
         if len(args) == 0:
             await self.bot.say(channel, embed=self.help)
             return False
