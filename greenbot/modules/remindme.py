@@ -100,6 +100,13 @@ class RemindMe(BaseModule):
             placeholder="",
             default="0",
         ),
+        ModuleSetting(
+            key="emoji",
+            label="Emoji for reminder",
+            type="text",
+            placeholder="🔔",
+            default="🔔",
+        ),
     ]
 
     def __init__(self, bot):
@@ -155,9 +162,20 @@ class RemindMe(BaseModule):
             await self.bot.say(channel, f"{author.mention} invalid time: {command_args[0]}")
             return False
         await self.bot.say(channel, f"{author.mention} ill remind you that in {seconds_to_resp(time_delta.total_seconds())}")
-        # reminder = {
-        #     "message_id": 
-        # }
+        bot_message = await self.bot.say(channel, f"If anyone else wants to be reminded click the {self.settings['emoji']}")
+        await bot_message.add_reaction(self.settings['emoji'])
+        reminder = {
+            "message_id": bot_message.id,
+            "channel_id": bot_message.channel.id,
+            "message": " ".join(command_args[1:])
+            "date_of_reminder": str(utils.now() + time_delta),
+            "date_reminder_set": str(utils.now())
+        }
+        user_reminders.append(reminder)
+        reminders_list[str(author.id)] = user_reminders
+        self.redis.set("remind-me-reminders", json.dumps(reminders_list))
+        salt = random_string()
+        self.reminder_tasks[salt] = ScheduleManager.execute_delayed(time_delta.total_seconds(), self.execute_reminder, args=[salt, user_id, reminder])
 
     async def myreminders(self, bot, author, channel, message, args):
         pass
@@ -210,6 +228,31 @@ class RemindMe(BaseModule):
             await bot_message.delete()
         except Exception as e:
             log.error(f"Failed to delete message from bot: {e}")
+        try:
+            reminders_list = json.loads(self.redis.get("remind-me-reminders"))
+            """
+            { 
+                user_id: [
+                    {
+                        "message_id": message_id,
+                        "channel_id": channel_id,
+                        "message": message,
+                        "date_of_reminder": date_of_reminder,
+                        "date_reminder_set": date_reminder_set
+                    },
+                ],
+            }
+            """
+        except:
+            self.redis.set("remind-me-reminders", json.dumps({}))
+            reminders_list = {}
+        user_reminders = reminders_list[str(user_id)] if str(user_id) in reminders_list else []
+        for _reminder in user_reminders:
+            if _reminder == reminder:
+                user_reminders.remove(_reminder)
+                break
+        reminders_list[str(user_id)] = user_reminders
+        self.redis.set("remind-me-reminders", json.dumps(reminders_list))
 
     def enable(self, bot):
         if not bot:
@@ -245,7 +288,7 @@ class RemindMe(BaseModule):
                 if date_of_reminder < utils.now():
                     continue
                 new_user_reminders.append(reminder)
-                self.reminder_tasks[salt] = ScheduleManager.execute_delayed((date_of_reminder-utils.now()).seconds, self.execute_reminder, args=[salt, user_id, reminder])
+                self.reminder_tasks[salt] = ScheduleManager.execute_delayed((date_of_reminder-utils.now()).total_seconds(), self.execute_reminder, args=[salt, user_id, reminder])
             new_reminders_list[user_id] = new_user_reminders
         self.redis.set("remind-me-reminders", json.dumps(new_reminders_list))
 
