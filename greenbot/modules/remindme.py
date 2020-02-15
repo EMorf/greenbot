@@ -123,6 +123,7 @@ class RemindMe(BaseModule):
 
 
     async def create_reminder(self, bot, author, channel, message, args):
+        command_args = message.split(" ")
         try:
             reminders_list = json.loads(self.redis.get("remind-me-reminders"))
             """
@@ -145,13 +146,13 @@ class RemindMe(BaseModule):
         if len(user_reminders) >= int(self.settings["max_reminders_per_user"]):
             await self.bot.say(channel, f"{author.mention} you already have {len(user_reminders)} reminders!")
             return False
-        log.info(args)
-        if len(args) == 0:
+        log.info(command_args)
+        if len(command_args) == 0:
             await self.bot.say(channel, embed=self.help)
             return False
-        time_delta = parse_timedelta(args[0])
+        time_delta = parse_timedelta(command_args[0])
         if not time_delta:
-            await self.bot.say(channel, f"{author.mention} invalid time: {args[0]}")
+            await self.bot.say(channel, f"{author.mention} invalid time: {command_args[0]}")
             return False
         await self.bot.say(channel, f"{author.mention} ill remind you that in {seconds_to_resp(time_delta.total_seconds())}")
         # reminder = {
