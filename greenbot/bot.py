@@ -167,6 +167,7 @@ class Bot:
 
     async def say(self, channel, message=None, embed=None):
         if not message and not embed:
+            log.info(embed)
             return None
         return await self.discord_bot.say(channel, message, embed)
 

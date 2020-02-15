@@ -175,6 +175,4 @@ class Functions:
         data = discord.Embed(colour=discord.Colour.dark_gold())
         data.set_thumbnail(url=args[0])
         data.set_image(url=args[0])
-        if data:
-            log.info("yes")
         return None, data
