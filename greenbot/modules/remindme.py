@@ -29,7 +29,8 @@ TIME_RE_STRING = r"\s?".join(
         r"((?P<days>\d+?)\s?(days?|d))?",
         r"((?P<hours>\d+?)\s?(hours?|hrs|hr?))?",
         r"((?P<minutes>\d+?)\s?(minutes?|mins?|m(?!o)))?",  # prevent matching "months"
-        r"((?P<seconds>\d+?)\s?(seconds?|secs?|s?))?",
+        r"((?P<seconds>\d+?)\s?(seconds?|secs?|s))?",
+        r"((?P<seconds>\d+?)\s?)?",
     ]
 )
 
