@@ -120,7 +120,7 @@ class DiscordBotManager:
     async def say(self, channel, message=None, embed=None):
         if message:
             message = discord.utils.escape_markdown(message)
-        if channel and (message or embed):
+        if channel and (message is None or embed is None):
             return await channel.send(content=message, embed=embed)
 
     async def ban(
@@ -195,7 +195,7 @@ class DiscordBotManager:
         return True
 
     async def private_message(self, user, message=None, embed=None):
-        if (not message and not embed) or not user:
+        if (message is None and embed is None) or user is None:
             return None
         try:
             if message:

@@ -161,13 +161,12 @@ class Bot:
         return await self.discord_bot.kick(user=user, reason=reason)
 
     async def private_message(self, user, message=None, embed=None):
-        if not message and not embed:
+        if message is None and embed is None:
             return None
         return await self.discord_bot.private_message(user, message, embed)
 
     async def say(self, channel, message=None, embed=None):
-        if not message and not embed:
-            log.info(embed)
+        if message is None and embed is None:
             return None
         return await self.discord_bot.say(channel, message, embed)
 
