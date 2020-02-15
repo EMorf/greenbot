@@ -1,5 +1,8 @@
+import discord
+
 from greenbot.managers.db import DBManager
 from greenbot.models.user import User
+
 
 class Functions:
     def __init__(self, bot, filters):
@@ -163,4 +166,7 @@ class Functions:
 
     async def func_output(self, args, extra={}):
         return f"args: {args}\nextra: {extra}", None
+
+    async def func_embed_url(self, args, extra={}):
+        return None, discord.Embed(url=args[0])
 
