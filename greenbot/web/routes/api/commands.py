@@ -72,7 +72,7 @@ class APICommandRemove(Resource):
             AdminLogManager.add_entry("Command removed", options["user"].discord_id, log_msg)
             db_session.delete(command.data)
             db_session.delete(command)
-
+        log.info("This Happend")
         if (
             SocketClientManager.send("command.remove", {"command_id": command_id})
             is True
