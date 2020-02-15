@@ -211,6 +211,7 @@ class RemindMe(BaseModule):
                 log.error(f"Failed to delete message from bot: {e}")
         reminders_list[str(author.id)] = []
         self.redis.set("remind-me-reminders", json.dumps(reminders_list))
+        await self.bot.say(channel, f"{author.mention} you have been forgotten")
 
     def load_commands(self, **options):
         self.commands["remindme"] = Command.raw_command(
