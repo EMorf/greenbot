@@ -640,9 +640,9 @@ async def run_functions(
         if num_urlfetch_subs == 0:
 
             return (
-                await bot.private_message(author, resp, embed)
+                await bot.private_message(user=author, message=resp, embed=embed)
                 if private_message
-                else await bot.say(channel, resp, embed)
+                else await bot.say(channel=channel, message=resp, embed=embed)
             )
 
         return ScheduleManager.execute_now(
