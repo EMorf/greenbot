@@ -207,7 +207,7 @@ class Bot:
     async def remove_role(self, user, role, reason=None):
         return self.discord_bot.remove_role(user, role, reason)
 
-    def quit(self, bot, author, channel, message, whisper, args):
+    def quit(self, bot, author, channel, message, args):
         self.quit_bot()
 
     def quit_bot(self):
