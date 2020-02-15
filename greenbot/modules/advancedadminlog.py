@@ -8,8 +8,6 @@ from datetime import timedelta
 import regex as re
 from datetime import datetime
 
-from sqlalchemy.orm import joinedload
-
 from greenbot import utils
 from greenbot.exc import InvalidPointAmount
 from greenbot.managers.db import DBManager

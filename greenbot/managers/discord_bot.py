@@ -29,43 +29,171 @@ class CustomClient(discord.Client):
         log.info(f"Discord Bot has started with id {self.user.id}")
         await HandlerManager.trigger("discord_ready")
 
-    async def on_message(self, message):
-        member = self.bot.guild.get_member(message.author.id)
-        if isinstance(message.author, discord.Member) and (
-            message.guild != self.bot.guild
-        ):
-            return
-        with DBManager.create_session_scope() as db_session:
-            user = User._create_or_get_by_discord_id(
-                db_session,
-                message.author.id,
-                user_name=str(member) if member else str(message.author),
-            )
-            Message._create(
-                db_session,
-                message.id,
-                message.author.id,
-                message.channel.id
-                if isinstance(message.author, discord.Member)
-                else None,
-                message.content,
-            )
-            db_session.commit()
-            await HandlerManager.trigger(
-                "discord_message",
-                message_raw=message,
-                message=message.content,
-                author=message.author,
-                user_level=user.level if user else 50,
-                channel=message.channel
-                if isinstance(message.author, discord.Member)
-                else None,
-                whisper=not isinstance(message.author, discord.Member),
-            )
+    async def on_connect(self):
+        await HandlerManager.trigger("discord_connect")
+
+    async def on_disconnect(self):
+        await HandlerManager.trigger("discord_disconnect")
+
+    async def on_shard_ready(self, shard_id):
+        await HandlerManager.trigger("discord_disconnect", shard_id=shard_id)
+
+    async def on_resumed(self):
+        await HandlerManager.trigger("discord_resumed")
 
     async def on_error(self, event, *args, **kwargs):
         log.error(traceback.format_exc())
+        await HandlerManager.trigger("discord_error", event=event, *args, **kwargs)
 
+    async def on_socket_raw_receive(self, payload):
+        await HandlerManager.trigger("discord_error", payload=payload)
+
+    async def on_socket_raw_send(self, payload):
+        await HandlerManager.trigger("discord_socket_raw_send", payload=payload)
+
+    async def on_typing(self, channel, user, when):
+        await HandlerManager.trigger("discord_socket_raw_send", channel=channel, user=user, when=when)
+
+    async def on_message(self, message):
+        await HandlerManager.trigger("discord_message", message=message)
+
+    async def on_message_delete(self, message):
+        await HandlerManager.trigger("discord_message_delete", message=message)
+
+    async def on_bulk_message_delete(self, messages):
+        await HandlerManager.trigger("discord_bulk_message_delete", messages=messages)
+
+    async def on_raw_message_delete(self, payload):
+        await HandlerManager.trigger("discord_raw_message_delete", payload=payload)
+
+    async def on_raw_bulk_message_delete(self, payload):
+        await HandlerManager.trigger("discord_raw_bulk_message_delete", payload=payload)
+
+    async def on_message_edit(self, before, after):
+        await HandlerManager.trigger("discord_message_edit", before=before, after=after)
+
+    async def on_raw_message_edit(self, payload):
+        await HandlerManager.trigger("discord_raw_message_edit", payload=payload)
+
+    async def on_reaction_add(self, reaction, user):
+        await HandlerManager.trigger("discord_reaction_add", reaction=reaction, user=user)
+
+    async def on_reaction_remove(self, reaction, user):
+        await HandlerManager.trigger("discord_reaction_remove", reaction=reaction, user=user)
+
+    async def on_raw_reaction_remove(self, payload):
+        await HandlerManager.trigger("discord_reaction_remove", payload=payload)
+
+    async def on_reaction_clear(self, message, reactions):
+        await HandlerManager.trigger("discord_reaction_clear", message=message, reactions=reactions)
+    
+    async def on_raw_reaction_clear(self, payload):
+        await HandlerManager.trigger("discord_raw_reaction_clear", payload=payload)
+
+    async def on_reaction_clear_emoji(self, reaction):
+        await HandlerManager.trigger("discord_reaction_clear_emoji", reaction=reaction)
+
+    async def on_raw_reaction_clear_emoji(self, payload):
+        await HandlerManager.trigger("discord_raw_reaction_clear_emoji", payload=payload)
+
+    async def on_private_channel_delete(self, channel):
+        await HandlerManager.trigger("discord_private_channel_delete", channel=channel)
+
+    async def on_private_channel_create(self, channel):
+        await HandlerManager.trigger("discord_private_channel_create", channel=channel)
+
+    async def on_private_channel_update(self, before, after):
+        await HandlerManager.trigger("discord_private_channel_update", before=before, after=after)
+
+    async def on_private_channel_pins_update(self, channel, last_pin):
+        await HandlerManager.trigger("discord_private_channel_pins_update", channel=channel, last_pin=last_pin)
+
+    async def on_guild_channel_delete(self, channel):
+        await HandlerManager.trigger("discord_guild_channel_delete", channel=channel)
+
+    async def on_guild_channel_create(self, channel):
+        await HandlerManager.trigger("discord_guild_channel_create", channel=channel)
+
+    async def on_guild_channel_update(self, before, after):
+        await HandlerManager.trigger("discord_guild_channel_update", before=before, after=after)
+
+    async def on_guild_channel_pins_update(self, channel, last_pin):
+        await HandlerManager.trigger("discord_guild_channel_pins_update", channel=channel, last_pin=last_pin)
+
+    async def on_guild_integrations_update(self, guild):
+        await HandlerManager.trigger("discord_guild_integrations_update", guild=guild)
+
+    async def on_webhooks_update(self, channel):
+        await HandlerManager.trigger("discord_webhooks_update", channel=channel)
+
+    async def on_member_join(self, member):
+        await HandlerManager.trigger("discord_member_join", member=member)
+
+    async def on_member_remove(self, member):
+        await HandlerManager.trigger("discord_member_remove", member=member)
+
+    async def on_member_update(self, before, after):
+        await HandlerManager.trigger("discord_member_update", before=before, after=after)
+
+    async def on_user_update(self, before, after):
+        await HandlerManager.trigger("discord_user_update", before=before, after=after)
+
+    async def on_guild_join(self, guild):
+        await HandlerManager.trigger("discord_guild_join", guild=guild)
+
+    async def on_guild_remove(self, guild):
+        await HandlerManager.trigger("discord_guild_remove", guild=guild)
+
+    async def on_guild_update(self, before, after):
+        await HandlerManager.trigger("discord_guild_update", before=before, after=after)
+    
+    async def on_guild_role_create(self, role):
+        await HandlerManager.trigger("discord_guild_role_create", role=role)
+
+    async def on_guild_role_delete(self, role):
+        await HandlerManager.trigger("discord_guild_role_delete", role=role)
+
+    async def on_guild_role_update(self, before, after):
+        await HandlerManager.trigger("discord_guild_role_update", before=before, after=after)
+
+    async def on_guild_emojis_update(self, guild, before, after):
+        await HandlerManager.trigger("discord_guild_emojis_update", guild=guild, before=before, after=after)
+
+    async def on_guild_available(self, guild):
+        await HandlerManager.trigger("discord_guild_available", guild=guild)
+
+    async def on_guild_unavailable(self, guild):
+        await HandlerManager.trigger("discord_guild_unavailable", guild=guild)
+
+    async def on_voice_state_update(self, member, before, after):
+        await HandlerManager.trigger("discord_voice_state_update", member=member, before=before, after=after)
+
+    async def on_member_ban(self, guild, user):
+        await HandlerManager.trigger("discord_member_ban", guild=guild, user=user)
+
+    async def on_member_unban(self, guild, user):
+        await HandlerManager.trigger("discord_member_unban", guild=guild, user=user)
+
+    async def on_invite_create(self, invite):
+        await HandlerManager.trigger("discord_invite_create", invite=invite)
+
+    async def on_invite_delete(self, invite):
+        await HandlerManager.trigger("discord_invite_delete", invite=invite)
+
+    async def on_group_join(self, channel, user):
+        await HandlerManager.trigger("discord_group_join", channel=channel, user=user)
+
+    async def on_group_remove(self, channel, user):
+        await HandlerManager.trigger("discord_group_remove", channel=channel, user=user)
+
+    async def on_relationship_add(self, relationship):
+        await HandlerManager.trigger("discord_relationship_add", relationship=relationship)
+
+    async def on_relationship_remove(self, relationship):
+        await HandlerManager.trigger("discord_relationship_remove", relationship=relationship)
+
+    async def discord_relationship_update(self, before, after):
+        await HandlerManager.trigger("discord_relationship_remove", before=before, after=after)
 
 class DiscordBotManager:
     def __init__(self, bot, settings, redis, private_loop):

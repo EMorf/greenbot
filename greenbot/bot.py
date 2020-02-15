@@ -1,11 +1,13 @@
 import logging
 import asyncio
 import sys
+import discord
 from pytz import timezone
 import urllib
 
 from greenbot.models.action import ActionParser
 from greenbot.models.user import User
+from greenbot.models.message import Message
 from greenbot.models.module import ModuleManager
 from greenbot.managers.sock import SocketManager
 from greenbot.managers.schedule import ScheduleManager
@@ -170,10 +172,30 @@ class Bot:
             return None
         return await self.discord_bot.say(channel, message, embed)
 
-    async def discord_message(
-        self, message_raw, message, author, channel, user_level, whisper
-    ):
-        msg_lower = message.lower()
+    async def discord_message(self, message):
+        member = self.discord_bot.get_member(message.author.id)
+        not_whisper = isinstance(message.author, discord.Member)
+        if not_whisper and (
+            message.guild != self.discord_bot.guild
+        ):
+            return
+        with DBManager.create_session_scope() as db_session:
+            user = User._create_or_get_by_discord_id(
+                db_session,
+                message.author.id,
+                user_name=str(member) if member else str(message.author),
+            )
+            Message._create(
+                db_session,
+                message.id,
+                message.author.id,
+                message.channel.id
+                if not_whisper
+                else None,
+                message.content,
+            )
+
+        msg_lower = message.content.lower()
         if msg_lower[:1] == self.settings["command_prefix"]:
             msg_lower_parts = msg_lower.split(" ")
             trigger = msg_lower_parts[0][1:]
@@ -185,15 +207,15 @@ class Bot:
                 command = self.commands[trigger]
                 extra_args = {
                     "trigger": trigger,
-                    "message_raw": message_raw,
-                    "user_level": user_level,
-                    "whisper": whisper,
+                    "message_raw": message,
+                    "user_level": user.level if user else 50,
+                    "whisper": not not_whisper,
                 }
                 try:
                     await command.run(
                         bot=self,
-                        author=author,
-                        channel=channel,
+                        author=message.author,
+                        channel=message.channel if not_whisper else None,
                         message=remaining_message,
                         args=extra_args,
                     )
