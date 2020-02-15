@@ -195,7 +195,7 @@ class Bot:
         if msg_lower[:1] == self.settings["command_prefix"]:
             msg_lower_parts = msg_lower.split(" ")
             trigger = msg_lower_parts[0][1:]
-            msg_raw_parts = message.split(" ")
+            msg_raw_parts = message.content.split(" ")
             remaining_message = (
                 " ".join(msg_raw_parts[1:]) if len(msg_raw_parts) > 1 else ""
             )
