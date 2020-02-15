@@ -37,9 +37,6 @@ class Dispatch:
 
         options["added_by"] = str(author.id)
 
-        if "functions" in options:
-            del options["functions"]
-
         alias_str = message_parts[0].replace("!", "").lower()
         type = "reply"
         if options["privatemessage"] is True:
@@ -89,9 +86,6 @@ class Dispatch:
             options, response = bot.commands.parse_command_arguments(message_parts[1:])
 
             options["edited_by"] = str(author.id)
-
-            if "functions" in options:
-                del options["functions"]
 
             if options is False:
                 await bot.private_message(author, "Invalid command")
@@ -164,13 +158,6 @@ class Dispatch:
             options, response = bot.commands.parse_command_arguments(message_parts[1:])
 
             options["added_by"] = str(author.id)
-
-            if "functions" not in options:
-                await bot.private_message(
-                    author,
-                    f"You didnt specify any functions --function abc --function xyz",
-                )
-                return False
 
             if options is False:
                 await bot.private_message(author, "Invalid command")
