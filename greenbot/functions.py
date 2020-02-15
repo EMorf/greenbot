@@ -168,5 +168,5 @@ class Functions:
         return f"args: {args}\nextra: {extra}", None
 
     async def func_embed_url(self, args, extra={}):
-        return None, discord.Embed(url=args[0])
+        return None, discord.Embed(description=("test"), url=args[0])
 
