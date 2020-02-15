@@ -167,7 +167,7 @@ class RemindMe(BaseModule):
         reminder = {
             "message_id": bot_message.id,
             "channel_id": bot_message.channel.id,
-            "message": " ".join(command_args[1:])
+            "message": " ".join(command_args[1:]),
             "date_of_reminder": str(utils.now() + time_delta),
             "date_reminder_set": str(utils.now())
         }
