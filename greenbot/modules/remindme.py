@@ -119,6 +119,7 @@ class RemindMe(BaseModule):
         - {self.bot.command_prefix}remindme 3h40m Do that thing in 3 hours and 40 minutes
         """
         data = discord.Embed(title="RemindMe help Menu", description=help_desc, colour=discord.Colour.red())
+        log.info(self.bot.discord_bot.client.user.avatar_url)
         data.set_thumbnail(self.bot.discord_bot.client.user.avatar_url)
 
 
