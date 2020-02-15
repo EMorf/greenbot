@@ -170,7 +170,8 @@ class Functions:
     async def func_output(self, args, extra={}):
         return f"args: {args}\nextra: {extra}", None
 
-    async def func_embed_url(self, args, extra={}):
+    async def func_embed_image(self, args, extra={}):
         log.info(args[0])
-        return None, discord.Embed(description=("test"), url=str(args[0]))
-
+        embed = discord.Embed()
+        embed.set_image(args[0])
+        return None, embed
