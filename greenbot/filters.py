@@ -203,7 +203,8 @@ class Filters:
         data = discord.Embed(
             description=(key), colour=discord.Colour.dark_gold()
         )
-        data.add_field(name=("ID"), value=command.id)
+        if command.id:
+            data.add_field(name=("ID"), value=command.id)
         data.add_field(name=("Level"), value=command.level)
         data.add_field(name=("Delay All"), value=command.delay_all)
         data.add_field(name=("Delay User"), value=command.delay_user)
@@ -220,9 +221,9 @@ class Filters:
                     f"Made by: {command.data.added_by} | Edited by {command.data.edited_by}"
                 )
             )
-        try:
-            data.add_field(name=("Description"), value=command.description if command.description else None)
-        except:
+        if command.description:
+            data.add_field(name=("Description"), value=command.description)
+        else:
             data.add_field(name=("Response"), value=command.action.response)
         data.set_thumbnail(url=extra["message_raw"].guild.icon_url)
 
