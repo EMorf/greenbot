@@ -172,6 +172,6 @@ class Functions:
 
     async def func_embed_image(self, args, extra={}):
         log.info(args[0])
-        embed = discord.Embed()
+        embed = discord.Embed(desctiption=("Image"))
         embed.set_image(url=args[0])
         return None, embed
