@@ -120,7 +120,7 @@ class RemindMe(BaseModule):
         """
         data = discord.Embed(title="RemindMe help Menu", description=help_desc, colour=discord.Colour.red())
         data.set_thumbnail(url=self.bot.discord_bot.client.user.avatar_url)
-
+        return data
 
     async def create_reminder(self, bot, author, channel, message, args):
         command_args = message.split(" ") if message else []
