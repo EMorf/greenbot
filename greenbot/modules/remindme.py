@@ -213,8 +213,9 @@ class RemindMe(BaseModule):
         bot_message = await channel.fetch_message(int(reminder["message_id"]))
         message = reminder["message"]
         for reaction in bot_message.reactions:
-            if reaction.emoji == self.settings["reaction_emoji"]:
+            if reaction.emoji == self.settings["emoji"]:
                 users = await reaction.users().flatten()
+                users.remove(self.bot.discord_bot.client.user)
                 sender = await self.bot.discord_bot.get_user(user_id)
                 if sender:
                     users.append(sender)
