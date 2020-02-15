@@ -164,10 +164,12 @@ class RemindMe(BaseModule):
             return False
         await self.bot.say(channel, f"{author.mention} ill remind you that in {seconds_to_resp(time_delta.total_seconds())}")
         bot_message = await self.bot.say(channel, f"If anyone else wants to be reminded click the {self.settings['emoji']}")
+        salt = random_string()
         await bot_message.add_reaction(self.settings['emoji'])
         reminder = {
             "message_id": bot_message.id,
             "channel_id": bot_message.channel.id,
+            "salt": salt,
             "message": " ".join(command_args[1:]),
             "date_of_reminder": str(utils.now() + time_delta),
             "date_reminder_set": str(utils.now())
@@ -175,14 +177,40 @@ class RemindMe(BaseModule):
         user_reminders.append(reminder)
         reminders_list[str(author.id)] = user_reminders
         self.redis.set("remind-me-reminders", json.dumps(reminders_list))
-        salt = random_string()
         self.reminder_tasks[salt] = ScheduleManager.execute_delayed(time_delta.total_seconds(), self.execute_reminder, args=[salt, author.id, reminder])
 
-    async def myreminders(self, bot, author, channel, message, args):
-        pass
 
     async def forgetme(self, bot, author, channel, message, args):
-        pass
+        try:
+            reminders_list = json.loads(self.redis.get("remind-me-reminders"))
+            """
+            { 
+                user_id: [
+                    {
+                        "message_id": message_id,
+                        "channel_id": channel_id,
+                        "salt": salt,
+                        "message": message,
+                        "date_of_reminder": date_of_reminder,
+                        "date_reminder_set": date_reminder_set
+                    },
+                ],
+            }
+            """
+        except:
+            self.redis.set("remind-me-reminders", json.dumps({}))
+            reminders_list = {}
+        user_reminders = reminders_list[str(author.id)] if str(author.id) else []
+        for reminder in user_reminders:
+            self.reminder_tasks.pop(reminder["salt"]).remove()
+            try:
+                channel = self.bot.discord_bot.guild.get_channel(int(reminder["channel_id"]))
+                bot_message = await channel.fetch_message(int(reminder["message_id"]))
+                await bot_message.delete()  
+            except Exception as e:
+                log.error(f"Failed to delete message from bot: {e}")
+        reminders_list[str(author.id)] = []
+        self.redis.set("remind-me-reminders", json.dumps(reminders_list))
 
     def load_commands(self, **options):
         self.commands["remindme"] = Command.raw_command(
@@ -191,12 +219,6 @@ class RemindMe(BaseModule):
             delay_user=0,
             cost=int(self.settings["cost"]),
             can_execute_with_whisper=False,
-            description="Creates a reminder",
-        )
-        self.commands["myreminders"] = Command.raw_command(
-            self.myreminders,
-            delay_all=0,
-            delay_user=0,
             description="Creates a reminder",
         )
         self.commands["forgetme"] = Command.raw_command(
@@ -209,8 +231,11 @@ class RemindMe(BaseModule):
 
     async def execute_reminder(self, salt, user_id, reminder):
         self.reminder_tasks.pop(salt)
-        channel = self.bot.discord_bot.guild.get_channel(int(reminder["channel_id"]))
-        bot_message = await channel.fetch_message(int(reminder["message_id"]))
+        try:
+            channel = self.bot.discord_bot.guild.get_channel(int(reminder["channel_id"]))
+            bot_message = await channel.fetch_message(int(reminder["message_id"]))
+        except:
+            return
         message = reminder["message"]
         for reaction in bot_message.reactions:
             if reaction.emoji == self.settings["emoji"]:
@@ -239,6 +264,7 @@ class RemindMe(BaseModule):
                     {
                         "message_id": message_id,
                         "channel_id": channel_id,
+                        "salt": salt,
                         "message": message,
                         "date_of_reminder": date_of_reminder,
                         "date_reminder_set": date_reminder_set
@@ -268,6 +294,7 @@ class RemindMe(BaseModule):
                     {
                         "message_id": message_id,
                         "channel_id": channel_id,
+                        "salt": salt,
                         "message": message,
                         "date_of_reminder": date_of_reminder,
                         "date_reminder_set": date_reminder_set
@@ -283,7 +310,7 @@ class RemindMe(BaseModule):
             user_reminders = reminders_list[user_id]
             new_user_reminders = []
             for reminder in user_reminders:
-                salt = random_string()
+                salt = reminder["salt"]
                 date_of_reminder = reminder["date_of_reminder"]
                 if ":" in date_of_reminder[-5:]:
                     date_of_reminder = f"{date_of_reminder[:-5]}{date_of_reminder[-5:-3]}{date_of_reminder[-2:]}"
