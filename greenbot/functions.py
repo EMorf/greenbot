@@ -172,5 +172,5 @@ class Functions:
 
     async def func_embed_url(self, args, extra={}):
         log.info(args[0])
-        return "", discord.Embed(description=("test"), url=args[0])
+        return None, discord.Embed(description=("test"), url=str(args[0]))
 
