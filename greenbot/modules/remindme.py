@@ -123,7 +123,7 @@ class RemindMe(BaseModule):
 
 
     async def create_reminder(self, bot, author, channel, message, args):
-        command_args = message.split(" ")
+        command_args = message.split(" ") if message else []
         try:
             reminders_list = json.loads(self.redis.get("remind-me-reminders"))
             """
