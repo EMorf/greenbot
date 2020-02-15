@@ -172,7 +172,6 @@ class Functions:
 
     async def func_embed_image(self, args, extra={}):
         log.info(args[0])
-        data = discord.Embed(colour=discord.Colour.dark_gold())
-        data.set_thumbnail(url=args[0])
+        data = discord.Embed()
         data.set_image(url=args[0])
         return None, data
