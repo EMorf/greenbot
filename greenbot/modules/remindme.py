@@ -209,7 +209,7 @@ class RemindMe(BaseModule):
 
     async def execute_reminder(self, salt, user_id, reminder):
         self.reminder_tasks.pop(salt)
-        channel = await self.bot.discord_bot.guild.get_channel(int(reminder["channel_id"]))
+        channel = self.bot.discord_bot.guild.get_channel(int(reminder["channel_id"]))
         bot_message = channel.fetch_message(int(reminder["message_id"]))
         message = reminder["message"]
         for reaction in bot_message.reactions:
@@ -222,7 +222,7 @@ class RemindMe(BaseModule):
                     date_of_reminder = parse_date(reminder["date_of_reminder"])
                     date_reminder_set = parse_date(reminder["date_reminder_set"])
                     seconds = (date_of_reminder - date_reminder_set).total_seconds()
-                    
+                    response_str = seconds_to_resp(seconds)
                     await self.bot.private_message(user, f"Hello! You asked me to remind you {response_str} ago:\n{message}")
                 break
         try:
