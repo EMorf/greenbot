@@ -175,7 +175,7 @@ class RemindMe(BaseModule):
         reminders_list[str(author.id)] = user_reminders
         self.redis.set("remind-me-reminders", json.dumps(reminders_list))
         salt = random_string()
-        self.reminder_tasks[salt] = ScheduleManager.execute_delayed(time_delta.total_seconds(), self.execute_reminder, args=[salt, user_id, reminder])
+        self.reminder_tasks[salt] = ScheduleManager.execute_delayed(time_delta.total_seconds(), self.execute_reminder, args=[salt, author.id, reminder])
 
     async def myreminders(self, bot, author, channel, message, args):
         pass
