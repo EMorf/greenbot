@@ -242,7 +242,7 @@ class RemindMe(BaseModule):
                 users = await reaction.users().flatten()
                 users.remove(self.bot.discord_bot.client.user)
                 sender = await self.bot.discord_bot.get_user(user_id)
-                if sender:
+                if sender and sender not in users:
                     users.append(sender)
                 for user in users:
                     date_of_reminder = parse_date(reminder["date_of_reminder"])
