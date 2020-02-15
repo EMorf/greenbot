@@ -336,7 +336,6 @@ class CommandManager(UserDict):
         parser.add_argument("--usercd", type=int, dest="delay_user")
         parser.add_argument("--level", type=int, dest="level")
         parser.add_argument("--cost", type=int, dest="cost")
-        parser.add_argument("--function", "-f", action="append", dest="functions")
         parser.add_argument("--channel", "-c", action="append", dest="channels")
 
         try:

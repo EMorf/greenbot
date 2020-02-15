@@ -184,10 +184,9 @@ class Dispatch:
                 type = "reply"
             action = {
                 "type": type,
-                "message": response,
-                "functions": options["functions"],
+                "message": None,
+                "functions": response.split(" "),
             }
-            del options["functions"]
 
             options["extra_extra_args"] = {"channels": " ".join(options["channels"] if "channels" in options else [])}
             if "channels" in options:
@@ -198,6 +197,7 @@ class Dispatch:
             )
             if new_command is True:
                 await bot.private_message(author, f"Added your command (ID: {command.id})")
+                AdminLogManager.add_entry("Command created", str(author.id), f"The !{command.command.split('|')[0]} command has been created")
                 return True
 
             # At least one alias is already in use, notify the user to use !edit command instead
@@ -238,19 +238,11 @@ class Dispatch:
             elif options["reply"] is True:
                 type = "reply"
 
-            if "functions" not in options:
-                await bot.private_message(
-                    author,
-                    f"You didnt specify any functions --function abc --function xyz",
-                )
-                return False
-
             options["action"] = {
                 "type": type,
-                "message": response,
-                "functions": options["functions"],
+                "message": None,
+                "functions": response.split(" "),
             }
-            del options["functions"]
 
             options["extra_extra_args"] = {"channels": " ".join(options["channels"] if "channels" in options else [])}
             if "channels" in options:
@@ -267,6 +259,11 @@ class Dispatch:
 
             bot.commands.edit_command(command, **options)
             await bot.private_message(author, f"Updated the command (ID: {command.id})")
+            AdminLogManager.add_entry(
+                "Command edited",
+                str(author.id),
+                f"The !{command.command.split('|')[0]} command has been updated",
+            )
 
     @staticmethod
     async def add_alias(bot, author, channel, message, args):
