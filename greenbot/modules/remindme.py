@@ -222,7 +222,7 @@ class RemindMe(BaseModule):
                 for user in users:
                     date_of_reminder = parse_date(reminder["date_of_reminder"])
                     date_reminder_set = parse_date(reminder["date_reminder_set"])
-                    seconds = (date_of_reminder - date_reminder_set).total_seconds()
+                    seconds = int(round((date_of_reminder - date_reminder_set).total_seconds()))
                     log.info(seconds)
                     response_str = seconds_to_resp(seconds)
                     await self.bot.private_message(user, f"Hello! You asked me to remind you {response_str} ago:\n{message}")
