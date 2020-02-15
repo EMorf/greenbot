@@ -147,6 +147,7 @@ class RemindMe(BaseModule):
             return False
         if len(args) == 0:
             await self.bot.say(channel, embed=self.help)
+            return False
         time_delta = parse_timedelta(args[0])
         if not time_delta:
             await self.bot.say(channel, f"{author.mention} invalid time: {args[0]}")
