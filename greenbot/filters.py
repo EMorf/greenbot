@@ -201,7 +201,7 @@ class Filters:
             return f"Cannot find command {key}"
         command = self.bot.commands[key]
         data = discord.Embed(
-            description=(command.command), colour=discord.Colour.dark_gold()
+            description=(key), colour=discord.Colour.dark_gold()
         )
         data.add_field(name=("ID"), value=command.id)
         data.add_field(name=("Level"), value=command.level)
@@ -221,9 +221,9 @@ class Filters:
                 )
             )
         try:
-            data.add_field(name=("Description"), value=command.action.response)
+            data.add_field(name=("Description"), value=command.description if command.description else None)
         except:
-            pass
+            data.add_field(name=("Response"), value=command.action.response)
         data.set_thumbnail(url=extra["message_raw"].guild.icon_url)
 
         return data
