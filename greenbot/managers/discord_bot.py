@@ -52,7 +52,9 @@ class CustomClient(discord.Client):
         await HandlerManager.trigger("discord_socket_raw_send", payload=payload)
 
     async def on_typing(self, channel, user, when):
-        await HandlerManager.trigger("discord_socket_raw_send", channel=channel, user=user, when=when)
+        await HandlerManager.trigger(
+            "discord_socket_raw_send", channel=channel, user=user, when=when
+        )
 
     async def on_message(self, message):
         await HandlerManager.trigger("discord_message", message=message)
@@ -76,17 +78,23 @@ class CustomClient(discord.Client):
         await HandlerManager.trigger("discord_raw_message_edit", payload=payload)
 
     async def on_reaction_add(self, reaction, user):
-        await HandlerManager.trigger("discord_reaction_add", reaction=reaction, user=user)
+        await HandlerManager.trigger(
+            "discord_reaction_add", reaction=reaction, user=user
+        )
 
     async def on_reaction_remove(self, reaction, user):
-        await HandlerManager.trigger("discord_reaction_remove", reaction=reaction, user=user)
+        await HandlerManager.trigger(
+            "discord_reaction_remove", reaction=reaction, user=user
+        )
 
     async def on_raw_reaction_remove(self, payload):
         await HandlerManager.trigger("discord_reaction_remove", payload=payload)
 
     async def on_reaction_clear(self, message, reactions):
-        await HandlerManager.trigger("discord_reaction_clear", message=message, reactions=reactions)
-    
+        await HandlerManager.trigger(
+            "discord_reaction_clear", message=message, reactions=reactions
+        )
+
     async def on_raw_reaction_clear(self, payload):
         await HandlerManager.trigger("discord_raw_reaction_clear", payload=payload)
 
@@ -94,7 +102,9 @@ class CustomClient(discord.Client):
         await HandlerManager.trigger("discord_reaction_clear_emoji", reaction=reaction)
 
     async def on_raw_reaction_clear_emoji(self, payload):
-        await HandlerManager.trigger("discord_raw_reaction_clear_emoji", payload=payload)
+        await HandlerManager.trigger(
+            "discord_raw_reaction_clear_emoji", payload=payload
+        )
 
     async def on_private_channel_delete(self, channel):
         await HandlerManager.trigger("discord_private_channel_delete", channel=channel)
@@ -103,10 +113,14 @@ class CustomClient(discord.Client):
         await HandlerManager.trigger("discord_private_channel_create", channel=channel)
 
     async def on_private_channel_update(self, before, after):
-        await HandlerManager.trigger("discord_private_channel_update", before=before, after=after)
+        await HandlerManager.trigger(
+            "discord_private_channel_update", before=before, after=after
+        )
 
     async def on_private_channel_pins_update(self, channel, last_pin):
-        await HandlerManager.trigger("discord_private_channel_pins_update", channel=channel, last_pin=last_pin)
+        await HandlerManager.trigger(
+            "discord_private_channel_pins_update", channel=channel, last_pin=last_pin
+        )
 
     async def on_guild_channel_delete(self, channel):
         await HandlerManager.trigger("discord_guild_channel_delete", channel=channel)
@@ -115,10 +129,14 @@ class CustomClient(discord.Client):
         await HandlerManager.trigger("discord_guild_channel_create", channel=channel)
 
     async def on_guild_channel_update(self, before, after):
-        await HandlerManager.trigger("discord_guild_channel_update", before=before, after=after)
+        await HandlerManager.trigger(
+            "discord_guild_channel_update", before=before, after=after
+        )
 
     async def on_guild_channel_pins_update(self, channel, last_pin):
-        await HandlerManager.trigger("discord_guild_channel_pins_update", channel=channel, last_pin=last_pin)
+        await HandlerManager.trigger(
+            "discord_guild_channel_pins_update", channel=channel, last_pin=last_pin
+        )
 
     async def on_guild_integrations_update(self, guild):
         await HandlerManager.trigger("discord_guild_integrations_update", guild=guild)
@@ -133,7 +151,9 @@ class CustomClient(discord.Client):
         await HandlerManager.trigger("discord_member_remove", member=member)
 
     async def on_member_update(self, before, after):
-        await HandlerManager.trigger("discord_member_update", before=before, after=after)
+        await HandlerManager.trigger(
+            "discord_member_update", before=before, after=after
+        )
 
     async def on_user_update(self, before, after):
         await HandlerManager.trigger("discord_user_update", before=before, after=after)
@@ -146,7 +166,7 @@ class CustomClient(discord.Client):
 
     async def on_guild_update(self, before, after):
         await HandlerManager.trigger("discord_guild_update", before=before, after=after)
-    
+
     async def on_guild_role_create(self, role):
         await HandlerManager.trigger("discord_guild_role_create", role=role)
 
@@ -154,10 +174,14 @@ class CustomClient(discord.Client):
         await HandlerManager.trigger("discord_guild_role_delete", role=role)
 
     async def on_guild_role_update(self, before, after):
-        await HandlerManager.trigger("discord_guild_role_update", before=before, after=after)
+        await HandlerManager.trigger(
+            "discord_guild_role_update", before=before, after=after
+        )
 
     async def on_guild_emojis_update(self, guild, before, after):
-        await HandlerManager.trigger("discord_guild_emojis_update", guild=guild, before=before, after=after)
+        await HandlerManager.trigger(
+            "discord_guild_emojis_update", guild=guild, before=before, after=after
+        )
 
     async def on_guild_available(self, guild):
         await HandlerManager.trigger("discord_guild_available", guild=guild)
@@ -166,7 +190,9 @@ class CustomClient(discord.Client):
         await HandlerManager.trigger("discord_guild_unavailable", guild=guild)
 
     async def on_voice_state_update(self, member, before, after):
-        await HandlerManager.trigger("discord_voice_state_update", member=member, before=before, after=after)
+        await HandlerManager.trigger(
+            "discord_voice_state_update", member=member, before=before, after=after
+        )
 
     async def on_member_ban(self, guild, user):
         await HandlerManager.trigger("discord_member_ban", guild=guild, user=user)
@@ -187,13 +213,20 @@ class CustomClient(discord.Client):
         await HandlerManager.trigger("discord_group_remove", channel=channel, user=user)
 
     async def on_relationship_add(self, relationship):
-        await HandlerManager.trigger("discord_relationship_add", relationship=relationship)
+        await HandlerManager.trigger(
+            "discord_relationship_add", relationship=relationship
+        )
 
     async def on_relationship_remove(self, relationship):
-        await HandlerManager.trigger("discord_relationship_remove", relationship=relationship)
+        await HandlerManager.trigger(
+            "discord_relationship_remove", relationship=relationship
+        )
 
     async def discord_relationship_update(self, before, after):
-        await HandlerManager.trigger("discord_relationship_remove", before=before, after=after)
+        await HandlerManager.trigger(
+            "discord_relationship_remove", before=before, after=after
+        )
+
 
 class DiscordBotManager:
     def __init__(self, bot, settings, redis, private_loop):
@@ -205,9 +238,11 @@ class DiscordBotManager:
         self.redis = redis
 
         self.guild = None
-        if not self.redis.get("timeouts-discord") or not json.loads(self.redis.get("timeouts-discord")):
+        if not self.redis.get("timeouts-discord") or not json.loads(
+            self.redis.get("timeouts-discord")
+        ):
             self.redis.set("timeouts-discord", json.dumps({}))
-        
+
         HandlerManager.add_handler("discord_ready", self.initial_unbans)
 
     async def initial_unbans(self):
@@ -216,13 +251,22 @@ class DiscordBotManager:
             for user in data:
                 unban_date = data[user]["unban_date"]
                 if ":" in unban_date[-5:]:
-                    unban_date = f"{unban_date[:-5]}{unban_date[-5:-3]}{unban_date[-2:]}"
+                    unban_date = (
+                        f"{unban_date[:-5]}{unban_date[-5:-3]}{unban_date[-2:]}"
+                    )
                 unban_date = datetime.strptime(unban_date, "%Y-%m-%d %H:%M:%S.%f%z")
                 time_now = utils.now()
                 if unban_date < time_now:
-                    ScheduleManager.execute_now(method=self.unban, args=[data[user]["discord_id"], "Unbanned by timer"])
+                    ScheduleManager.execute_now(
+                        method=self.unban,
+                        args=[data[user]["discord_id"], "Unbanned by timer"],
+                    )
                     continue
-                ScheduleManager.execute_delayed(delay=(unban_date - time_now).seconds, method=self.unban, args=[data[user]["discord_id"], "Unbanned by timer"])
+                ScheduleManager.execute_delayed(
+                    delay=(unban_date - time_now).seconds,
+                    method=self.unban,
+                    args=[data[user]["discord_id"], "Unbanned by timer"],
+                )
         except Exception as e:
             log.exception(e)
             self.redis.set("timeouts-discord", json.dumps({}))
@@ -251,9 +295,7 @@ class DiscordBotManager:
         if channel and (message is None or embed is None):
             return await channel.send(content=message, embed=embed)
 
-    async def ban(
-        self, user, timeout_in_seconds=0, reason=None, delete_message_days=0
-    ):
+    async def ban(self, user, timeout_in_seconds=0, reason=None, delete_message_days=0):
         delete_message_days = (
             7
             if delete_message_days > 7
@@ -279,11 +321,17 @@ class DiscordBotManager:
                 timeouts = json.loads(self.redis.get("timeouts-discord"))
                 timeouts[str(user.id)] = {
                     "discord_id": str(user.id),
-                    "unban_date": str(utils.now() + timedelta(seconds=timeout_in_seconds)),
-                    "reason": str(reason)
+                    "unban_date": str(
+                        utils.now() + timedelta(seconds=timeout_in_seconds)
+                    ),
+                    "reason": str(reason),
                 }
                 self.redis.set("timeouts-discord", json.dumps(timeouts))
-                ScheduleManager.execute_delayed(delay=timeout_in_seconds, method=self.unban, args=[user.id, "Unbanned by timer"])
+                ScheduleManager.execute_delayed(
+                    delay=timeout_in_seconds,
+                    method=self.unban,
+                    args=[user.id, "Unbanned by timer"],
+                )
         except:
             return False
         return True

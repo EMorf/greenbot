@@ -50,7 +50,11 @@ class ScheduleManager:
             )
             return ScheduledJob(job)
         job = scheduler.add_job(
-            ScheduleManager.run_async_task, "date", run_date=utils.now(), args=[method, *args], kwargs=kwargs
+            ScheduleManager.run_async_task,
+            "date",
+            run_date=utils.now(),
+            args=[method, *args],
+            kwargs=kwargs,
         )
         return ScheduledJob(job)
 
@@ -64,7 +68,11 @@ class ScheduleManager:
 
         if not ScheduleManager.bot:
             job = scheduler.add_job(
-                method, "date", run_date=utils.now() + datetime.timedelta(seconds=delay), args=args, kwargs=kwargs
+                method,
+                "date",
+                run_date=utils.now() + datetime.timedelta(seconds=delay),
+                args=args,
+                kwargs=kwargs,
             )
             return ScheduledJob(job)
 
@@ -89,7 +97,12 @@ class ScheduleManager:
 
         if not ScheduleManager.bot:
             job = scheduler.add_job(
-                method, "interval", seconds=interval, args=args, kwargs=kwargs,jitter=jitter
+                method,
+                "interval",
+                seconds=interval,
+                args=args,
+                kwargs=kwargs,
+                jitter=jitter,
             )
             return ScheduledJob(job)
 

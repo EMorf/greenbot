@@ -11,5 +11,5 @@ available_modules = [
     AdminCommandsModule,
     ActivityTracker,
     BasicCommandsModule,
-    RemindMe
+    RemindMe,
 ]

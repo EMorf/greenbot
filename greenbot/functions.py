@@ -11,7 +11,7 @@ class Functions:
     def __init__(self, bot, filters):
         self.bot = bot
         self.filters = filters
-    
+
     async def func_kick_member(self, args, extra={}):
         author = extra["author"]
         if len(args) == 0:
@@ -134,7 +134,10 @@ class Functions:
         with DBManager.create_session_scope() as db_session:
             user = User._create_or_get_by_discord_id(db_session, str(member_id))
             if user.level >= extra["user_level"]:
-                return "You cannot set a level of a user with a higher then your own!", None
+                return (
+                    "You cannot set a level of a user with a higher then your own!",
+                    None,
+                )
             user.level = level
         return f"Level, {level}, set for <@!{member_id}>", None
 

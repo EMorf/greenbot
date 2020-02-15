@@ -26,7 +26,9 @@ class Dispatch:
         # Make sure we got both an alias and a response
         message_parts = message.split()
         if len(message_parts) < 2:
-            await bot.private_message(author, "Usage: !add command ALIAS [options] RESPONSE")
+            await bot.private_message(
+                author, "Usage: !add command ALIAS [options] RESPONSE"
+            )
             return False
 
         options, response = bot.commands.parse_command_arguments(message_parts[1:])
@@ -44,7 +46,9 @@ class Dispatch:
         elif options["reply"] is True:
             type = "reply"
 
-        options["extra_extra_args"] = {"channels": " ".join(options["channels"] if "channels" in options else [])}
+        options["extra_extra_args"] = {
+            "channels": " ".join(options["channels"] if "channels" in options else [])
+        }
         if "channels" in options:
             del options["channels"]
 
@@ -118,7 +122,11 @@ class Dispatch:
             elif not type == command.action.subtype:
                 options["action"] = {"type": type, "message": command.action.response}
 
-            options["extra_extra_args"] = {"channels": " ".join(options["channels"] if "channels" in options else [])}
+            options["extra_extra_args"] = {
+                "channels": " ".join(
+                    options["channels"] if "channels" in options else []
+                )
+            }
             if "channels" in options:
                 del options["channels"]
 
@@ -175,7 +183,11 @@ class Dispatch:
                 "functions": response.split(" "),
             }
 
-            options["extra_extra_args"] = {"channels": " ".join(options["channels"] if "channels" in options else [])}
+            options["extra_extra_args"] = {
+                "channels": " ".join(
+                    options["channels"] if "channels" in options else []
+                )
+            }
             if "channels" in options:
                 del options["channels"]
 
@@ -183,8 +195,14 @@ class Dispatch:
                 alias_str, action=action, **options
             )
             if new_command is True:
-                await bot.private_message(author, f"Added your command (ID: {command.id})")
-                AdminLogManager.add_entry("Command created", str(author.id), f"The !{command.command.split('|')[0]} command has been created")
+                await bot.private_message(
+                    author, f"Added your command (ID: {command.id})"
+                )
+                AdminLogManager.add_entry(
+                    "Command created",
+                    str(author.id),
+                    f"The !{command.command.split('|')[0]} command has been created",
+                )
                 return True
 
             # At least one alias is already in use, notify the user to use !edit command instead
@@ -231,7 +249,11 @@ class Dispatch:
                 "functions": response.split(" "),
             }
 
-            options["extra_extra_args"] = {"channels": " ".join(options["channels"] if "channels" in options else [])}
+            options["extra_extra_args"] = {
+                "channels": " ".join(
+                    options["channels"] if "channels" in options else []
+                )
+            }
             if "channels" in options:
                 del options["channels"]
 
@@ -263,7 +285,9 @@ class Dispatch:
             # Make sure we got both an existing alias and at least one new alias
             message_parts = message.split()
             if len(message_parts) < 2:
-                await bot.private_message(author, "Usage: !add alias existingalias newalias")
+                await bot.private_message(
+                    author, "Usage: !add alias existingalias newalias"
+                )
                 return False
 
             existing_alias = message_parts[0]
@@ -310,7 +334,9 @@ class Dispatch:
                     f"The following aliases were already in use: {', '.join(already_used_aliases)}",
                 )
         else:
-            await bot.private_message(author, "Usage: !add alias existingalias newalias")
+            await bot.private_message(
+                author, "Usage: !add alias existingalias newalias"
+            )
 
     @staticmethod
     async def remove_alias(bot, author, channel, message, args):

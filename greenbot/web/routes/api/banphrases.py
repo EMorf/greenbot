@@ -25,7 +25,10 @@ class APIBanphraseRemove(Resource):
             if banphrase is None:
                 return {"error": "Invalid banphrase ID"}, 404
             AdminLogManager.post(
-                "Banphrase removed", options["user"].discord_id, banphrase.id, banphrase.phrase
+                "Banphrase removed",
+                options["user"].discord_id,
+                banphrase.id,
+                banphrase.phrase,
             )
             db_session.delete(banphrase)
             db_session.delete(banphrase.data)

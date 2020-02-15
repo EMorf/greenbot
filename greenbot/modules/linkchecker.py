@@ -755,7 +755,9 @@ class LinkCheckerModule(BaseModule):
                 for link in parts:
                     if len(link) > 1:
                         self.blacklist_url(link, **options)
-                        AdminLogManager.post("Blacklist link added", source.discord_id, link)
+                        AdminLogManager.post(
+                            "Blacklist link added", source.discord_id, link
+                        )
                 bot.whisper(source, "Successfully added your links")
                 return True
             except:

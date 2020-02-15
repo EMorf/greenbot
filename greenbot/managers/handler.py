@@ -13,15 +13,13 @@ class HandlerManager:
     def init_handlers():
         HandlerManager.handlers = {}
 
-
-
         # When the managers are loaded!
         HandlerManager.create_handler("manager_loaded")
 
         # on_quit
         HandlerManager.create_handler("on_quit")
 
-        #discord event handles
+        # discord event handles
         # discord.on_ready()
         HandlerManager.create_handler("discord_ready")
 
@@ -36,19 +34,19 @@ class HandlerManager:
 
         # discord.on_resumed()
         HandlerManager.create_handler("discord_resumed")
-        
+
         # discord.on_error(event, *args, **kwargs)
         HandlerManager.create_handler("discord_error")
 
         # discord.on_socket_raw_receive(payload)
         HandlerManager.create_handler("discord_socket_raw_receive")
-        
+
         # discord.on_socket_raw_send(payload)
         HandlerManager.create_handler("discord_socket_raw_send")
-        
+
         # discord.on_typing(channel, user, when)
         HandlerManager.create_handler("discord_typing")
-       
+
         # discord.on_message(message)
         HandlerManager.create_handler("discord_message")
 
@@ -68,7 +66,7 @@ class HandlerManager:
         HandlerManager.create_handler("discord_message_edit")
 
         # discord.on_raw_message_edit(payload)
-        HandlerManager.create_handler("discord_raw_message_edit") 
+        HandlerManager.create_handler("discord_raw_message_edit")
 
         # discord.on_reaction_add(reaction, user)
         HandlerManager.create_handler("discord_reaction_add")
@@ -140,14 +138,14 @@ class HandlerManager:
         HandlerManager.create_handler("discord_guild_remove")
 
         # discord.on_guild_update(before, after)
-        HandlerManager.create_handler("discord_guild_update") 
+        HandlerManager.create_handler("discord_guild_update")
 
         # discord.on_guild_role_create(role)
-        HandlerManager.create_handler("discord_guild_role_create") 
+        HandlerManager.create_handler("discord_guild_role_create")
 
         # discord.on_guild_role_delete(role)
-        HandlerManager.create_handler("discord_guild_role_delete") 
-        
+        HandlerManager.create_handler("discord_guild_role_delete")
+
         # discord.on_guild_role_update(before, after)
         HandlerManager.create_handler("discord_guild_role_update")
 
@@ -174,7 +172,7 @@ class HandlerManager:
 
         # discord.on_invite_delete(invite)
         HandlerManager.create_handler("discord_invite_delete")
-        
+
         # discord.on_group_join(channel, user)
         HandlerManager.create_handler("discord_group_join")
 

@@ -88,7 +88,7 @@ class Bot:
             private_loop=self.private_loop,
         )
         self.filters = Filters(self, self.discord_bot)
-        self.functions = Functions(self, self.filters)    
+        self.functions = Functions(self, self.filters)
 
     @property
     def bot_id(self):
@@ -175,9 +175,7 @@ class Bot:
     async def discord_message(self, message):
         member = self.discord_bot.get_member(message.author.id)
         not_whisper = isinstance(message.author, discord.Member)
-        if not_whisper and (
-            message.guild != self.discord_bot.guild
-        ):
+        if not_whisper and (message.guild != self.discord_bot.guild):
             return
         with DBManager.create_session_scope() as db_session:
             user = User._create_or_get_by_discord_id(
@@ -189,9 +187,7 @@ class Bot:
                 db_session,
                 message.id,
                 message.author.id,
-                message.channel.id
-                if not_whisper
-                else None,
+                message.channel.id if not_whisper else None,
                 message.content,
             )
 

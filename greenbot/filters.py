@@ -44,7 +44,7 @@ class Filters:
             return getattr(db_user, key) if db_user else None
 
     def rest(self, key, extra={}):
-        return " ".join(extra["message"].split(" ")[int(key):])
+        return " ".join(extra["message"].split(" ")[int(key) :])
 
     def get_role_value(self, key, extra={}):
         role_name = extra["argument"]
@@ -96,9 +96,7 @@ class Filters:
                 continuation_string = (
                     "and {numeric_number} more roles not displayed due to embed limits."
                 )
-                available_length = 1024 - len(
-                    continuation_string
-                )
+                available_length = 1024 - len(continuation_string)
 
                 role_chunks = []
                 remaining_roles = 0
@@ -200,9 +198,7 @@ class Filters:
         if key not in self.bot.commands:
             return f"Cannot find command {key}"
         command = self.bot.commands[key]
-        data = discord.Embed(
-            description=(key), colour=discord.Colour.dark_gold()
-        )
+        data = discord.Embed(description=(key), colour=discord.Colour.dark_gold())
         if command.id:
             data.add_field(name=("ID"), value=command.id)
         data.add_field(name=("Level"), value=command.level)

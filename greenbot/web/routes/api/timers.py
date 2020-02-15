@@ -21,7 +21,9 @@ class APITimerRemove(Resource):
             timer = db_session.query(Timer).filter_by(id=timer_id).one_or_none()
             if timer is None:
                 return {"error": "Invalid timer ID"}, 404
-            AdminLogManager.post("Timer removed", options["user"].discord_id, timer.name)
+            AdminLogManager.post(
+                "Timer removed", options["user"].discord_id, timer.name
+            )
             db_session.delete(timer)
             SocketClientManager.send("timer.remove", {"id": timer.id})
             return {"success": "good job"}
