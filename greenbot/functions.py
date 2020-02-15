@@ -1,7 +1,10 @@
+import logging
 import discord
 
 from greenbot.managers.db import DBManager
 from greenbot.models.user import User
+
+log = logging.getLogger("greenbot")
 
 
 class Functions:
@@ -168,5 +171,6 @@ class Functions:
         return f"args: {args}\nextra: {extra}", None
 
     async def func_embed_url(self, args, extra={}):
+        log.info(args[0])
         return "", discord.Embed(description=("test"), url=args[0])
 
