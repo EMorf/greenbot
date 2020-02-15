@@ -308,11 +308,12 @@ class MessageAction(BaseAction):
         )
 
         if bot:
-            self.argument_subs = get_argument_substitutions(self.response)
-            self.num_urlfetch_subs = len(
-                get_urlfetch_substitutions(self.response, all=True)
-            )
-            self.subs = get_substitutions(self.response, bot)
+            if self.response:
+                self.argument_subs = get_argument_substitutions(self.response)
+                self.num_urlfetch_subs = len(
+                    get_urlfetch_substitutions(self.response, all=True)
+                )
+                self.subs = get_substitutions(self.response, bot)
         else:
             self.argument_subs = []
             self.num_urlfetch_subs = 0
