@@ -3,6 +3,7 @@ import logging
 import json
 import random
 import discord
+import string
 from datetime import timedelta
 import regex as re
 from datetime import datetime
@@ -72,7 +73,7 @@ def seconds_to_resp(seconds):
     return response_str + f"{'and ' if response_str != '' else ''}{response[-1]}"
 
 def random_string(length=10):
-    return ''.join(random.choice(str.ascii_lowercase) for i in range(length))
+    return ''.join(random.choice(string.ascii_lowercase) for i in range(length))
 
 def parse_date(string):
     if ":" in string[-5:]:
