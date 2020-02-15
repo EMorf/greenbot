@@ -167,7 +167,7 @@ class RemindMe(BaseModule):
             self.create_reminder,
             delay_all=0,
             delay_user=0,
-            cost=self.settings["cost"],
+            cost=int(self.settings["cost"]),
             can_execute_with_whisper=False,
             description="Creates a reminder",
         )

@@ -274,6 +274,7 @@ class Command(Base):
         if self.delay_user < 0:
             self.delay_user = 0
         self.enabled = options.get("enabled", self.enabled)
+        self.cost = int(self.cost)
         self.cost = options.get("cost", self.cost)
         if self.cost < 0:
             self.cost = 0
