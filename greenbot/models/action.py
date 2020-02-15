@@ -524,6 +524,7 @@ def method_func(bot):
         method_mapping["output"] = bot.functions.func_output if bot else None
         method_mapping["addrole"] = bot.functions.func_add_role_member if bot else None
         method_mapping["removerole"] = bot.functions.func_remove_role_member if bot else None
+        method_mapping["embed"] = bot.functions.func_embed_url if bot else None
     except AttributeError:
         pass
     return method_mapping
