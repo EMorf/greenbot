@@ -52,7 +52,7 @@ class Functions:
         delete_message_days = int(args[2] if len(args) > 3 and args[2] != "" else 0)
         reason = args[3] if len(args) == 4 else ""
 
-        resp = await self.ban(
+        resp = await self.bot.ban(
             user=member,
             timeout_in_seconds=timeout_in_seconds,
             delete_message_days=delete_message_days,
@@ -69,7 +69,7 @@ class Functions:
         author = extra["author"]
         reason = args[1]
 
-        resp = await self.unban(
+        resp = await self.bot.unban(
             user_id=member_id, reason=f"{reason}\nUnbanned by {author}",
         )
         if not resp:
@@ -88,7 +88,7 @@ class Functions:
         if not role:
             return "Invalid Role", None
         reason = args[2]
-        resp = await self.add_role(
+        resp = await self.bot.add_role(
             user=member, role=role, reason=f"{reason}\nAdded by {author}",
         )
         if not resp:
@@ -103,11 +103,11 @@ class Functions:
         if not member:
             return "Invalid User", None
         author = extra["author"]
-        role = self.get_role(args[1])
+        role = self.filters.get_role(args[1])
         if not role:
             return "Invalid Role", None
         reason = args[2]
-        resp = await self.remove_role(
+        resp = await self.bot.remove_role(
             user=member, role=role, reason=f"{reason}\nRemoved by {author}",
         )
         if not resp:
