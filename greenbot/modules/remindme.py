@@ -210,7 +210,7 @@ class RemindMe(BaseModule):
     async def execute_reminder(self, salt, user_id, reminder):
         self.reminder_tasks.pop(salt)
         channel = self.bot.discord_bot.guild.get_channel(int(reminder["channel_id"]))
-        bot_message = channel.fetch_message(int(reminder["message_id"]))
+        bot_message = await channel.fetch_message(int(reminder["message_id"]))
         message = reminder["message"]
         for reaction in bot_message.reactions:
             if reaction.emoji == self.settings["reaction_emoji"]:
@@ -226,7 +226,7 @@ class RemindMe(BaseModule):
                     await self.bot.private_message(user, f"Hello! You asked me to remind you {response_str} ago:\n{message}")
                 break
         try:
-            await bot_message.delete()
+            await bot_message.delete()  
         except Exception as e:
             log.error(f"Failed to delete message from bot: {e}")
         try:
