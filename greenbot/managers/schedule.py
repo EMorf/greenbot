@@ -50,7 +50,7 @@ class ScheduleManager:
             )
             return ScheduledJob(job)
         job = scheduler.add_job(
-            ScheduleManager.bot.private_loop.create_task, "date", run_date=utils.now(), args=[method(*args, **kwargs)], kwargs={}
+            ScheduleManager.run_async_task, "date", run_date=utils.now(), args=[method, *args], kwargs=kwargs
         )
         return ScheduledJob(job)
 
@@ -69,11 +69,11 @@ class ScheduleManager:
             return ScheduledJob(job)
 
         job = scheduler.add_job(
-            ScheduleManager.bot.private_loop.create_task,
+            ScheduleManager.run_async_task,
             "date",
             run_date=utils.now() + datetime.timedelta(seconds=delay),
-            args=[method(*args, **kwargs)],
-            kwargs={},
+            args=[method, *args],
+            kwargs=kwargs,
         )
         return ScheduledJob(job)
 
@@ -94,11 +94,15 @@ class ScheduleManager:
             return ScheduledJob(job)
 
         job = scheduler.add_job(
-            ScheduleManager.bot.private_loop.create_task,
+            ScheduleManager.run_async_task,
             "interval",
             seconds=interval,
-            args=[method(*args, **kwargs)],
-            kwargs={},
+            args=[method, *args],
+            kwargs=kwargs,
             jitter=jitter,
         )
         return ScheduledJob(job)
+
+    @staticmethod
+    def run_async_task(method, *args, **kwargs):
+        ScheduleManager.bot.private_loop.create_task(method(*args, **kwargs))

@@ -125,10 +125,10 @@ class Bot:
         self.execute_delayed(0, function, *args, **kwargs)
 
     def execute_delayed(self, delay, function, *args, **kwargs):
-        ScheduleManager.execute_delayed(delay, lambda: function(*args, **kwargs))
+        ScheduleManager.execute_delayed(delay, function, *args, *kwargs)
 
     def execute_every(self, period, function, *args, **kwargs):
-        ScheduleManager.execute_every(period, lambda: function(*args, **kwargs))
+        ScheduleManager.execute_every(period, function, *args, **kwargs)
 
     async def _quit_bot(self):
         await HandlerManager.trigger("on_quit")
