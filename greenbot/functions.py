@@ -174,7 +174,9 @@ class Functions:
         return f"args: {args}\nextra: {extra}", None
 
     async def func_embed_image(self, args, extra={}):
-        log.info(args[0])
         data = discord.Embed()
         data.set_image(url=args[0])
         return None, data
+
+    async def func_get_channel(self, args, extra={}):
+        return self.bot.discord_bot.guild.get_channel(args[0]), None

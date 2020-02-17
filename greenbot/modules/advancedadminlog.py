@@ -1,21 +1,7 @@
 import logging
 
-import json
-import random
-import discord
-import string
-from datetime import timedelta
-import regex as re
-from datetime import datetime
-
-from greenbot import utils
-from greenbot.exc import InvalidPointAmount
 from greenbot.managers.db import DBManager
-from greenbot.managers.schedule import ScheduleManager
-from greenbot.managers.redis import RedisManager
-from greenbot.models.command import Command
-from greenbot.models.message import Message
-from greenbot.models.user import User
+from greenbot.managers.handler import HandlerManager
 from greenbot.modules import BaseModule
 from greenbot.modules import ModuleSetting
 
@@ -29,50 +15,37 @@ class AdvancedAdminLog(BaseModule):
     CATEGORY = "Feature"
 
     SETTINGS = [
-        # ModuleSetting(
-        #     key="max_reminders_per_user",
-        #     label="Maximum reminders per user",
-        #     type="int",
-        #     placeholder="",
-        #     default=3,
-        # ),
-        # ModuleSetting(
-        #     key="cost",
-        #     label="Points required to add a reminder",
-        #     type="number",
-        #     placeholder="",
-        #     default="0",
-        # ),
-        # ModuleSetting(
-        #     key="emoji",
-        #     label="Emoji for reminder",
-        #     type="text",
-        #     placeholder="🔔",
-        #     default="🔔",
-        # ),
+        ModuleSetting(
+            key="ingore_channels",
+            label="Channels to ignore seperated by a space",
+            type="text",
+            placeholder="",
+            default="",
+        ),
+        ModuleSetting(
+            key="output_channel",
+            label="Channels to send logs to",
+            type="text",
+            placeholder="",
+            default="",
+        ),
     ]
 
     def __init__(self, bot):
         super().__init__(bot)
         self.bot = bot
 
-    async def create_reminder(self, bot, author, channel, message, args):
-        pass
-
-    def load_commands(self, **options):
-        # self.commands["remindme"] = Command.raw_command(
-        #     self.create_reminder,
-        #     delay_all=0,
-        #     delay_user=0,
-        #     cost=int(self.settings["cost"]),
-        #     can_execute_with_whisper=False,
-        #     description="Creates a reminder",
-        # )
-        pass
+    async def raw_message_edit(self, payload):
+        channel, _  = self.bot.functions.func_get_channel([int(self.settings["output_channel"])])
+        if not channel:
+            return
+        self.bot.say(channel, f"message_id: {payload.message_id}\ndata:{payload.data}")
 
     def enable(self, bot):
         if not bot:
             return
+
+        HandlerManager.add_handler("discord_raw_message_edit", self.raw_message_edit)
 
     def disable(self, bot):
         if not bot:
