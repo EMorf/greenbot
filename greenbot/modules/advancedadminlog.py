@@ -44,7 +44,7 @@ class AdvancedAdminLog(BaseModule):
         if not channel:
             log.error("Channel not found")
             return
-        channels = self.settings["output_channel"].split(" ") if self.settings["output_channel"] else []
+        channels = self.settings["output_channel"].split(" ") if self.settings["output_channel"] != "" else []
         if len(channels) > 0 and sent_in_channel not in channels:
             return
         message_id = payload.message_id
