@@ -36,7 +36,6 @@ class SocketManager:
     def start(self):
         while self.running:
             message = self.pubsub.get_message(ignore_subscribe_messages=True, timeout=1)
-            log.info(message)
             if not message:
                 continue
 
@@ -55,7 +54,7 @@ class SocketManager:
 
             for handler in self.handlers[message["channel"]]:
                 # invokes the handler on the bot's main thread (the IRC event loop)
-                self.callback(handler, parsed_data)
+                self.callback(handler, [parsed_data])
 
         self.pubsub.close()
 
