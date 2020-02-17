@@ -220,10 +220,10 @@ class Bot:
                         log.exception(e)
 
     async def add_role(self, user, role, reason=None):
-        return self.discord_bot.add_role(user, role)
+        return await self.discord_bot.add_role(user, role)
 
     async def remove_role(self, user, role, reason=None):
-        return self.discord_bot.remove_role(user, role, reason)
+        return await self.discord_bot.remove_role(user, role, reason)
 
     def quit(self, bot, author, channel, message, args):
         self.quit_bot()
