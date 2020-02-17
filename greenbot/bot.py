@@ -13,6 +13,7 @@ from greenbot.managers.sock import SocketManager
 from greenbot.managers.schedule import ScheduleManager
 from greenbot.managers.db import DBManager
 from greenbot.managers.redis import RedisManager
+from greenbot.managers.message import MessageManager
 from greenbot.managers.handler import HandlerManager
 from greenbot.managers.discord_bot import DiscordBotManager
 from greenbot.managers.command import CommandManager
@@ -69,7 +70,7 @@ class Bot:
             log.error(error)
 
         HandlerManager.init_handlers()
-        HandlerManager.add_handler("discord_message", self.discord_message)
+        HandlerManager.add_handler("parse_command_from_message", self.parse_command_from_message)
         self.bot_name = self.config["main"]["bot_name"]
         self.command_prefix = self.config["discord"]["command_prefix"]
         self.settings = {
@@ -97,7 +98,9 @@ class Bot:
     async def wait_discord_load(self):
 
         self.socket_manager = SocketManager(self.bot_name, self.execute_now)
+        self.message_manager = MessageManager(self)
         self.module_manager = ModuleManager(self.socket_manager, bot=self).load()
+        
 
         self.commands = CommandManager(
             socket_manager=self.socket_manager,
@@ -172,52 +175,34 @@ class Bot:
             return None
         return await self.discord_bot.say(channel, message, embed)
 
-    async def discord_message(self, message):
-        member = self.discord_bot.get_member(message.author.id)
-        not_whisper = isinstance(message.author, discord.Member)
-        if not_whisper and (message.guild != self.discord_bot.guild):
-            return
-        with DBManager.create_session_scope() as db_session:
-            user = User._create_or_get_by_discord_id(
-                db_session,
-                message.author.id,
-                user_name=str(member) if member else str(message.author),
+    async def parse_command_from_message(self, message, content, user_level, author, not_whisper, channel):
+        msg_lower = content.lower()
+        if msg_lower[:1] == self.settings["command_prefix"]:
+            msg_lower_parts = msg_lower.split(" ")
+            trigger = msg_lower_parts[0][1:]
+            msg_raw_parts = content.split(" ")
+            remaining_message = (
+                " ".join(msg_raw_parts[1:]) if len(msg_raw_parts) > 1 else ""
             )
-            Message._create(
-                db_session,
-                message.id,
-                message.author.id,
-                message.channel.id if not_whisper else None,
-                message.content,
-            )
-
-            msg_lower = message.content.lower()
-            if msg_lower[:1] == self.settings["command_prefix"]:
-                msg_lower_parts = msg_lower.split(" ")
-                trigger = msg_lower_parts[0][1:]
-                msg_raw_parts = message.content.split(" ")
-                remaining_message = (
-                    " ".join(msg_raw_parts[1:]) if len(msg_raw_parts) > 1 else ""
-                )
-                if trigger in self.commands:
-                    command = self.commands[trigger]
-                    extra_args = {
-                        "trigger": trigger,
-                        "message_raw": message,
-                        "user_level": user.level if user else 50,
-                        "whisper": not not_whisper,
-                    }
-                    try:
-                        await command.run(
-                            bot=self,
-                            author=message.author,
-                            channel=message.channel if not_whisper else None,
-                            message=remaining_message,
-                            args=extra_args,
-                        )
-                    except Exception as e:
-                        log.error(f"Error thrown on command {trigger}")
-                        log.exception(e)
+            if trigger in self.commands:
+                command = self.commands[trigger]
+                extra_args = {
+                    "trigger": trigger,
+                    "message_raw": message,
+                    "user_level": user_level,
+                    "whisper": not not_whisper,
+                }
+                try:
+                    await command.run(
+                        bot=self,
+                        author=author,
+                        channel=channel if not_whisper else None,
+                        message=remaining_message,
+                        args=extra_args,
+                    )
+                except Exception as e:
+                    log.error(f"Error thrown on command {trigger}")
+                    log.exception(e)
 
     async def add_role(self, user, role, reason=None):
         return await self.discord_bot.add_role(user, role)

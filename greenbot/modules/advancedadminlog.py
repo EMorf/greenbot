@@ -35,21 +35,21 @@ class AdvancedAdminLog(BaseModule):
         super().__init__(bot)
         self.bot = bot
 
-    async def message_edit(self, before, after):
+    async def message_edit(self, payload):
         channel, _  = await self.bot.functions.func_get_channel(args=[int(self.settings["output_channel"])])
         if not channel:
             log.error("Channel not found")
             return
-        await self.bot.say(channel, f"before: {before.content}\nafter:{after.content}")
+        await self.bot.say(channel, f"{payload}")
 
     def enable(self, bot):
         if not bot:
             return
 
-        HandlerManager.add_handler("discord_message_edit", self.message_edit)
+        HandlerManager.add_handler("discord_raw_message_edit", self.message_edit)
 
     def disable(self, bot):
         if not bot:
             return
 
-        HandlerManager.remove_handler("discord_message_edit", self.message_edit)
+        HandlerManager.remove_handler("discord_raw_message_edit", self.message_edit)

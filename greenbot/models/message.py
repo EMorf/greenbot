@@ -1,4 +1,5 @@
 import logging
+import json
 
 from contextlib import contextmanager
 
@@ -31,12 +32,12 @@ class Message(Base):
     user = relationship("User")
 
     @staticmethod
-    def _create(db_session, message_id, user_id, channel_id, content):
+    def _create(db_session, message_id, user_id, channel_id, content): # Content is an array
         user = Message(
             message_id=str(message_id),
             user_id=str(user_id),
             channel_id=str(channel_id),
-            content=content,
+            content=json.dumps(content),
             time_sent=utils.now(),
         )
         db_session.add(user)

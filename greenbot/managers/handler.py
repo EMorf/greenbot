@@ -19,6 +19,9 @@ class HandlerManager:
         # on_quit
         HandlerManager.create_handler("on_quit")
 
+        # parse_command_from_message
+        HandlerManager.create_handler("parse_command_from_message")
+
         # discord event handles
         # discord.on_ready()
         HandlerManager.create_handler("discord_ready")
