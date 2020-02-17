@@ -20,7 +20,7 @@ class AdvancedAdminLog(BaseModule):
     SETTINGS = [
         ModuleSetting(
             key="ingore_channels",
-            label="Channels to ignore seperated by a space",
+            label="Channels to ignore for message edit/delete seperated by a space",
             type="text",
             placeholder="",
             default="",
@@ -32,6 +32,14 @@ class AdvancedAdminLog(BaseModule):
             placeholder="",
             default="",
         ),
+        ModuleSetting(
+            key="output_channel",
+            label="Channels to send logs to",
+            type="text",
+            placeholder="",
+            default="",
+        ),
+        ModuleSetting(key="log_edit_message", label="Log Edit Message Event", type="boolean", placeholder="", default=True),
     ]
 
     def __init__(self, bot):
@@ -39,6 +47,8 @@ class AdvancedAdminLog(BaseModule):
         self.bot = bot
 
     async def message_edit(self, payload):
+        if not self.settings["log_edit_message"]:
+            return
         channel, _  = await self.bot.functions.func_get_channel(args=[int(self.settings["output_channel"])])
         sent_in_channel = await self.bot.functions.func_get_channel(args=[int(payload.data["channel_id"])])
         if not channel:
