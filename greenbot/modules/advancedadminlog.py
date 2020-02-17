@@ -36,7 +36,7 @@ class AdvancedAdminLog(BaseModule):
         self.bot = bot
 
     async def raw_message_edit(self, payload):
-        channel, _  = self.bot.functions.func_get_channel([int(self.settings["output_channel"])])
+        channel, _  = await self.bot.functions.func_get_channel([int(self.settings["output_channel"])])
         if not channel:
             return
         self.bot.say(channel, f"message_id: {payload.message_id}\ndata:{payload.data}")
