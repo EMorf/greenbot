@@ -49,7 +49,7 @@ class AdvancedAdminLog(BaseModule):
             return
         message_id = payload.message_id
         with DBManager.create_session_scope() as db_session:
-            content = json.loads(Message._get(db_session, message_id))
+            content = json.loads(Message._get(db_session, message_id).content)
             await self.bot.say(channel, f"MessageID: {message_id}\n from: {content[-2]}\nto: {content[-1]}")
 
     def enable(self, bot):
