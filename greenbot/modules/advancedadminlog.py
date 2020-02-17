@@ -50,3 +50,5 @@ class AdvancedAdminLog(BaseModule):
     def disable(self, bot):
         if not bot:
             return
+
+        HandlerManager.remove_handler("discord_raw_message_edit", self.raw_message_edit)
