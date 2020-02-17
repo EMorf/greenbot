@@ -40,7 +40,7 @@ class AdvancedAdminLog(BaseModule):
         if not channel:
             log.error("Channel not found")
             return
-        await self.bot.say(channel, f"before: {before}\after:{after}")
+        await self.bot.say(channel, f"before: {before.content}\nafter:{after.content}")
 
     def enable(self, bot):
         if not bot:
