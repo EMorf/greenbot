@@ -43,4 +43,4 @@ class MessageManager:
     def edit_message(self, payload):
         with DBManager.create_session_scope() as db_session:
             log.info(payload.data)
-            Message._get(db_session, payload.message_id).edit_message(db_session, payload.data.content)
+            Message._get(db_session, payload.message_id).edit_message(db_session, payload.data["content"])
