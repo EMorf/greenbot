@@ -36,6 +36,7 @@ class SocketManager:
     def start(self):
         while self.running:
             message = self.pubsub.get_message(ignore_subscribe_messages=True, timeout=1)
+            log.info(message)
             if not message:
                 continue
 
