@@ -32,13 +32,6 @@ class AdvancedAdminLog(BaseModule):
             placeholder="",
             default="",
         ),
-        ModuleSetting(
-            key="output_channel",
-            label="Channels to send logs to",
-            type="text",
-            placeholder="",
-            default="",
-        ),
         ModuleSetting(key="log_edit_message", label="Log Edit Message Event", type="boolean", placeholder="", default=True),
     ]
 
