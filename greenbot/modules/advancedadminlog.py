@@ -1,9 +1,12 @@
 import logging
+import json
 
 from greenbot.managers.db import DBManager
 from greenbot.managers.handler import HandlerManager
 from greenbot.modules import BaseModule
 from greenbot.modules import ModuleSetting
+from greenbot.models.message import Message
+
 
 log = logging.getLogger(__name__)
 
@@ -40,7 +43,13 @@ class AdvancedAdminLog(BaseModule):
         if not channel:
             log.error("Channel not found")
             return
-        await self.bot.say(channel, f"{payload}")
+        channels = self.settings["output_channels"].split(" ") if self.settings["output_channels"] else []
+        if channel not in channels:
+            return
+        message_id = payload.message_id
+        with DBManager.create_session_scope() as db_session:
+            content = json.loads(Message._get(db_session, message_id))
+            await self.bot.say(channel, f"MessageID: {message_id}\n from: {content[-2]}\nto: {content[-1]}")
 
     def enable(self, bot):
         if not bot:

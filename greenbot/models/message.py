@@ -31,6 +31,13 @@ class Message(Base):
     credited = Column(BOOLEAN, nullable=False, default=False)
     user = relationship("User")
 
+    def edit_message(self, db_session, data):
+        local_content = json.loads(self.content)
+        local_content.append(data)
+        self.content = json.dumps(local_content)
+        db_session.merge(self)
+        return self
+
     @staticmethod
     def _create(db_session, message_id, user_id, channel_id, content): # Content is an array
         user = Message(
@@ -99,4 +106,12 @@ class Message(Base):
             .filter(Message.user_id == str(user_id))
             .filter(Message.time_sent > utils.now() - timedelta(days=7))
             .scalar()
+        )
+
+    @staticmethod
+    def _get(db_session, message_id):
+        return (
+            db_session.query(Message)
+            .filter_by(message_id=str(message_id))
+            .one_or_none()
         )
