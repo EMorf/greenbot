@@ -40,11 +40,12 @@ class AdvancedAdminLog(BaseModule):
 
     async def message_edit(self, payload):
         channel, _  = await self.bot.functions.func_get_channel(args=[int(self.settings["output_channel"])])
+        sent_in_channel = await self.bot.functions.func_get_channel(args=[int(payload.data["channel_id"])])
         if not channel:
             log.error("Channel not found")
             return
         channels = self.settings["output_channel"].split(" ") if self.settings["output_channel"] else []
-        if channel not in channels:
+        if len(channels) > 0 and sent_in_channel not in channels:
             return
         message_id = payload.message_id
         with DBManager.create_session_scope() as db_session:
