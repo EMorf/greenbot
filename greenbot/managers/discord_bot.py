@@ -26,6 +26,7 @@ class CustomClient(discord.Client):
         if not self.bot.guild:
             log.error("Discord Guild not found!")
             return
+        log.info(f"discord.py {discord.__version__}")
         log.info(f"Discord Bot has started with id {self.user.id}")
         await HandlerManager.trigger("discord_ready")
 

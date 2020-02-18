@@ -616,11 +616,11 @@ class AdvancedAdminLog(BaseModule):
     async def guild_update(self, before, after):
         if not self.settings["log_guild_update"]:
             return
-        if before != self.bot.discord_bot.guild:
+        if after != self.bot.discord_bot.guild:
             return
         out_channel, _ = await self.bot.functions.func_get_channel(args=[int(self.settings["output_channel"])])
         embed = discord.Embed(
-            timestamp=utils.now(), colour=await self.get_event_colour(guild, "guild_change")
+            timestamp=utils.now(), colour=await self.get_event_colour(after, "guild_change")
         )
         embed.set_author(name="Updated Guild", icon_url=str(after.icon_url))
         embed.set_thumbnail(url=str(after.icon_url))
@@ -740,13 +740,12 @@ class AdvancedAdminLog(BaseModule):
         reason = None
         if not worth_updating:
             return
-        if channel.permissions_for(guild.me).view_audit_log:
-            if action:
-                async for log in guild.audit_logs(limit=1, action=action):
-                    perp = log.user
-                    if log.reason:
-                        reason = log.reason
-                    break
+        if action:
+            async for _log in guild.audit_logs(limit=1, action=action):
+                perp = _log.user
+                if _log.reason:
+                    reason = _log.reason
+                break
         if perp:
             embed.add_field(name="Updated by ", value=perp.mention)
         if reason:
@@ -878,7 +877,7 @@ class AdvancedAdminLog(BaseModule):
 
     async def get_event_colour(self, guild, event_type, changed_object=None):
         if guild.text_channels:
-            cmd_colour = await self.get_colour(guild.text_channels[0])
+            cmd_colour = discord.Colour.blue()
         else:
             cmd_colour = discord.Colour.red()
         defaults = {
