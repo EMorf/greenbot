@@ -53,7 +53,7 @@ class AdvancedAdminLog(BaseModule):
                 return
             content = json.loads(db_message.content)
             author_id = db_message.user_id
-        sent_in_channel = await self.bot.functions.func_get_channel(args=[int(payload.data["channel_id"])])
+        sent_in_channel, _ = await self.bot.functions.func_get_channel(args=[int(payload.data["channel_id"])])
         author = self.bot.discord_bot.get_member(int(author_id))
         embed = discord.Embed(
             description=content,
@@ -80,7 +80,7 @@ class AdvancedAdminLog(BaseModule):
         if not self.settings["log_edit_message"]:
             return
         channel = await self.bot.functions.func_get_channel(args=[int(self.settings["output_channel"])])
-        sent_in_channel = await self.bot.functions.func_get_channel(args=[int(payload.data["channel_id"])])
+        sent_in_channel, _ = await self.bot.functions.func_get_channel(args=[int(payload.data["channel_id"])])
         if not channel:
             log.error("Channel not found")
             return
