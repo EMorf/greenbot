@@ -306,8 +306,7 @@ class DiscordBotManager:
             if ban:
                 return False
         except Exception as e:
-            log.error(e)
-            return False
+            pass
         try:
             await self.guild.ban(
                 user=user, reason=reason, delete_message_days=delete_message_days
@@ -328,8 +327,7 @@ class DiscordBotManager:
                     method=self.unban,
                     args=[user.id, "Unbanned by timer"],
                 )
-        except Exception as e:
-            log.error(e)
+        except:
             return False
         return True
 
