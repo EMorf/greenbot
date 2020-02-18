@@ -284,9 +284,9 @@ class DiscordBotManager:
         except:
             return None
 
-    async def say(self, channel, message=None, embed=None):
-        # if message:
-            # message = discord.utils.escape_markdown(message)
+    async def say(self, channel, message=None, embed=None, ignore_escape=False):
+        if message and not ignore_escape:
+            message = discord.utils.escape_markdown(message)
         if not channel or (message is None and embed is None):
             return
         return await channel.send(content=message, embed=embed)
@@ -372,11 +372,11 @@ class DiscordBotManager:
             return False
         return True
 
-    async def private_message(self, user, message=None, embed=None):
+    async def private_message(self, user, message=None, embed=None, ignore_escape=False):
         if (message is None and embed is None) or user is None:
             return None
         try:
-            if message:
+            if message and not ignore_escape:
                 message = discord.utils.escape_markdown(message)
             await user.create_dm()
             return await user.dm_channel.send(content=message, embed=embed)

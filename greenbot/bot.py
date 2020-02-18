@@ -166,16 +166,16 @@ class Bot:
     async def kick(self, user, reason=None):
         return await self.discord_bot.kick(user=user, reason=reason)
 
-    async def private_message(self, user, message=None, embed=None):
+    async def private_message(self, user, message=None, embed=None, ignore_escape=False):
         if message is None and embed is None:
             return None
-        return await self.discord_bot.private_message(user, message, embed)
+        return await self.discord_bot.private_message(user, message, embed, ignore_escape)
 
-    async def say(self, channel, message=None, embed=None):
+    async def say(self, channel, message=None, embed=None, ignore_escap=False):
         if message is None and embed is None:
             log.error("sent invalid message")
             return None
-        return await self.discord_bot.say(channel, message, embed)
+        return await self.discord_bot.say(channel, message, embed, ignore_escape)
 
     async def parse_command_from_message(
         self, message, content, user_level, author, not_whisper, channel
