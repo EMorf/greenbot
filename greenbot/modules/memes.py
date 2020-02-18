@@ -202,7 +202,7 @@ class Memes(BaseModule):
             await m.edit(content=f"{author.mention} finished in {round(elapsed_time.total_seconds(), 2)}s")
             self.vroom_races.remove(m)
         else:
-            await self.bot.say(channel=channel, message=f"{author.mention} there can only be up to {self.settings['max_vroom_races']} races at the same time. Try later...")
+            await self.bot.say(channel=channel, message=f"<@!{author.id}> there can only be up to {self.settings['max_vroom_races']} races at the same time. Try later...")
 
     async def dank(self, bot, author, channel, message, args):
         role = self.bot.discord_bot.guild.get_role(int(self.settings["dank_role_id"]))
