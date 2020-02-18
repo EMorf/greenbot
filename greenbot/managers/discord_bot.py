@@ -330,6 +330,12 @@ class DiscordBotManager:
             return False
         return True
 
+    def get_member(self, member_id):
+        try:
+            return self.guild.get_member(int(member_id))
+        except:
+            return None
+
     async def unban(self, user_id, reason=None):
         if not self.guild:
             return False
