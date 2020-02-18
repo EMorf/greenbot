@@ -118,8 +118,8 @@ rainbowcolors = [
 
 class Memes(BaseModule):
     ID = __name__.split(".")[-1]
-    NAME = "RemindMe"
-    DESCRIPTION = "Allows users to create reminders"
+    NAME = "Memes"
+    DESCRIPTION = "Fun Module"
     CATEGORY = "Feature"
 
     SETTINGS = [
