@@ -428,7 +428,7 @@ class AdvancedAdminLog(BaseModule):
                     break
         embed.add_field(name="Total Users:", value=str(len(guild.members)))
         if perp:
-            embed.add_field(name="Kicked" if not banned else "Banned", value=perp.mention)
+            embed.add_field(name="Kicked By" if not banned else "Banned By", value=perp.mention)
         if reason:
             embed.add_field(name="Reason", value=str(reason))
         embed.set_footer(text="User ID: " + str(member.id))
