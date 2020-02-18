@@ -66,7 +66,7 @@ class AdvancedAdminLog(BaseModule):
         async for _log in self.bot.discord_bot.guild.audit_logs(limit=2, action=action):
             log.info(_log)
             same_chan = _log.extra.channel.id == sent_in_channel.id
-            if _log.target.id == author_id and same_chan:
+            if _log.target.id == int(author_id) and same_chan:
                 perp = f"{_log.user}({_log.user.id})"
                 break
         if perp:
