@@ -18,8 +18,8 @@ log = logging.getLogger(__name__)
 
 class ActivityTracker(BaseModule):
     ID = __name__.split(".")[-1]
-    NAME = "ActivityTracker"
-    DESCRIPTION = "Gives points for being active"
+    NAME = "Memes"
+    DESCRIPTION = "Fun Module"
     CATEGORY = "Feature"
 
     SETTINGS = [
