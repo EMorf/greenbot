@@ -220,6 +220,7 @@ sudo systemctl restart greenbot@name
 ```
 
 ## Further Steps
+
 ```
   !add command points --allow_whisper $(member;1:mention) has $(user;1:points) $(currency:name)
   !add command commands --allow_whisper $(member;1:mention), $(commands)
@@ -228,7 +229,7 @@ sudo systemctl restart greenbot@name
   !add command userinfo $(member;1:mention), $(userinfo;1)
   !add command avatar $(member;1:mention), $(userinfo;1)
 
-  !add funccommand kick --level 1000 --privatemessage --function $(kick;$(1);$(2)) 
+  !add funccommand kick --level 1000 --privatemessage --function $(kick;$(1);$(2))
   !add funccommand ban --level 1000 --privatemessage --function $(banmember;$(1);$(2);$(3);$(rest:3))
   !add funccommand unban --level 1000 --privatemessage --function $(unbanmember;$(1);$(rest:1))
   !add funccommand level --level 1500 --privatemessage --function $(level;$(1);$(2))

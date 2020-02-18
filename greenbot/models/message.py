@@ -39,7 +39,9 @@ class Message(Base):
         return self
 
     @staticmethod
-    def _create(db_session, message_id, user_id, channel_id, content): # Content is an array
+    def _create(
+        db_session, message_id, user_id, channel_id, content
+    ):  # Content is an array
         user = Message(
             message_id=str(message_id),
             user_id=str(user_id),

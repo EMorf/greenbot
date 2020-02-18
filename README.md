@@ -1,6 +1,6 @@
 # Greenbot
 
-greenbot is a discord bot created by [troydota](http://twitch.tv/troydota).  
+greenbot is a discord bot created by [troydota](http://twitch.tv/troydota).
 
 ## Quick install
 

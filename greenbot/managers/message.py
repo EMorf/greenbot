@@ -10,11 +10,12 @@ log = logging.getLogger(__name__)
 
 
 class MessageManager:
-    
     def __init__(self, bot):
         self.bot = bot
         HandlerManager.add_handler("discord_message", self.on_message)
-        HandlerManager.add_handler("discord_raw_message_edit", self.edit_message, priority=1000)
+        HandlerManager.add_handler(
+            "discord_raw_message_edit", self.edit_message, priority=1000
+        )
 
     async def on_message(self, message):
         member = self.bot.discord_bot.get_member(message.author.id)
@@ -29,7 +30,15 @@ class MessageManager:
             )
             user_level = user.level
             self.new_message(db_session, message)
-        await HandlerManager.trigger("parse_command_from_message", message=message, content=message.content, user_level=user_level, author=message.author, not_whisper=not_whisper, channel=message.channel)
+        await HandlerManager.trigger(
+            "parse_command_from_message",
+            message=message,
+            content=message.content,
+            user_level=user_level,
+            author=message.author,
+            not_whisper=not_whisper,
+            channel=message.channel,
+        )
 
     def new_message(self, db_session, message):
         Message._create(

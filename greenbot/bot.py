@@ -70,7 +70,9 @@ class Bot:
             log.error(error)
 
         HandlerManager.init_handlers()
-        HandlerManager.add_handler("parse_command_from_message", self.parse_command_from_message)
+        HandlerManager.add_handler(
+            "parse_command_from_message", self.parse_command_from_message
+        )
         self.bot_name = self.config["main"]["bot_name"]
         self.command_prefix = self.config["discord"]["command_prefix"]
         self.settings = {
@@ -100,7 +102,6 @@ class Bot:
         self.socket_manager = SocketManager(self.bot_name, self.execute_now)
         self.message_manager = MessageManager(self)
         self.module_manager = ModuleManager(self.socket_manager, bot=self).load()
-        
 
         self.commands = CommandManager(
             socket_manager=self.socket_manager,
@@ -176,7 +177,9 @@ class Bot:
             return None
         return await self.discord_bot.say(channel, message, embed)
 
-    async def parse_command_from_message(self, message, content, user_level, author, not_whisper, channel):
+    async def parse_command_from_message(
+        self, message, content, user_level, author, not_whisper, channel
+    ):
         msg_lower = content.lower()
         if msg_lower[:1] == self.settings["command_prefix"]:
             msg_lower_parts = msg_lower.split(" ")

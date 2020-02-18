@@ -7,6 +7,7 @@ from greenbot.modules.basic.admincommands import AdminCommandsModule
 from greenbot.modules.advancedadminlog import AdvancedAdminLog
 from greenbot.modules.activitytracker import ActivityTracker
 from greenbot.modules.remindme import RemindMe
+
 available_modules = [
     AdminCommandsModule,
     AdvancedAdminLog,
