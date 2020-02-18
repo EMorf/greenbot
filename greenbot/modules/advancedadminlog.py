@@ -927,7 +927,6 @@ class AdvancedAdminLog(BaseModule):
             before_attr = getattr(invite, attr)
             if before_attr:
                 worth_updating = True
-                msg += f"{name} {before_attr}\n"
                 embed.add_field(name=name, value=str(before_attr))
         if not worth_updating:
             return
