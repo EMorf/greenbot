@@ -286,7 +286,7 @@ class DiscordBotManager:
     async def say(self, channel, message=None, embed=None):
         if message:
             message = discord.utils.escape_markdown(message)
-        if not channel or (message is None or embed is None):
+        if not channel or (message is None and embed is None):
             return
         return await channel.send(content=message, embed=embed)
 

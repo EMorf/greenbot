@@ -102,7 +102,7 @@ class AdvancedAdminLog(BaseModule):
                 return
             content = json.loads(db_message.content)
             author_id = db_message.user_id
-        author = self.bot.discord_bot.get_member(int(author_id))
+        author = self.bot.discord_bot.get_member(int(author_id)
         if author_id == self.bot.discord_bot.client.user.id:
             return
         embed = discord.Embed(
