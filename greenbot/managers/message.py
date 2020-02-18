@@ -45,6 +45,4 @@ class MessageManager:
             message = Message._get(db_session, payload.message_id)
             if not message:
                 return
-            if "content" not in payload.data:
-                return
-            message.edit_message(db_session, payload.data["content"])
+            message.edit_message(db_session, payload.data.get("content", ""))
