@@ -76,7 +76,7 @@ class AdvancedAdminLog(BaseModule):
             name="{member} ({m_id})- Deleted Message".format(member=author, m_id=author.id),
             icon_url=str(author.avatar_url),
         )
-        await self.bot.say(channel, embed=embed)
+        await self.bot.say(channel, message="Testing", embed=embed)
 
     async def message_edit(self, payload):
         if not self.settings["log_edit_message"]:
@@ -116,7 +116,7 @@ class AdvancedAdminLog(BaseModule):
             ),
             icon_url=str(author.avatar_url),
         )
-        await self.bot.say(channel, embed=embed)
+        await self.bot.say(channel, message="Testing", embed=embed)
 
     def enable(self, bot):
         if not bot:
