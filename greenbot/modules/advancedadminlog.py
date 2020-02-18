@@ -62,10 +62,12 @@ class AdvancedAdminLog(BaseModule):
 
         embed.add_field(name=("Channel"), value=sent_in_channel)
         action = discord.AuditLogAction.message_delete
-        async for log in self.bot.discord_bot.guild.audit_logs(limit=2, action=action):
+        perp = None
+        async for _log in self.bot.discord_bot.guild.audit_logs(limit=2, action=action):
+            log.info(_log)
             same_chan = log.extra.channel.id == sent_in_channel.id
-            if log.target.id == author_id and same_chan:
-                perp = f"{log.user}({log.user.id})"
+            if _log.target.id == author_id and same_chan:
+                perp = f"{_log.user}({_log.user.id})"
                 break
         if perp:
             embed.add_field(name=("Deleted by"), value=perp)
@@ -92,8 +94,10 @@ class AdvancedAdminLog(BaseModule):
         guild_id = payload.data.get("guild_id", None)
         author = self.bot.discord_bot.get_member(int(payload.data["author"]["id"]))
         message = sent_in_channel.fetch_message(int(message_id))
-        log.info(guild_id)
-        if not guild_id or self.bot.discord_bot.guild.id != guild_id:
+        if not guild_id or self.bot.discord_bot.guild.id != int(guild_id):
+            log.info("Wrong Guild!")
+            log.info(guild_id)
+            log.info(self.bot.discord_bot.guild.id)
             return
 
         with DBManager.create_session_scope() as db_session:
