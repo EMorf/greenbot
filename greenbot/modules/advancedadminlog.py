@@ -48,6 +48,9 @@ class AdvancedAdminLog(BaseModule):
         ModuleSetting(key="log_channel_create", label="Log Channel Create Event", type="boolean", placeholder="", default=True),
         ModuleSetting(key="log_channel_delete", label="Log Channel Delete Event", type="boolean", placeholder="", default=True),
         ModuleSetting(key="log_guild_update", label="Log Guild Update Event", type="boolean", placeholder="", default=True),
+        ModuleSetting(key="log_emoji_update", label="Log Emoji Update Event", type="boolean", placeholder="", default=True),
+        ModuleSetting(key="log_invite_create", label="Log Invite Create Event", type="boolean", placeholder="", default=True),
+        ModuleSetting(key="log_invite_delete", label="Log Invite Delete Event", type="boolean", placeholder="", default=True),
     ]
 
     def __init__(self, bot):
@@ -69,7 +72,7 @@ class AdvancedAdminLog(BaseModule):
         author = self.bot.discord_bot.get_member(int(author_id))
         embed = discord.Embed(
             description=content[-1],
-            colour=discord.Colour.red(),
+            colour=await self.get_event_colour(guild, "message_delete"),
             timestamp=utils.now()
         )
 
@@ -116,7 +119,7 @@ class AdvancedAdminLog(BaseModule):
             return
         embed = discord.Embed(
             description=f"Old Message: {content[-2]}",
-            colour=discord.Colour.red(),
+            colour=await self.get_event_colour(guild, "message_edit"),
             timestamp=utils.now()
         )
         jump_url = f"[Click to see new message]({message.jump_url})"
@@ -137,7 +140,7 @@ class AdvancedAdminLog(BaseModule):
             return
 
         out_channel, _ = await self.bot.functions.func_get_channel(args=[int(self.settings["output_channel"])])
-        embed = discord.Embed(colour=discord.Color.green(), timestamp=utils.now())
+        embed = discord.Embed(colour=await self.get_event_colour(guild, "user_change"), timestamp=utils.now())
         emb_msg = f"{before} ({before.id}) updated"
         embed.set_author(name=emb_msg, icon_url=before.avatar_url)
         member_updates = {"nick": "Nickname:", "roles": "Roles:"}
@@ -308,7 +311,7 @@ class AdvancedAdminLog(BaseModule):
             return
         out_channel, _ = await self.bot.functions.func_get_channel(args=[int(self.settings["output_channel"])])
         embed = discord.Embed(
-            timestamp=utils.now(), colour=discord.Colour.gold(),
+            timestamp=utils.now(), colour=await self.get_event_colour(guild, "voice_change"),
         )
         embed.set_author(
             name=f"{member} ({member.id}) Voice State Update"
@@ -378,7 +381,7 @@ class AdvancedAdminLog(BaseModule):
 
         embed = discord.Embed(
             description=member.mention,
-            colour=discord.Color.gold(),
+            colour=await self.get_event_colour(guild, "user_join"),
             timestamp=member.joined_at if member.joined_at else utils.now(),
         )
         embed.add_field(name="Total Users:", value=str(users))
@@ -402,7 +405,7 @@ class AdvancedAdminLog(BaseModule):
 
         embed = discord.Embed(
             description=member.mention,
-            colour=discord.Color.gold(),
+            colour=await self.get_event_colour(guild, "user_left"),
             timestamp=utils.now(),
         )
         perp = None
@@ -447,7 +450,7 @@ class AdvancedAdminLog(BaseModule):
         embed = discord.Embed(
             description=after.mention,
             timestamp=utils.now(),
-            colour=discord.Colour.gold(),
+            colour=await self.get_event_colour(guild, "channel_create"),
         )
         embed.set_author(
             name=f"{channel_type} Channel Updated {before.name} ({before.id})"
@@ -557,7 +560,7 @@ class AdvancedAdminLog(BaseModule):
         embed = discord.Embed(
             description=f"{channel.mention} {channel.name}",
             timestamp=utils.now(),
-            colour=discord.Colour.gold(),
+            colour=await self.get_event_colour(guild, "channel_create"),
         )
         embed.set_author(
             name=f"{channel_type} Channel Created {channel.name} ({channel.id})"
@@ -589,7 +592,7 @@ class AdvancedAdminLog(BaseModule):
         embed = discord.Embed(
             description=channel.name,
             timestamp=utils.now(),
-            colour=discord.Colour.gold(),
+            colour=await self.get_event_colour(guild, "channel_delete"),
         )
         embed.set_author(
             name=f"{channel_type} Channel Deleted {channel.name} ({channel.id})"
@@ -617,7 +620,7 @@ class AdvancedAdminLog(BaseModule):
             return
         out_channel, _ = await self.bot.functions.func_get_channel(args=[int(self.settings["output_channel"])])
         embed = discord.Embed(
-            timestamp=utils.now(), colour=discord.Colour.purple()
+            timestamp=utils.now(), colour=await self.get_event_colour(guild, "guild_change")
         )
         embed.set_author(name="Updated Guild", icon_url=str(after.icon_url))
         embed.set_thumbnail(url=str(after.icon_url))
@@ -654,6 +657,155 @@ class AdvancedAdminLog(BaseModule):
         if reasons:
             embed.add_field(name="Reasons ", value=", ".join(str(r) for r in reasons))
         await self.bot.say(channel=out_channel, embed=embed)
+
+    async def emoji_update(self, guild, before, after):
+        if not self.settings["log_emoji_update"]:
+            return
+        if guild != self.bot.discord_bot.guild:
+            return
+        out_channel, _ = await self.bot.functions.func_get_channel(args=[int(self.settings["output_channel"])])
+        perp = None
+
+        time = datetime.datetime.utcnow()
+        embed = discord.Embed(
+            description="",
+            timestamp=time,
+            colour=await self.get_event_colour(guild, "emoji_change"),
+        )
+        embed.set_author(name="Updated Server Emojis")
+        worth_updating = False
+        b = set(before)
+        a = set(after)
+        # discord.Emoji uses id for hashing so we use set difference to get added/removed emoji
+        try:
+            added_emoji = (a - b).pop()
+        except KeyError:
+            added_emoji = None
+        try:
+            removed_emoji = (b - a).pop()
+        except KeyError:
+            removed_emoji = None
+        # changed emojis have their name and/or allowed roles changed while keeping id unchanged
+        if added_emoji is not None:
+            to_iter = before + (added_emoji,)
+        else:
+            to_iter = before
+        changed_emoji = set((e, e.name, tuple(e.roles)) for e in after)
+        changed_emoji.difference_update((e, e.name, tuple(e.roles)) for e in to_iter)
+        try:
+            changed_emoji = changed_emoji.pop()[0]
+        except KeyError:
+            changed_emoji = None
+        else:
+            for old_emoji in before:
+                if old_emoji.id == changed_emoji.id:
+                    break
+            else:
+                # this shouldn't happen but it's here just in case
+                changed_emoji = None
+        action = None
+        if removed_emoji is not None:
+            worth_updating = True 
+            embed.description += f"`{removed_emoji}` (ID: {removed_emoji.id})" + " Removed from the guild\n"
+            action = discord.AuditLogAction.emoji_delete
+        elif added_emoji is not None:
+            worth_updating = True
+            embed.description += f"{added_emoji} `{added_emoji}`" + " Added to the guild\n"
+            action = discord.AuditLogAction.emoji_create
+        elif changed_emoji is not None:
+            worth_updating = True
+            new_msg = f"{changed_emoji} `{changed_emoji}`"
+            if old_emoji.name != changed_emoji.name:
+                new_msg += (
+                    " Renamed from " + old_emoji.name + " to " + f"{changed_emoji.name}\n"
+                )
+                # emoji_update shows only for renames and not for role restriction updates
+                action = discord.AuditLogAction.emoji_update
+            embed.description += new_msg
+            if old_emoji.roles != changed_emoji.roles:
+                worth_updating = True
+                if not changed_emoji.roles:
+                    new_msg = " Changed to unrestricted.\n"
+                    embed.description += new_msg
+                elif not old_emoji.roles:
+                    embed.description += " Restricted to roles: " + " ".join([role.mention for role in changed_emoji.roles])
+                else:
+                    embed.description += (
+                        " Role restriction changed from "
+                        + " ".join([role.mention for role in old_emoji.roles])
+                        + " to "
+                        + " ".join([role.mention for role in changed_emoji.roles])
+                    )
+        perp = None
+        reason = None
+        if not worth_updating:
+            return
+        if channel.permissions_for(guild.me).view_audit_log:
+            if action:
+                async for log in guild.audit_logs(limit=1, action=action):
+                    perp = log.user
+                    if log.reason:
+                        reason = log.reason
+                    break
+        if perp:
+            embed.add_field(name="Updated by ", value=perp.mention)
+        if reason:
+            embed.add_field(name="Reason ", value=reason)
+        self.bot.say(channel=out_channel, embed=embed)
+
+    async def invite_create(self, invite):
+        if not self.settings["log_invite_create"]:
+            return
+        guild = invite.guild
+        if guild != self.bot.discord_bot.guild:
+            return
+        out_channel, _ = await self.bot.functions.func_get_channel(args=[int(self.settings["output_channel"])])
+        invite_attrs = {
+            "code": "Code:",
+            "inviter": "Inviter:",
+            "channel": "Channel:",
+            "max_uses": "Max Uses:",
+        }
+        embed = discord.Embed(
+            title="Invite Created", colour=await self.get_event_colour(guild, "invite_created")
+        )
+        worth_updating = False
+        for attr, name in invite_attrs.items():
+            before_attr = getattr(invite, attr)
+            if before_attr:
+                worth_updating = True
+                msg += f"{name} {before_attr}\n"
+                embed.add_field(name=name, value=str(before_attr))
+        if not worth_updating:
+            return
+        await self.bot.say(channel=out_channel, embed=embed)
+
+    async def invite_delete(self, invite):
+        if not self.settings["log_invite_delete"]:
+            return
+        guild = invite.guild
+        if guild != self.bot.discord_bot.guild:
+            return
+        out_channel, _ = await self.bot.functions.func_get_channel(args=[int(self.settings["output_channel"])])
+        invite_attrs = {
+            "code": "Code: ",
+            "inviter": "Inviter: ",
+            "channel": "Channel: ",
+            "max_uses": "Max Uses: ",
+            "uses": "Used: ",
+        }
+        embed = discord.Embed(
+            title="Invite Deleted", colour=await self.get_event_colour(guild, "invite_deleted")
+        )
+        worth_updating = False
+        for attr, name in invite_attrs.items():
+            before_attr = getattr(invite, attr)
+            if before_attr:
+                worth_updating = True
+                embed.add_field(name=name, value=str(before_attr))
+        if not worth_updating:
+            return
+        self.bot.say(channel=out_channel, embed=embed)
 
     async def get_permission_change(self, before, after):
         p_msg = ""
@@ -724,6 +876,35 @@ class AdvancedAdminLog(BaseModule):
                 p_msg += f"{p} Set to {change}\n"
         return p_msg
 
+    async def get_event_colour(self, guild, event_type, changed_object=None):
+        if guild.text_channels:
+            cmd_colour = await self.get_colour(guild.text_channels[0])
+        else:
+            cmd_colour = discord.Colour.red()
+        defaults = {
+            "message_edit": discord.Colour.orange(),
+            "message_delete": discord.Colour.dark_red(),
+            "user_change": discord.Colour.greyple(),
+            "role_change": changed_object.colour if changed_object else discord.Colour.blue(),
+            "role_create": discord.Colour.blue(),
+            "role_delete": discord.Colour.dark_blue(),
+            "voice_change": discord.Colour.magenta(),
+            "user_join": discord.Colour.green(),
+            "user_left": discord.Colour.dark_green(),
+            "channel_change": discord.Colour.teal(),
+            "channel_create": discord.Colour.teal(),
+            "channel_delete": discord.Colour.dark_teal(),
+            "guild_change": discord.Colour.blurple(),
+            "emoji_change": discord.Colour.gold(),
+            "commands_used": cmd_colour,
+            "invite_created": discord.Colour.blurple(),
+            "invite_deleted": discord.Colour.blurple(),
+        }
+        colour = defaults[event_type]
+        if self.settings[guild.id][event_type]["colour"] is not None:
+            colour = discord.Colour(self.settings[guild.id][event_type]["colour"])
+        return colour
+
     def enable(self, bot):
         if not bot:
             return
@@ -741,6 +922,9 @@ class AdvancedAdminLog(BaseModule):
         HandlerManager.add_handler("discord_guild_channel_create", self.channel_create)
         HandlerManager.add_handler("discord_guild_channel_delete", self.channel_delete)
         HandlerManager.add_handler("discord_guild_update", self.guild_update)
+        HandlerManager.add_handler("discord_guild_emojis_update", self.emoji_update)
+        HandlerManager.add_handler("discord_invite_create", self.invite_create)
+        HandlerManager.add_handler("discord_invite_delete", self.invite_delete)
 
     def disable(self, bot):
         if not bot:
@@ -758,3 +942,6 @@ class AdvancedAdminLog(BaseModule):
         HandlerManager.remove_handler("discord_guild_channel_update", self.channel_update)
         HandlerManager.remove_handler("discord_guild_channel_create", self.channel_create)
         HandlerManager.remove_handler("discord_guild_update", self.guild_update)
+        HandlerManager.remove_handler("discord_guild_emojis_update", self.emoji_update)
+        HandlerManager.remove_handler("discord_invite_create", self.invite_create)
+        HandlerManager.remove_handler("discord_invite_delete", self.invite_delete)
