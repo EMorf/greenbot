@@ -94,9 +94,6 @@ class AdvancedAdminLog(BaseModule):
             return
         out_channel, _ = await self.bot.functions.func_get_channel(args=[int(self.settings["output_channel"])])
         sent_in_channel, _ = await self.bot.functions.func_get_channel(args=[int(payload.data["channel_id"])])
-        if not channel:
-            log.error("Channel not found")
-            return
         channels = self.settings["ingore_channels"].split(" ") if self.settings["ingore_channels"] != "" else []
         if len(channels) > 0 and sent_in_channel not in channels:
             return
@@ -165,11 +162,11 @@ class AdvancedAdminLog(BaseModule):
                         for role in after_roles:
                             embed.description = role.mention + " Role applied."
                         action = discord.AuditLogAction.member_role_update
-                        async for log in self.bot.discord_bot.guild.audit_logs(limit=5, action=action):
-                            if log.target.id == before.id:
-                                perp = log.user
-                                if log.reason:
-                                    reason = log.reason
+                        async for _log in self.bot.discord_bot.guild.audit_logs(limit=5, action=action):
+                            if _log.target.id == before.id:
+                                perp = _log.user
+                                if _log.reason:
+                                    reason = _log.reason
                                 break
                 else:
                     action = discord.AuditLogAction.member_update
@@ -461,7 +458,7 @@ class AdvancedAdminLog(BaseModule):
         async for _log in guild.audit_logs(limit=5, action=action):
             log.info(_log)
             if _log.target.id == before.id:
-                perp = log.user
+                perp = _log.user
                 if _log.reason:
                     reason = _log.reason
                 break
