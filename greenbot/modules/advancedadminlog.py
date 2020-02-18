@@ -1059,8 +1059,6 @@ class AdvancedAdminLog(BaseModule):
             "invite_deleted": discord.Colour.blurple(),
         }
         colour = defaults[event_type]
-        if self.settings[guild.id][event_type]["colour"] is not None:
-            colour = discord.Colour(self.settings[guild.id][event_type]["colour"])
         return colour
 
     def enable(self, bot):
