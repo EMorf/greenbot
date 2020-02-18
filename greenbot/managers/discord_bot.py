@@ -283,12 +283,6 @@ class DiscordBotManager:
         except:
             return None
 
-    def get_member(self, member_id):
-        try:
-            return self.guild.get_member(int(member_id))
-        except:
-            return None
-
     async def say(self, channel, message=None, embed=None):
         if message:
             message = discord.utils.escape_markdown(message)
