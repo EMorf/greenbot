@@ -172,6 +172,7 @@ class Bot:
 
     async def say(self, channel, message=None, embed=None):
         if message is None and embed is None:
+            log.error("sent invalid message")
             return None
         return await self.discord_bot.say(channel, message, embed)
 

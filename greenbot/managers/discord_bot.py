@@ -286,8 +286,9 @@ class DiscordBotManager:
     async def say(self, channel, message=None, embed=None):
         if message:
             message = discord.utils.escape_markdown(message)
-        if channel and (message is None or embed is None):
-            return await channel.send(content=message, embed=embed)
+        if not channel or (message is None or embed is None):
+            return
+        return await channel.send(content=message, embed=embed)
 
     async def ban(self, user, timeout_in_seconds=0, reason=None, delete_message_days=0):
         delete_message_days = (
