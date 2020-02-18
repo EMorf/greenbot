@@ -178,12 +178,12 @@ class Memes(BaseModule):
             return False
         self.mod_pride_running = True
         role = self.bot.discord_bot.guild.get_role(int(self.settings["mod_role_id"]))
-        default_color = role.color.to_rgb()
+        r, g, b = role.color.to_rgb()
         for c in rainbowcolors:
             dcol = discord.Colour(c)
             await asyncio.sleep(0.2)
             await role.edit(colour=dcol)
-        await role.edit(colour=discord.Colour.from_rgb(default_color))
+        await role.edit(colour=discord.Colour.from_rgb(r, g, b))
         self.mod_pride_running = False
 
     async def vroom(self, bot, author, channel, message, args):
@@ -202,7 +202,7 @@ class Memes(BaseModule):
             await m.edit(content=f"{author.mention} finished in {round(elapsed_time.total_seconds(), 2)}s")
             self.vroom_races.remove(m)
         else:
-            await self.bot.say(f"{author.mention} there can only be up to {self.settings['max_vroom_races']} races at the same time. Try later...")
+            await self.bot.say(channel=channel, message=f"{author.mention} there can only be up to {self.settings['max_vroom_races']} races at the same time. Try later...")
 
     async def dank(self, bot, author, channel, message, args):
         role = self.bot.discord_bot.guild.get_role(int(self.settings["dank_role_id"]))
