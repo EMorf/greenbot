@@ -47,6 +47,7 @@ class AdvancedAdminLog(BaseModule):
         ModuleSetting(key="log_channel_update", label="Log Channel Update Event", type="boolean", placeholder="", default=True),
         ModuleSetting(key="log_channel_create", label="Log Channel Create Event", type="boolean", placeholder="", default=True),
         ModuleSetting(key="log_channel_delete", label="Log Channel Delete Event", type="boolean", placeholder="", default=True),
+        ModuleSetting(key="log_guild_update", label="Log Guild Update Event", type="boolean", placeholder="", default=True),
     ]
 
     def __init__(self, bot):
@@ -586,7 +587,7 @@ class AdvancedAdminLog(BaseModule):
         out_channel, _ = await self.bot.functions.func_get_channel(args=[int(self.settings["output_channel"])])
         channel_type = str(channel.type).title()
         embed = discord.Embed(
-            description=f"{channel.mention} {channel.name}",
+            description=channel.name,
             timestamp=utils.now(),
             colour=discord.Colour.gold(),
         )
@@ -607,6 +608,51 @@ class AdvancedAdminLog(BaseModule):
             embed.add_field(name="Deleted by ", value=perp.mention)
         if reason:
             embed.add_field(name="Reason ", value=reason)
+        await self.bot.say(channel=out_channel, embed=embed)
+
+    async def guild_update(self, before, after):
+        if not self.settings["log_guild_update"]:
+            return
+        if before != self.bot.discord_bot.guild:
+            return
+        out_channel, _ = await self.bot.functions.func_get_channel(args=[int(self.settings["output_channel"])])
+        embed = discord.Embed(
+            timestamp=utils.now(), colour=discord.Colour.purple()
+        )
+        embed.set_author(name="Updated Guild", icon_url=str(after.icon_url))
+        embed.set_thumbnail(url=str(after.icon_url))
+        guild_updates = {
+            "name": "Name:",
+            "region": "Region:",
+            "afk_timeout": "AFK Timeout:",
+            "afk_channel": "AFK Channel:",
+            "icon_url": "Server Icon:",
+            "owner": "Server Owner:",
+            "splash": "Splash Image:",
+            "system_channel": "Welcome message channel:",
+            "verification_level": "Verification Level:",
+        }
+        worth_updating = False
+        for attr, name in guild_updates.items():
+            before_attr = getattr(before, attr)
+            after_attr = getattr(after, attr)
+            if before_attr != after_attr:
+                worth_updating = True
+                embed.add_field(name="Before " + name, value=str(before_attr))
+                embed.add_field(name="After " + name, value=str(after_attr))
+        if not worth_updating:
+            return
+        perps = []
+        reasons = []
+        action = discord.AuditLogAction.guild_update
+        async for _log in self.bot.discord_bot.guild.audit_logs(limit=int(len(embed.fields) / 2), action=action):
+            perps.append(_log.user)
+            if _log.reason:
+                reasons.append(_log.reason)
+        if perps:
+            embed.add_field(name="Updated by", value=", ".join(p.mention for p in perps))
+        if reasons:
+            embed.add_field(name="Reasons ", value=", ".join(str(r) for r in reasons))
         await self.bot.say(channel=out_channel, embed=embed)
 
     async def get_permission_change(self, before, after):
@@ -694,6 +740,7 @@ class AdvancedAdminLog(BaseModule):
         HandlerManager.add_handler("discord_guild_channel_update", self.channel_update)
         HandlerManager.add_handler("discord_guild_channel_create", self.channel_create)
         HandlerManager.add_handler("discord_guild_channel_delete", self.channel_delete)
+        HandlerManager.add_handler("discord_guild_update", self.guild_update)
 
     def disable(self, bot):
         if not bot:
@@ -710,4 +757,4 @@ class AdvancedAdminLog(BaseModule):
         HandlerManager.remove_handler("discord_member_join", self.member_join)
         HandlerManager.remove_handler("discord_guild_channel_update", self.channel_update)
         HandlerManager.remove_handler("discord_guild_channel_create", self.channel_create)
-        HandlerManager.remove_handler("discord_guild_channel_delete", self.channel_delete)
+        HandlerManager.remove_handler("discord_guild_update", self.guild_update)
