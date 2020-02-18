@@ -56,7 +56,7 @@ class AdvancedAdminLog(BaseModule):
     async def message_delete(self, payload):
         if not self.settings["log_delete_message"]:
             return
-        channel, _ = await self.bot.functions.func_get_channel(args=[int(self.settings["output_channel"])])
+        out_channel, _ = await self.bot.functions.func_get_channel(args=[int(self.settings["output_channel"])])
         message_id = payload.message_id
         with DBManager.create_session_scope() as db_session:
             db_message = Message._get(db_session, message_id)
@@ -88,12 +88,12 @@ class AdvancedAdminLog(BaseModule):
             name=f"{author} ({author.id})- Deleted Message",
             icon_url=str(author.avatar_url),
         )
-        await self.bot.say(channel, embed=embed)
+        await self.bot.say(out_channel, embed=embed)
 
     async def message_edit(self, payload):
         if not self.settings["log_edit_message"]:
             return
-        channel, _ = await self.bot.functions.func_get_channel(args=[int(self.settings["output_channel"])])
+        out_channel, _ = await self.bot.functions.func_get_channel(args=[int(self.settings["output_channel"])])
         sent_in_channel, _ = await self.bot.functions.func_get_channel(args=[int(payload.data["channel_id"])])
         if not channel:
             log.error("Channel not found")
@@ -130,7 +130,7 @@ class AdvancedAdminLog(BaseModule):
             name=f"{author} ({author.id}) - Edited Message",
             icon_url=str(author.avatar_url),
         )
-        await self.bot.say(channel, embed=embed)
+        await self.bot.say(out_channel, embed=embed)
 
     async def member_update(self, before, after):
         if not self.settings["log_member_update"]:
@@ -139,7 +139,7 @@ class AdvancedAdminLog(BaseModule):
         if guild != self.bot.discord_bot.guild:
             return
 
-        channel, _ = await self.bot.functions.func_get_channel(args=[int(self.settings["output_channel"])])
+        out_channel, _ = await self.bot.functions.func_get_channel(args=[int(self.settings["output_channel"])])
         embed = discord.Embed(colour=discord.Color.green(), timestamp=utils.now())
         emb_msg = f"{before} ({before.id}) updated"
         embed.set_author(name=emb_msg, icon_url=before.avatar_url)
@@ -188,7 +188,7 @@ class AdvancedAdminLog(BaseModule):
             embed.add_field(name="Updated by ", value=perp.mention)
         if reason:
             embed.add_field(name="Reason", value=reason)
-        await self.bot.say(channel=channel, embed=embed)
+        await self.bot.say(channel=out_channel, embed=embed)
         
     async def role_update(self, before, after):
         if not self.settings["log_role_update"]:
@@ -196,7 +196,7 @@ class AdvancedAdminLog(BaseModule):
         guild = before.guild
         if guild != self.bot.discord_bot.guild:
             return
-        channel, _ = await self.bot.functions.func_get_channel(args=[int(self.settings["output_channel"])])
+        out_channel, _ = await self.bot.functions.func_get_channel(args=[int(self.settings["output_channel"])])
         perp = None
         reason = None
         action = discord.AuditLogAction.role_update
@@ -241,7 +241,7 @@ class AdvancedAdminLog(BaseModule):
             embed.add_field(name="Permissions", value=p_msg[:1024])
         if not worth_updating:
             return
-        await self.bot.say(channel=channel, embed=embed)
+        await self.bot.say(channel=out_channel, embed=embed)
 
     async def role_create(self, role):
         if not self.settings["log_role_create"]:
@@ -249,7 +249,7 @@ class AdvancedAdminLog(BaseModule):
         guild = role.guild
         if guild != self.bot.discord_bot.guild:
             return
-        channel, _ = await self.bot.functions.func_get_channel(args=[int(self.settings["output_channel"])])
+        out_channel, _ = await self.bot.functions.func_get_channel(args=[int(self.settings["output_channel"])])
         perp = None
         reason = None
         action = discord.AuditLogAction.role_create
@@ -271,7 +271,7 @@ class AdvancedAdminLog(BaseModule):
             embed.add_field(name="Created by", value=perp.mention)
         if reason:
             embed.add_field(name="Reason ", value=reason)
-        await self.bot.say(channel=channel, embed=embed)
+        await self.bot.say(channel=out_channel, embed=embed)
 
     async def role_delete(self, role):
         if not self.settings["log_role_create"]:
@@ -279,7 +279,7 @@ class AdvancedAdminLog(BaseModule):
         guild = role.guild
         if guild != self.bot.discord_bot.guild:
             return
-        channel, _ = await self.bot.functions.func_get_channel(args=[int(self.settings["output_channel"])])
+        out_channel, _ = await self.bot.functions.func_get_channel(args=[int(self.settings["output_channel"])])
         perp = None
         reason = None
         action = discord.AuditLogAction.role_create
@@ -301,7 +301,7 @@ class AdvancedAdminLog(BaseModule):
             embed.add_field(name="Deleted by", value=perp.mention)
         if reason:
             embed.add_field(name="Reason ", value=reason)
-        await self.bot.say(channel=channel, embed=embed)
+        await self.bot.say(channel=out_channel, embed=embed)
     
     async def voice_change(self, member, before, after):
         if not self.settings["log_voice_change"]:
@@ -309,7 +309,7 @@ class AdvancedAdminLog(BaseModule):
         guild = before.guild
         if guild != self.bot.discord_bot.guild:
             return
-        channel, _ = await self.bot.functions.func_get_channel(args=[int(self.settings["output_channel"])])
+        out_channel, _ = await self.bot.functions.func_get_channel(args=[int(self.settings["output_channel"])])
         embed = discord.Embed(
             timestamp=utils.now(), colour=discord.Colour.gold(),
         )
@@ -363,7 +363,7 @@ class AdvancedAdminLog(BaseModule):
             embed.add_field(name="Updated by", value=perp.mention)
         if reason:
             embed.add_field(name="Reason ", value=reason)
-        await self.bot.say(channel=channel, embed=embed)
+        await self.bot.say(channel=out_channel, embed=embed)
 
     async def member_join(self, member):
         if not self.settings["log_member_join"]:
@@ -371,7 +371,7 @@ class AdvancedAdminLog(BaseModule):
         guild = member.guild
         if guild != self.bot.discord_bot.guild:
             return
-        channel, _ = await self.bot.functions.func_get_channel(args=[int(self.settings["output_channel"])])
+        out_channel, _ = await self.bot.functions.func_get_channel(args=[int(self.settings["output_channel"])])
         users = len(guild.members)
         created_at = member.created_at.replace(tzinfo=datetime.timezone.utc)
         since_created = (utils.now() - created_at).days
@@ -393,7 +393,7 @@ class AdvancedAdminLog(BaseModule):
             icon_url=member.avatar_url,
         )
         embed.set_thumbnail(url=member.avatar_url)
-        await self.bot.say(channel=channel, embed=embed)
+        await self.bot.say(channel=out_channel, embed=embed)
 
     async def member_remove(self, member):
         if not self.settings["log_member_remove"]:
@@ -401,7 +401,7 @@ class AdvancedAdminLog(BaseModule):
         guild = member.guild
         if guild != self.bot.discord_bot.guild:
             return
-        channel, _ = await self.bot.functions.func_get_channel(args=[int(self.settings["output_channel"])])
+        out_channel, _ = await self.bot.functions.func_get_channel(args=[int(self.settings["output_channel"])])
 
         embed = discord.Embed(
             description=member.mention,
@@ -437,7 +437,7 @@ class AdvancedAdminLog(BaseModule):
             icon_url=member.avatar_url,
         )
         embed.set_thumbnail(url=member.avatar_url)
-        await self.bot.say(channel=channel, embed=embed)
+        await self.bot.say(channel=out_channel, embed=embed)
 
     async def channel_update(self, before, after):
         if not self.settings["log_channel_update"]:
@@ -445,7 +445,7 @@ class AdvancedAdminLog(BaseModule):
         guild = before.guild
         if guild != self.bot.discord_bot.guild:
             return
-        channel, _ = await self.bot.functions.func_get_channel(args=[int(self.settings["output_channel"])])
+        out_channel, _ = await self.bot.functions.func_get_channel(args=[int(self.settings["output_channel"])])
         channel_type = str(after.type).title()
         embed = discord.Embed(
             description=after.mention,
@@ -520,7 +520,7 @@ class AdvancedAdminLog(BaseModule):
             embed.add_field(name="Reason ", value=reason)
         if not worth_updating:
             return
-        await self.bot.say(channel=channel, embed=embed)
+        await self.bot.say(channel=out_channel, embed=embed)
 
     async def channel_create(self, channel):
         if not self.settings["log_channel_create"]:
@@ -528,7 +528,7 @@ class AdvancedAdminLog(BaseModule):
         guild = channel.guild
         if guild != self.bot.discord_bot.guild:
             return
-        channel, _ = await self.bot.functions.func_get_channel(args=[int(self.settings["output_channel"])])
+        out_channel, _ = await self.bot.functions.func_get_channel(args=[int(self.settings["output_channel"])])
         channel_type = str(channel.type).title()
         embed = discord.Embed(
             description=f"{channel.mention} {channel.name}",
@@ -553,7 +553,7 @@ class AdvancedAdminLog(BaseModule):
             embed.add_field(name="Created by ", value=perp.mention)
         if reason:
             embed.add_field(name="Reason ", value=reason)
-        await self.bot.say(channel=channel, embed=embed)
+        await self.bot.say(channel=out_channel, embed=embed)
 
     async def channel_delete(self, channel):
         if not self.settings["log_channel_delete"]:
@@ -561,7 +561,7 @@ class AdvancedAdminLog(BaseModule):
         guild = channel.guild
         if guild != self.bot.discord_bot.guild:
             return
-        channel, _ = await self.bot.functions.func_get_channel(args=[int(self.settings["output_channel"])])
+        out_channel, _ = await self.bot.functions.func_get_channel(args=[int(self.settings["output_channel"])])
         channel_type = str(channel.type).title()
         embed = discord.Embed(
             description=f"{channel.mention} {channel.name}",
@@ -586,7 +586,7 @@ class AdvancedAdminLog(BaseModule):
             embed.add_field(name="Deleted by ", value=perp.mention)
         if reason:
             embed.add_field(name="Reason ", value=reason)
-        await self.bot.say(channel=channel, embed=embed)
+        await self.bot.say(channel=out_channel, embed=embed)
 
     async def get_permission_change(self, before, after):
         p_msg = ""
