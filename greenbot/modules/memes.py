@@ -199,7 +199,7 @@ class Memes(BaseModule):
                 await asyncio.sleep((random.randint(5, 30) / 10))
                 await m.edit(content=newtick)
             elapsed_time = utils.now() - start_time
-            await m.edit(content=f"{author.mention} finished in {round(elapsed_time, 2)}s")
+            await m.edit(content=f"{author.mention} finished in {round(elapsed_time.total_seconds(), 2)}s")
             self.vroom_races.remove(m)
         else:
             await self.bot.say(f"{author.mention} there can only be up to {self.settings['max_vroom_races']} races at the same time. Try later...")
