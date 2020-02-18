@@ -56,7 +56,7 @@ class AdvancedAdminLog(BaseModule):
         sent_in_channel, _ = await self.bot.functions.func_get_channel(args=[int(payload.channel_id)])
         author = self.bot.discord_bot.get_member(int(author_id))
         embed = discord.Embed(
-            description=content,
+            description=content[-1],
             colour=discord.Colour.red(),
         )
 
@@ -91,7 +91,7 @@ class AdvancedAdminLog(BaseModule):
             return
         message_id = payload.message_id
         guild_id = payload.data.get("guild_id", None)
-        author = self.bot.discord_bot.get_member(int(payload.data["author"]["id"]))
+        
         message = await sent_in_channel.fetch_message(int(message_id))
         if not guild_id or self.bot.discord_bot.guild.id != int(guild_id):
             return
@@ -101,7 +101,8 @@ class AdvancedAdminLog(BaseModule):
             if not db_message:
                 return
             content = json.loads(db_message.content)
-        
+            author_id = db_message.user_id
+        author = self.bot.discord_bot.get_member(int(author_id))
         embed = discord.Embed(
             description=content[-2],
             colour=discord.Colour.red(),
