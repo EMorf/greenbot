@@ -54,8 +54,17 @@ class Functions:
                 return "You cannot ban someone who has the same level as you :)", None
             elif author_user.level < member_user.level:
                 return "You cannot ban someone who is a higher level than you :)", None
-        timeout_in_seconds = int(args[1] if len(args) > 2 and args[1] != "" else 0)
-        delete_message_days = int(args[2] if len(args) > 3 and args[2] != "" else 0)
+
+        try:
+            timeout_in_seconds = int(args[1] if len(args) > 2 and args[1] != "" else 0)
+        except ValueError:
+            return f"Invalid timeout in seconds {args[1] if len(args) > 2 and args[1] != '' else 0}!", None
+
+        try:
+            delete_message_days = int(args[2] if len(args) > 3 and args[2] != "" else 0)
+        except ValueError:
+            return f"Invalid delete message days {args[2] if len(args) > 3 and args[2] != '' else 0}!", None
+
         reason = args[3] if len(args) == 4 else ""
 
         resp = await self.bot.ban(
@@ -127,8 +136,8 @@ class Functions:
         level = args[1] if len(args) >= 2 else None
         try:
             level = int(level)
-        except:
-            return "Invalid level (1-2000)", None
+        except ValueError:
+            return f"Invalid level (1-2000) {level}", None
         if level >= extra["user_level"]:
             return "You cannot set a level higher then your own!", None
         with DBManager.create_session_scope() as db_session:
@@ -147,7 +156,7 @@ class Functions:
         user_id = args[0][3:][:-1]
         try:
             amount = int(args[1])
-        except:
+        except ValueError:
             return f"Invalid points amount", None
         with DBManager.create_session_scope() as db_session:
             user = User._create_or_get_by_discord_id(db_session, str(user_id))
@@ -161,8 +170,8 @@ class Functions:
         user_id = args[0][3:][:-1]
         try:
             amount = int(args[1])
-        except:
-            return f"Invalid points amount", None
+        except ValueError:
+            return f"Invalid points amount {args[1]}", None
         with DBManager.create_session_scope() as db_session:
             user = User._create_or_get_by_discord_id(db_session, str(user_id))
             user.points += amount
