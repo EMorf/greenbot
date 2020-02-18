@@ -40,6 +40,7 @@ class AdvancedAdminLog(BaseModule):
         ModuleSetting(key="log_member_update_nickname", label="Log Member Update Nickname Event", type="boolean", placeholder="", default=True),
         ModuleSetting(key="log_role_update", label="Log Role Update Event", type="boolean", placeholder="", default=True),
         ModuleSetting(key="log_role_create", label="Log Role Create Event", type="boolean", placeholder="", default=True),
+        ModuleSetting(key="log_voice_change", label="Log Role Create Event", type="boolean", placeholder="", default=True),
     ]
 
     def __init__(self, bot):
@@ -285,7 +286,7 @@ class AdvancedAdminLog(BaseModule):
                     reason = log.reason
                 break
         embed = discord.Embed(
-            description=role.mention,
+            description=role.name,
             colour=role.colour,
             timestamp=utils.now(),
         )
@@ -297,7 +298,136 @@ class AdvancedAdminLog(BaseModule):
         if reason:
             embed.add_field(name="Reason ", value=reason)
         await self.bot.say(channel=channel, embed=embed)
-        
+    
+    async def voice_change(self, member, before, after):
+        if not self.settings["log_voice_change"]:
+            return
+        guild = before.guild
+        if guild != self.bot.discord_bot.guild:
+            return
+        channel, _ = await self.bot.functions.func_get_channel(args=[int(self.settings["output_channel"])])
+        embed = discord.Embed(
+            timestamp=utils.now(), colour=discord.Colour.gold(),
+        )
+        embed.set_author(
+            name="{member} ({m_id}) Voice State Update".format(member=member, m_id=member.id)
+        )
+        change_type = None
+        worth_updating = False
+        if before.deaf != after.deaf:
+            worth_updating = True
+            change_type = "deaf"
+            if after.deaf:
+                embed.description = member.mention + " was deafened. "
+            else:
+                embed.description = member.mention + " was undeafened. "
+        if before.mute != after.mute:
+            worth_updating = True
+            change_type = "mute"
+            if after.mute:
+                embed.description = member.mention + " was muted. "
+            else:
+                embed.description = chan_msg = member.mention + " was unmuted. "
+        if before.channel != after.channel:
+            worth_updating = True
+            change_type = "channel"
+            if before.channel is None:
+                embed.description = member.mention + " has joined " + after.channel.name
+            elif after.channel is None:
+                embed.description = member.mention + " has left " + before.channel.name
+            else:
+                embed.description = chan_msg = (
+                    member.mention
+                    + " has moved from "
+                    + before.channel.name
+                    + " to "
+                    + after.channel.name
+                )
+        if not worth_updating:
+            return
+        perp = None
+        reason = None
+        action = discord.AuditLogAction.member_update
+        async for log in guild.audit_logs(limit=5, action=action):
+            is_change = getattr(log.after, change_type, None)
+            if log.target.id == member.id and is_change:
+                perp = log.user
+                if log.reason:
+                    reason = log.reason
+                break
+        if perp:
+            embed.add_field(name="Updated by", value=perp.mention)
+        if reason:
+            embed.add_field(name="Reason ", value=reason)
+        await self.bot.say(channel=channel, embed=embed)
+
+    async def member_join(self, member):
+        if not self.settings["log_role_create"]:
+            return
+        guild = member.guild
+        if guild != self.bot.discord_bot.guild:
+            return
+        channel, _ = await self.bot.functions.func_get_channel(args=[int(self.settings["output_channel"])])
+        users = len(guild.members)
+        since_created = (utils.now() - member.created_at).days
+        user_created = member.created_at.strftime("%d %b %Y %H:%M")
+
+        created_on = "{}\n({} days ago)".format(user_created, since_created)
+
+        embed = discord.Embed(
+            description=member.mention,
+            colour=discord.Color.gold(),
+            timestamp=member.joined_at if member.joined_at else utils.now(),
+        )
+        embed.add_field(name="Total Users:", value=str(users))
+        embed.add_field(name="Account created on:", value=created_on)
+        embed.set_footer(text="User ID: " + str(member.id))
+        embed.set_author(
+            name="{member} ({m_id}) has joined the guild".format(
+                member=member, m_id=member.id
+            ),
+            url=member.avatar_url,
+            icon_url=member.avatar_url,
+        )
+        embed.set_thumbnail(url=member.avatar_url)
+        await self.bot.say(channel=channel, embed=embed)
+
+    async def member_remove(self, member):
+        if not self.settings["log_role_create"]:
+            return
+        guild = member.guild
+        if guild != self.bot.discord_bot.guild:
+            return
+        channel, _ = await self.bot.functions.func_get_channel(args=[int(self.settings["output_channel"])])
+
+        embed = discord.Embed(
+            description=member.mention,
+            colour=discord.Color.gold(),
+            timestamp=utils.now(),
+        )
+        perp = None
+        action = discord.AuditLogAction.kick
+        async for log in guild.audit_logs(limit=5, action=action):
+            if log.target.id == member.id:
+                perp = log.user
+                reason = log.reason
+                break
+        embed.add_field(name="Total Users:", value=str(len(guild.members)))
+        if perp:
+            embed.add_field(name="Kicked", value=perp.mention)
+        if reason:
+            embed.add_field(name="Reason", value=str(reason))
+        embed.set_footer(text="User ID: " + str(member.id))
+        embed.set_author(
+            name="{member} ({m_id}) has left the guild".format(
+                member=member, m_id=member.id
+            ),
+            url=member.avatar_url,
+            icon_url=member.avatar_url,
+        )
+        embed.set_thumbnail(url=member.avatar_url)
+        await self.bot.say(channel=channel, embed=embed)
+
     async def get_role_permission_change(self, before, after):
         permission_list = [
             "create_instant_invite",
@@ -347,6 +477,8 @@ class AdvancedAdminLog(BaseModule):
         HandlerManager.add_handler("discord_guild_role_update", self.role_update)
         HandlerManager.add_handler("discord_guild_role_create", self.role_create)
         HandlerManager.add_handler("discord_guild_role_delete", self.role_delete)
+        HandlerManager.add_handler("discord_voice_state_update", self.voice_change)
+        HandlerManager.add_handler("discord_member_join", self.member_join)
 
     def disable(self, bot):
         if not bot:
@@ -358,3 +490,5 @@ class AdvancedAdminLog(BaseModule):
         HandlerManager.remove_handler("discord_guild_role_update", self.role_update)
         HandlerManager.remove_handler("discord_guild_role_create", self.role_create)
         HandlerManager.remove_handler("discord_guild_role_delete", self.role_delete)
+        HandlerManager.remove_handler("discord_voice_state_update", self.voice_change)
+        HandlerManager.remove_handler   ("discord_member_join", self.member_join)
