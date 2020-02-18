@@ -462,6 +462,33 @@ class AdvancedAdminLog(BaseModule):
                 if _log.reason:
                     reason = _log.reason
                 break
+        if not perp:
+            action = discord.AuditLogAction.overwrite_create
+            async for _log in guild.audit_logs(limit=5, action=action):
+                log.info(_log)
+                if _log.target.id == before.id:
+                    perp = _log.user
+                    if _log.reason:
+                        reason = _log.reason
+                    break
+            if not perp:
+                action = discord.AuditLogAction.overwrite_update
+                async for _log in guild.audit_logs(limit=5, action=action):
+                    log.info(_log)
+                    if _log.target.id == before.id:
+                        perp = _log.user
+                        if _log.reason:
+                            reason = _log.reason
+                        break
+            if not perp:
+                action = discord.AuditLogAction.overwrite_delete
+                async for _log in guild.audit_logs(limit=5, action=action):
+                    log.info(_log)
+                    if _log.target.id == before.id:
+                        perp = _log.user
+                        if _log.reason:
+                            reason = _log.reason
+                        break
         if type(before) == discord.TextChannel:
             text_updates = {
                 "name": "Name:",
