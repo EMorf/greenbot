@@ -65,7 +65,7 @@ class AdvancedAdminLog(BaseModule):
         perp = None
         async for _log in self.bot.discord_bot.guild.audit_logs(limit=2, action=action):
             log.info(_log)
-            same_chan = log.extra.channel.id == sent_in_channel.id
+            same_chan = _log.extra.channel.id == sent_in_channel.id
             if _log.target.id == author_id and same_chan:
                 perp = f"{_log.user}({_log.user.id})"
                 break
@@ -93,7 +93,7 @@ class AdvancedAdminLog(BaseModule):
         message_id = payload.message_id
         guild_id = payload.data.get("guild_id", None)
         author = self.bot.discord_bot.get_member(int(payload.data["author"]["id"]))
-        message = sent_in_channel.fetch_message(int(message_id))
+        message = await sent_in_channel.fetch_message(int(message_id))
         if not guild_id or self.bot.discord_bot.guild.id != int(guild_id):
             log.info("Wrong Guild!")
             log.info(guild_id)
