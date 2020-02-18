@@ -103,6 +103,8 @@ class AdvancedAdminLog(BaseModule):
             content = json.loads(db_message.content)
             author_id = db_message.user_id
         author = self.bot.discord_bot.get_member(int(author_id))
+        if author == self.bot.discord_bot.client.user:
+            return
         embed = discord.Embed(
             description=content[-2],
             colour=discord.Colour.red(),
@@ -117,7 +119,7 @@ class AdvancedAdminLog(BaseModule):
             ),
             icon_url=str(author.avatar_url),
         )
-        await self.bot.say(channel, message="Testing", embed=embed)
+        await self.bot.say(channel, embed=embed)
 
     def enable(self, bot):
         if not bot:
