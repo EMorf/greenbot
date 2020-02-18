@@ -57,7 +57,7 @@ class AdvancedAdminLog(BaseModule):
         author = self.bot.discord_bot.get_member(int(author_id))
         embed = discord.Embed(
             description=content,
-            colour=discord.colour.red(),
+            colour=discord.Colour.red(),
         )
 
         embed.add_field(name=("Channel"), value=sent_in_channel)
@@ -92,7 +92,7 @@ class AdvancedAdminLog(BaseModule):
         guild_id = payload.data.get("guild_id", None)
         author = self.bot.discord_bot.get_member(int(payload.data["author"]["id"]))
         message = sent_in_channel.fetch_message(int(message_id))
-
+        log.info(guild_id)
         if not guild_id or self.bot.discord_bot.guild.id != guild_id:
             return
 
@@ -104,7 +104,7 @@ class AdvancedAdminLog(BaseModule):
         
         embed = discord.Embed(
             description=content[-2],
-            colour=discord.colour.red(),
+            colour=discord.Colour.red(),
         )
         jump_url = f"[Click to see new message]({message.jump_url})"
         embed.add_field(name=_("After Message:"), value=jump_url)
