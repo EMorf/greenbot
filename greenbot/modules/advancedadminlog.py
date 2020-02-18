@@ -41,6 +41,8 @@ class AdvancedAdminLog(BaseModule):
         ModuleSetting(key="log_role_update", label="Log Role Update Event", type="boolean", placeholder="", default=True),
         ModuleSetting(key="log_role_create", label="Log Role Create Event", type="boolean", placeholder="", default=True),
         ModuleSetting(key="log_voice_change", label="Log Role Create Event", type="boolean", placeholder="", default=True),
+        ModuleSetting(key="log_member_join", label="Log Role Create Event", type="boolean", placeholder="", default=True),
+        ModuleSetting(key="log_member_remove", label="Log Role Create Event", type="boolean", placeholder="", default=True),
     ]
 
     def __init__(self, bot):
@@ -362,7 +364,7 @@ class AdvancedAdminLog(BaseModule):
         await self.bot.say(channel=channel, embed=embed)
 
     async def member_join(self, member):
-        if not self.settings["log_role_create"]:
+        if not self.settings["log_member_join"]:
             return
         guild = member.guild
         if guild != self.bot.discord_bot.guild:
@@ -393,7 +395,7 @@ class AdvancedAdminLog(BaseModule):
         await self.bot.say(channel=channel, embed=embed)
 
     async def member_remove(self, member):
-        if not self.settings["log_role_create"]:
+        if not self.settings["log_member_remove"]:
             return
         guild = member.guild
         if guild != self.bot.discord_bot.guild:
@@ -478,6 +480,7 @@ class AdvancedAdminLog(BaseModule):
         HandlerManager.add_handler("discord_guild_role_create", self.role_create)
         HandlerManager.add_handler("discord_guild_role_delete", self.role_delete)
         HandlerManager.add_handler("discord_voice_state_update", self.voice_change)
+        HandlerManager.add_handler("discord_member_remove", self.member_remove)
         HandlerManager.add_handler("discord_member_join", self.member_join)
 
     def disable(self, bot):
@@ -491,4 +494,5 @@ class AdvancedAdminLog(BaseModule):
         HandlerManager.remove_handler("discord_guild_role_create", self.role_create)
         HandlerManager.remove_handler("discord_guild_role_delete", self.role_delete)
         HandlerManager.remove_handler("discord_voice_state_update", self.voice_change)
-        HandlerManager.remove_handler   ("discord_member_join", self.member_join)
+        HandlerManager.remove_handler("discord_member_remove", self.member_remove)
+        HandlerManager.remove_handler("discord_member_join", self.member_join)
