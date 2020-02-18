@@ -39,6 +39,7 @@ class AdvancedAdminLog(BaseModule):
         ModuleSetting(key="log_member_update", label="Log Member Update Event", type="boolean", placeholder="", default=True),
         ModuleSetting(key="log_member_update_nickname", label="Log Member Update Nickname Event", type="boolean", placeholder="", default=True),
         ModuleSetting(key="log_role_update", label="Log Role Update Event", type="boolean", placeholder="", default=True),
+        ModuleSetting(key="log_role_create", label="Log Role Create Event", type="boolean", placeholder="", default=True),
     ]
 
     def __init__(self, bot):
@@ -188,9 +189,9 @@ class AdvancedAdminLog(BaseModule):
         if not self.settings["log_role_update"]:
             return
         guild = before.guild
-        channel, _ = await self.bot.functions.func_get_channel(args=[int(self.settings["output_channel"])])
         if guild != self.bot.discord_bot.guild:
             return
+        channel, _ = await self.bot.functions.func_get_channel(args=[int(self.settings["output_channel"])])
         perp = None
         reason = None
         action = discord.AuditLogAction.role_update
@@ -237,6 +238,66 @@ class AdvancedAdminLog(BaseModule):
             return
         await self.bot.say(channel=channel, embed=embed)
 
+    async def role_create(self, role):
+        if not self.settings["log_role_create"]:
+            return
+        guild = role.guild
+        if guild != self.bot.discord_bot.guild:
+            return
+        channel, _ = await self.bot.functions.func_get_channel(args=[int(self.settings["output_channel"])])
+        perp = None
+        reason = None
+        action = discord.AuditLogAction.role_create
+        async for log in guild.audit_logs(limit=5, action=action):
+            if log.target.id == role.id:
+                perp = log.user
+                if log.reason:
+                    reason = log.reason
+                break
+        embed = discord.Embed(
+            description=role.mention,
+            colour=role.colour,
+            timestamp=utils.now(),
+        )
+        embed.set_author(
+            name="Role created {role} ({r_id})".format(role=role.name, r_id=role.id)
+        )
+        if perp:
+            embed.add_field(name="Created by", value=perp.mention)
+        if reason:
+            embed.add_field(name="Reason ", value=reason)
+        await self.bot.say(channel=channel, embed=embed)
+
+    async def role_delete(self, role):
+        if not self.settings["log_role_create"]:
+            return
+        guild = role.guild
+        if guild != self.bot.discord_bot.guild:
+            return
+        channel, _ = await self.bot.functions.func_get_channel(args=[int(self.settings["output_channel"])])
+        perp = None
+        reason = None
+        action = discord.AuditLogAction.role_create
+        async for log in guild.audit_logs(limit=5, action=action):
+            if log.target.id == role.id:
+                perp = log.user
+                if log.reason:
+                    reason = log.reason
+                break
+        embed = discord.Embed(
+            description=role.mention,
+            colour=role.colour,
+            timestamp=utils.now(),
+        )
+        embed.set_author(
+            name="Role deleted {role} ({r_id})".format(role=role.name, r_id=role.id)
+        )
+        if perp:
+            embed.add_field(name="Deleted by", value=perp.mention)
+        if reason:
+            embed.add_field(name="Reason ", value=reason)
+        await self.bot.say(channel=channel, embed=embed)
+        
     async def get_role_permission_change(self, before, after):
         permission_list = [
             "create_instant_invite",
@@ -284,6 +345,8 @@ class AdvancedAdminLog(BaseModule):
         HandlerManager.add_handler("discord_raw_message_delete", self.message_delete)
         HandlerManager.add_handler("discord_member_update", self.member_update)
         HandlerManager.add_handler("discord_guild_role_update", self.role_update)
+        HandlerManager.add_handler("discord_guild_role_create", self.role_create)
+        HandlerManager.add_handler("discord_guild_role_delete", self.role_delete)
 
     def disable(self, bot):
         if not bot:
@@ -293,3 +356,5 @@ class AdvancedAdminLog(BaseModule):
         HandlerManager.remove_handler("discord_raw_message_delete", self.message_delete)
         HandlerManager.remove_handler("discord_member_update", self.member_update)
         HandlerManager.remove_handler("discord_guild_role_update", self.role_update)
+        HandlerManager.remove_handler("discord_guild_role_create", self.role_create)
+        HandlerManager.remove_handler("discord_guild_role_delete", self.role_delete)
