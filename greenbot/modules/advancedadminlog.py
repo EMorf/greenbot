@@ -174,11 +174,11 @@ class AdvancedAdminLog(BaseModule):
                                 break
                 else:
                     action = discord.AuditLogAction.member_update
-                    async for log in self.bot.discord_bot.guild.audit_logs(limit=5, action=action):
-                        if log.target.id == before.id:
-                            perp = log.user
-                            if log.reason:
-                                reason = log.reason
+                    async for _log in self.bot.discord_bot.guild.audit_logs(limit=5, action=action):
+                        if _log.target.id == before.id:
+                            perp = _log.user
+                            if _log.reason:
+                                reason = _log.reason
                             break
                     embed.add_field(name="Before " + name, value=str(before_attr)[:1024])
                     embed.add_field(name="After " + name, value=str(after_attr)[:1024])
@@ -200,11 +200,11 @@ class AdvancedAdminLog(BaseModule):
         perp = None
         reason = None
         action = discord.AuditLogAction.role_update
-        async for log in guild.audit_logs(limit=5, action=action):
-            if log.target.id == before.id:
-                perp = log.user
-                if log.reason:
-                    reason = log.reason
+        async for _log in guild.audit_logs(limit=5, action=action):
+            if _log.target.id == before.id:
+                perp = _log.user
+                if _log.reason:
+                    reason = _log.reason
                 break
         embed = discord.Embed(description=after.mention, colour=after.colour, timestamp=utils.now())
         if after is guild.default_role:
@@ -253,11 +253,11 @@ class AdvancedAdminLog(BaseModule):
         perp = None
         reason = None
         action = discord.AuditLogAction.role_create
-        async for log in guild.audit_logs(limit=5, action=action):
-            if log.target.id == role.id:
-                perp = log.user
-                if log.reason:
-                    reason = log.reason
+        async for _log in guild.audit_logs(limit=5, action=action):
+            if _log.target.id == role.id:
+                perp = _log.user
+                if _log.reason:
+                    reason = _log.reason
                 break
         embed = discord.Embed(
             description=role.mention,
@@ -283,11 +283,11 @@ class AdvancedAdminLog(BaseModule):
         perp = None
         reason = None
         action = discord.AuditLogAction.role_create
-        async for log in guild.audit_logs(limit=5, action=action):
-            if log.target.id == role.id:
-                perp = log.user
-                if log.reason:
-                    reason = log.reason
+        async for _log in guild.audit_logs(limit=5, action=action):
+            if _log.target.id == role.id:
+                perp = _log.user
+                if _log.reason:
+                    reason = _log.reason
                 break
         embed = discord.Embed(
             description=role.name,
@@ -331,7 +331,7 @@ class AdvancedAdminLog(BaseModule):
             if after.mute:
                 embed.description = member.mention + " was muted. "
             else:
-                embed.description = chan_msg = member.mention + " was unmuted. "
+                embed.description = member.mention + " was unmuted. "
         if before.channel != after.channel:
             worth_updating = True
             change_type = "channel"
@@ -340,7 +340,7 @@ class AdvancedAdminLog(BaseModule):
             elif after.channel is None:
                 embed.description = member.mention + " has left " + before.channel.name
             else:
-                embed.description = chan_msg = (
+                embed.description = (
                     member.mention
                     + " has moved from "
                     + before.channel.name
@@ -352,12 +352,12 @@ class AdvancedAdminLog(BaseModule):
         perp = None
         reason = None
         action = discord.AuditLogAction.member_update
-        async for log in guild.audit_logs(limit=5, action=action):
-            is_change = getattr(log.after, change_type, None)
-            if log.target.id == member.id and is_change:
-                perp = log.user
-                if log.reason:
-                    reason = log.reason
+        async for _log in guild.audit_logs(limit=5, action=action):
+            is_change = getattr(_log.after, change_type, None)
+            if _log.target.id == member.id and is_change:
+                perp = _log.user
+                if _log.reason:
+                    reason = _log.reason
                 break
         if perp:
             embed.add_field(name="Updated by", value=perp.mention)
@@ -412,17 +412,17 @@ class AdvancedAdminLog(BaseModule):
         reason = None
         banned = False
         action = discord.AuditLogAction.kick
-        async for log in guild.audit_logs(limit=5, action=action):
-            if log.target.id == member.id:
-                perp = log.user
-                reason = log.reason
+        async for _log in guild.audit_logs(limit=5, action=action):
+            if _log.target.id == member.id:
+                perp = _log.user
+                reason = _log.reason
                 break
         if not perp:
             action = discord.AuditLogAction.ban
-            async for log in guild.audit_logs(limit=5, action=action):
-                if log.target.id == member.id:
-                    perp = log.user
-                    reason = log.reason
+            async for _log in guild.audit_logs(limit=5, action=action):
+                if _log.target.id == member.id:
+                    perp = _log.user
+                    reason = _log.reason
                     banned = True
                     break
         embed.add_field(name="Total Users:", value=str(len(guild.members)))
@@ -459,11 +459,12 @@ class AdvancedAdminLog(BaseModule):
         reason = None
         worth_updating = False
         action = discord.AuditLogAction.channel_update
-        async for log in guild.audit_logs(limit=5, action=action):
-            if log.target.id == before.id:
+        async for _log in guild.audit_logs(limit=5, action=action):
+            log.info(_log)
+            if _log.target.id == before.id:
                 perp = log.user
-                if log.reason:
-                    reason = log.reason
+                if _log.reason:
+                    reason = _log.reason
                 break
         if type(before) == discord.TextChannel:
             text_updates = {
@@ -540,11 +541,12 @@ class AdvancedAdminLog(BaseModule):
         perp = None
         reason = None
         action = discord.AuditLogAction.channel_create
-        async for log in guild.audit_logs(limit=2, action=action):
-            if log.target.id == channel.id:
-                perp = log.user
-                if log.reason:
-                    reason = log.reason
+        async for _log in guild.audit_logs(limit=5, action=action):
+            log.info(_log)
+            if _log.target.id == channel.id:
+                perp = _log.user
+                if _log.reason:
+                    reason = _log.reason
                 break
         embed.add_field(name="Type", value=channel_type)
         if perp:
@@ -572,11 +574,12 @@ class AdvancedAdminLog(BaseModule):
         perp = None
         reason = None
         action = discord.AuditLogAction.channel_delete
-        async for log in guild.audit_logs(limit=2, action=action):
-            if log.target.id == channel.id:
-                perp = log.user
-                if log.reason:
-                    reason = log.reason
+        async for _log in guild.audit_logs(limit=5, action=action):
+            log.info(_log)
+            if _log.target.id == channel.id:
+                perp = _log.user
+                if _log.reason:
+                    reason = _log.reason
                 break
         embed.add_field(name="Type", value=channel_type)
         if perp:
