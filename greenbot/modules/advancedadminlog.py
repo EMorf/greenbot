@@ -172,7 +172,7 @@ class AdvancedAdminLog(BaseModule):
         author = self.bot.discord_bot.get_member(int(author_id))
         embed = discord.Embed(
             description=content[-1],
-            colour=await self.get_event_colour(guild, "message_delete"),
+            colour=await self.get_event_colour(author.guild, "message_delete"),
             timestamp=utils.now(),
         )
 
@@ -227,7 +227,7 @@ class AdvancedAdminLog(BaseModule):
             return
         embed = discord.Embed(
             description=f"Old Message: {content[-2]}",
-            colour=await self.get_event_colour(guild, "message_edit"),
+            colour=await self.get_event_colour(author.guild, "message_edit"),
             timestamp=utils.now(),
         )
         jump_url = f"[Click to see new message]({message.jump_url})"
@@ -952,7 +952,7 @@ class AdvancedAdminLog(BaseModule):
             title="Invite Deleted",
             colour=await self.get_event_colour(guild, "invite_deleted"),
         )
-        worth_updating = False
+        worth_updating = True # False
         for attr, name in invite_attrs.items():
             before_attr = getattr(invite, attr)
             if before_attr:
