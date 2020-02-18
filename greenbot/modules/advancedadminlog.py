@@ -127,7 +127,7 @@ class AdvancedAdminLog(BaseModule):
         embed.add_field(name="Channel:", value=sent_in_channel.mention)
         embed.set_footer(text="User ID: " + str(author.id))
         embed.set_author(
-            name=f"{author} ({author.id}) - Edited Message"
+            name=f"{author} ({author.id}) - Edited Message",
             icon_url=str(author.avatar_url),
         )
         await self.bot.say(channel, embed=embed)
