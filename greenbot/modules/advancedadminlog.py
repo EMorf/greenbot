@@ -817,7 +817,6 @@ class AdvancedAdminLog(BaseModule):
         worth_updating = False
         b = set(before)
         a = set(after)
-        # discord.Emoji uses id for hashing so we use set difference to get added/removed emoji
         try:
             added_emoji = (a - b).pop()
         except KeyError:
@@ -826,7 +825,6 @@ class AdvancedAdminLog(BaseModule):
             removed_emoji = (b - a).pop()
         except KeyError:
             removed_emoji = None
-        # changed emojis have their name and/or allowed roles changed while keeping id unchanged
         if added_emoji is not None:
             to_iter = before + (added_emoji,)
         else:
@@ -842,7 +840,6 @@ class AdvancedAdminLog(BaseModule):
                 if old_emoji.id == changed_emoji.id:
                     break
             else:
-                # this shouldn't happen but it's here just in case
                 changed_emoji = None
         action = None
         if removed_emoji is not None:
@@ -868,7 +865,6 @@ class AdvancedAdminLog(BaseModule):
                     + " to "
                     + f"{changed_emoji.name}\n"
                 )
-                # emoji_update shows only for renames and not for role restriction updates
                 action = discord.AuditLogAction.emoji_update
             embed.description += new_msg
             if old_emoji.roles != changed_emoji.roles:
