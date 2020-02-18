@@ -44,6 +44,9 @@ class AdvancedAdminLog(BaseModule):
         ModuleSetting(key="log_voice_change", label="Log Role Create Event", type="boolean", placeholder="", default=True),
         ModuleSetting(key="log_member_join", label="Log Role Create Event", type="boolean", placeholder="", default=True),
         ModuleSetting(key="log_member_remove", label="Log Role Create Event", type="boolean", placeholder="", default=True),
+        ModuleSetting(key="log_channel_update", label="Log Channel Update Event", type="boolean", placeholder="", default=True),
+        ModuleSetting(key="log_channel_create", label="Log Channel Create Event", type="boolean", placeholder="", default=True),
+        ModuleSetting(key="log_channel_delete", label="Log Channel Delete Event", type="boolean", placeholder="", default=True),
     ]
 
     def __init__(self, bot):
@@ -82,7 +85,7 @@ class AdvancedAdminLog(BaseModule):
             embed.add_field(name="Deleted by", value=perp)
         embed.set_footer(text="User ID: " + str(author_id))
         embed.set_author(
-            name="{member} ({m_id})- Deleted Message".format(member=author, m_id=author.id),
+            name=f"{author} ({author.id})- Deleted Message",
             icon_url=str(author.avatar_url),
         )
         await self.bot.say(channel, embed=embed)
@@ -124,9 +127,7 @@ class AdvancedAdminLog(BaseModule):
         embed.add_field(name="Channel:", value=sent_in_channel.mention)
         embed.set_footer(text="User ID: " + str(author.id))
         embed.set_author(
-            name="{member} ({m_id}) - Edited Message".format(
-                member=author, m_id=author.id
-            ),
+            name=f"{author} ({author.id}) - Edited Message"
             icon_url=str(author.avatar_url),
         )
         await self.bot.say(channel, embed=embed)
@@ -140,7 +141,7 @@ class AdvancedAdminLog(BaseModule):
 
         channel, _ = await self.bot.functions.func_get_channel(args=[int(self.settings["output_channel"])])
         embed = discord.Embed(colour=discord.Color.green(), timestamp=utils.now())
-        emb_msg = "{member} ({m_id}) updated".format(member=before, m_id=before.id)
+        emb_msg = f"{before} ({before.id}) updated"
         embed.set_author(name=emb_msg, icon_url=before.avatar_url)
         member_updates = {"nick": "Nickname:", "roles": "Roles:"}
         perp = None
@@ -210,7 +211,7 @@ class AdvancedAdminLog(BaseModule):
             embed.set_author(name="Updated @everyone role ")
         else:
             embed.set_author(
-                name="Updated {role} ({r_id}) role ".format(role=before.name, r_id=before.id)
+                name=f"Updated {before.name} ({before.id}) role "
             )
         if perp:
             embed.add_field(name="Updated by ", value=perp.mention)
@@ -264,7 +265,7 @@ class AdvancedAdminLog(BaseModule):
             timestamp=utils.now(),
         )
         embed.set_author(
-            name="Role created {role} ({r_id})".format(role=role.name, r_id=role.id)
+            name=f"Role created {role.name} ({role.id})"
         )
         if perp:
             embed.add_field(name="Created by", value=perp.mention)
@@ -294,7 +295,7 @@ class AdvancedAdminLog(BaseModule):
             timestamp=utils.now(),
         )
         embed.set_author(
-            name="Role deleted {role} ({r_id})".format(role=role.name, r_id=role.id)
+            name=f"Role deleted {role.name} ({role.id})"
         )
         if perp:
             embed.add_field(name="Deleted by", value=perp.mention)
@@ -313,7 +314,7 @@ class AdvancedAdminLog(BaseModule):
             timestamp=utils.now(), colour=discord.Colour.gold(),
         )
         embed.set_author(
-            name="{member} ({m_id}) Voice State Update".format(member=member, m_id=member.id)
+            name=f"{member} ({member.id}) Voice State Update"
         )
         change_type = None
         worth_updating = False
@@ -376,7 +377,7 @@ class AdvancedAdminLog(BaseModule):
         since_created = (utils.now() - created_at).days
         user_created = created_at.strftime("%d %b %Y %H:%M")
 
-        created_on = "{}\n({} days ago)".format(user_created, since_created)
+        created_on = f"{user_created}\n({since_created} days ago)"
 
         embed = discord.Embed(
             description=member.mention,
@@ -387,9 +388,7 @@ class AdvancedAdminLog(BaseModule):
         embed.add_field(name="Account created on:", value=created_on)
         embed.set_footer(text="User ID: " + str(member.id))
         embed.set_author(
-            name="{member} ({m_id}) has joined the guild".format(
-                member=member, m_id=member.id
-            ),
+            name=f"{member} ({member.id}) has joined the guild"
             url=member.avatar_url,
             icon_url=member.avatar_url,
         )
@@ -433,14 +432,188 @@ class AdvancedAdminLog(BaseModule):
             embed.add_field(name="Reason", value=str(reason))
         embed.set_footer(text="User ID: " + str(member.id))
         embed.set_author(
-            name="{member} ({m_id}) has left the guild".format(
-                member=member, m_id=member.id
-            ),
+            name=f"{member} ({member.id}) has left the guild"
             url=member.avatar_url,
             icon_url=member.avatar_url,
         )
         embed.set_thumbnail(url=member.avatar_url)
         await self.bot.say(channel=channel, embed=embed)
+
+    async def channel_update(self, before, after):
+        if not self.settings["log_channel_update"]:
+            return
+        guild = before.guild
+        if guild != self.bot.discord_bot.guild:
+            return
+        channel, _ = await self.bot.functions.func_get_channel(args=[int(self.settings["output_channel"])])
+        channel_type = str(after.type).title()
+        embed = discord.Embed(
+            description=after.mention,
+            timestamp=utils.now(),
+            colour=discord.Colour.gold(),
+        )
+        embed.set_author(
+            name="{channel_type} Channel Updated {before.name} ({before.id})"
+        )
+        perp = None
+        reason = None
+        worth_updating = False
+        action = discord.AuditLogAction.channel_update
+        async for log in guild.audit_logs(limit=5, action=action):
+            if log.target.id == before.id:
+                perp = log.user
+                if log.reason:
+                    reason = log.reason
+                break
+        if type(before) == discord.TextChannel:
+            text_updates = {
+                "name": "Name:",
+                "topic": "Topic:",
+                "category": "Category:",
+                "slowmode_delay": "Slowmode delay:",
+            }
+
+            for attr, name in text_updates.items():
+                before_attr = getattr(before, attr)
+                after_attr = getattr(after, attr)
+                if before_attr != after_attr:
+                    worth_updating = True
+                    if before_attr == "":
+                        before_attr = "None"
+                    if after_attr == "":
+                        after_attr = "None"
+                    embed.add_field(name="Before " + name, value=str(before_attr)[:1024])
+                    embed.add_field(name="After " + name, value=str(after_attr)[:1024])
+            if before.is_nsfw() != after.is_nsfw():
+                worth_updating = True
+                embed.add_field(name="Before " + "NSFW", value=str(before.is_nsfw()))
+                embed.add_field(name="After " + "NSFW", value=str(after.is_nsfw()))
+            p_msg = await self.get_permission_change(before, after)
+            if p_msg != "":
+                worth_updating = True
+                embed.add_field(name="Permissions", value=p_msg[:1024])
+
+        if type(before) == discord.VoiceChannel:
+            voice_updates = {
+                "name": "Name:",
+                "position": "Position:",
+                "category": "Category:",
+                "bitrate": "Bitrate:",
+                "user_limit": "User limit:",
+            }
+            for attr, name in voice_updates.items():
+                before_attr = getattr(before, attr)
+                after_attr = getattr(after, attr)
+                if before_attr != after_attr:
+                    worth_updating = True
+                    embed.add_field(name="Before " + name, value=str(before_attr))
+                    embed.add_field(name="After " + name, value=str(after_attr))
+            p_msg = await self.get_permission_change(before, after)
+            if p_msg != "":
+                worth_updating = True
+                embed.add_field(name="Permissions", value=p_msg[:1024])
+
+        if perp:
+            embed.add_field(name="Updated by ", value=perp.mention)
+        if reason:
+            embed.add_field(name="Reason ", value=reason)
+        if not worth_updating:
+            return
+        await self.bot.say(channel=channel, embed=embed)
+
+    async def channel_create(self, channel):
+        if not self.settings["log_channel_create"]:
+            return
+        guild = channel.guild
+        if guild != self.bot.discord_bot.guild:
+            return
+        channel, _ = await self.bot.functions.func_get_channel(args=[int(self.settings["output_channel"])])
+        channel_type = str(channel.type).title()
+        embed = discord.Embed(
+            description=f"{channel.mention} {channel.name}",
+            timestamp=utils.now(),
+            colour=discord.Colour.gold(),
+        )
+        embed.set_author(
+            name=f"{channel_type} Channel Created {channel.name} ({channel.id})"
+        )
+        perp = None
+        reason = None
+        action = discord.AuditLogAction.channel_create
+        async for log in guild.audit_logs(limit=2, action=action):
+            if log.target.id == channel.id:
+                perp = log.user
+                if log.reason:
+                    reason = log.reason
+                break
+        embed.add_field(name="Type", value=channel_type)
+        if perp:
+            embed.add_field(name="Created by ", value=perp.mention)
+        if reason:
+            embed.add_field(name="Reason ", value=reason)
+        await self.bot.say(channel=channel, embed=embed)
+
+    async def channel_delete(self, channel):
+        if not self.settings["log_channel_delete"]:
+            return
+        guild = channel.guild
+        if guild != self.bot.discord_bot.guild:
+            return
+        channel, _ = await self.bot.functions.func_get_channel(args=[int(self.settings["output_channel"])])
+        channel_type = str(channel.type).title()
+        embed = discord.Embed(
+            description=f"{channel.mention} {channel.name}",
+            timestamp=utils.now(),
+            colour=discord.Colour.gold(),
+        )
+        embed.set_author(
+            name=f"{channel_type} Channel Deleted {channel.name} ({channel.id})"
+        )
+        perp = None
+        reason = None
+        action = discord.AuditLogAction.channel_delete
+        async for log in guild.audit_logs(limit=2, action=action):
+            if log.target.id == channel.id:
+                perp = log.user
+                if log.reason:
+                    reason = log.reason
+                break
+        embed.add_field(name="Type", value=channel_type)
+        if perp:
+            embed.add_field(name="Deleted by ", value=perp.mention)
+        if reason:
+            embed.add_field(name="Reason ", value=reason)
+        await self.bot.say(channel=channel, embed=embed)
+
+    async def get_permission_change(self, before, after):
+        p_msg = ""
+        before_perms = {}
+        after_perms = {}
+        for o, p in before.overwrites.items():
+            before_perms[str(o.id)] = [i for i in p]
+        for o, p in after.overwrites.items():
+            after_perms[str(o.id)] = [i for i in p]
+        for entity in before_perms:
+            entity_obj = before.guild.get_role(int(entity))
+            if not entity_obj:
+                entity_obj = before.guild.get_member(int(entity))
+            if entity not in after_perms:
+                p_msg += f"{entity_obj.mention} Overwrites removed.\n"
+                continue
+            if after_perms[entity] != before_perms[entity]:
+                a = set(after_perms[entity])
+                b = set(before_perms[entity])
+                a_perms = list(a - b)
+                for diff in a_perms:
+                    p_msg += f"{entity_obj.mention} {diff[0]} Set to {diff[1]}\n"
+        for entity in after_perms:
+            entity_obj = after.guild.get_role(int(entity))
+            if not entity_obj:
+                entity_obj = after.guild.get_member(int(entity))
+            if entity not in before_perms:
+                p_msg += f"{entity_obj.mention} Overwrites added.\n"
+                continue
+        return p_msg
 
     async def get_role_permission_change(self, before, after):
         permission_list = [
@@ -494,6 +667,9 @@ class AdvancedAdminLog(BaseModule):
         HandlerManager.add_handler("discord_voice_state_update", self.voice_change)
         HandlerManager.add_handler("discord_member_remove", self.member_remove)
         HandlerManager.add_handler("discord_member_join", self.member_join)
+        HandlerManager.add_handler("discord_guild_channel_update", self.channel_update)
+        HandlerManager.add_handler("discord_guild_channel_create", self.channel_create)
+        HandlerManager.add_handler("discord_guild_channel_delete", self.channel_delete)
 
     def disable(self, bot):
         if not bot:
@@ -508,3 +684,6 @@ class AdvancedAdminLog(BaseModule):
         HandlerManager.remove_handler("discord_voice_state_update", self.voice_change)
         HandlerManager.remove_handler("discord_member_remove", self.member_remove)
         HandlerManager.remove_handler("discord_member_join", self.member_join)
+        HandlerManager.remove_handler("discord_guild_channel_update", self.channel_update)
+        HandlerManager.remove_handler("discord_guild_channel_create", self.channel_create)
+        HandlerManager.remove_handler("discord_guild_channel_delete", self.channel_delete)
