@@ -58,12 +58,18 @@ class Functions:
         try:
             timeout_in_seconds = int(args[1] if len(args) > 2 and args[1] != "" else 0)
         except ValueError:
-            return f"Invalid timeout in seconds {args[1] if len(args) > 2 and args[1] != '' else 0}!", None
+            return (
+                f"Invalid timeout in seconds {args[1] if len(args) > 2 and args[1] != '' else 0}!",
+                None,
+            )
 
         try:
             delete_message_days = int(args[2] if len(args) > 3 and args[2] != "" else 0)
         except ValueError:
-            return f"Invalid delete message days {args[2] if len(args) > 3 and args[2] != '' else 0}!", None
+            return (
+                f"Invalid delete message days {args[2] if len(args) > 3 and args[2] != '' else 0}!",
+                None,
+            )
 
         reason = args[3] if len(args) == 4 else ""
 
