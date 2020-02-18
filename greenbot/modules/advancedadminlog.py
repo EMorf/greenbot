@@ -388,7 +388,7 @@ class AdvancedAdminLog(BaseModule):
         embed.add_field(name="Account created on:", value=created_on)
         embed.set_footer(text="User ID: " + str(member.id))
         embed.set_author(
-            name=f"{member} ({member.id}) has joined the guild"
+            name=f"{member} ({member.id}) has joined the guild",
             url=member.avatar_url,
             icon_url=member.avatar_url,
         )
@@ -432,7 +432,7 @@ class AdvancedAdminLog(BaseModule):
             embed.add_field(name="Reason", value=str(reason))
         embed.set_footer(text="User ID: " + str(member.id))
         embed.set_author(
-            name=f"{member} ({member.id}) has left the guild"
+            name=f"{member} ({member.id}) has left the guild",
             url=member.avatar_url,
             icon_url=member.avatar_url,
         )
@@ -453,7 +453,7 @@ class AdvancedAdminLog(BaseModule):
             colour=discord.Colour.gold(),
         )
         embed.set_author(
-            name="{channel_type} Channel Updated {before.name} ({before.id})"
+            name=f"{channel_type} Channel Updated {before.name} ({before.id})"
         )
         perp = None
         reason = None
