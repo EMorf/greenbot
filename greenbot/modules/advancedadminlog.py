@@ -53,7 +53,7 @@ class AdvancedAdminLog(BaseModule):
                 return
             content = json.loads(db_message.content)
             author_id = db_message.user_id
-        sent_in_channel, _ = await self.bot.functions.func_get_channel(args=[int(payload.channel_id])])
+        sent_in_channel, _ = await self.bot.functions.func_get_channel(args=[int(payload.channel_id)])
         author = self.bot.discord_bot.get_member(int(author_id))
         embed = discord.Embed(
             description=content,
