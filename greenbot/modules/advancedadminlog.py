@@ -1,6 +1,7 @@
 import logging
 import json
 import discord
+import datetime
 
 from greenbot.managers.db import DBManager
 from greenbot.managers.handler import HandlerManager
@@ -371,8 +372,9 @@ class AdvancedAdminLog(BaseModule):
             return
         channel, _ = await self.bot.functions.func_get_channel(args=[int(self.settings["output_channel"])])
         users = len(guild.members)
-        since_created = (utils.now() - member.created_at).days
-        user_created = member.created_at.strftime("%d %b %Y %H:%M")
+        created_at = member.created_at.replace(tzinfo=datetime.timezone.utc)
+        since_created = (utils.now() - created_at).days
+        user_created = created_at.strftime("%d %b %Y %H:%M")
 
         created_on = "{}\n({} days ago)".format(user_created, since_created)
 
@@ -408,15 +410,25 @@ class AdvancedAdminLog(BaseModule):
             timestamp=utils.now(),
         )
         perp = None
+        reason = None
+        banned = False
         action = discord.AuditLogAction.kick
         async for log in guild.audit_logs(limit=5, action=action):
             if log.target.id == member.id:
                 perp = log.user
                 reason = log.reason
                 break
+        if not perp:
+            action = discord.AuditLogAction.ban
+            async for log in guild.audit_logs(limit=5, action=action):
+                if log.target.id == member.id:
+                    perp = log.user
+                    reason = log.reason
+                    banned = True
+                    break
         embed.add_field(name="Total Users:", value=str(len(guild.members)))
         if perp:
-            embed.add_field(name="Kicked", value=perp.mention)
+            embed.add_field(name="Kicked" if not banned else "Banned", value=perp.mention)
         if reason:
             embed.add_field(name="Reason", value=str(reason))
         embed.set_footer(text="User ID: " + str(member.id))
