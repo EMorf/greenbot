@@ -60,7 +60,7 @@ class AdvancedAdminLog(BaseModule):
             colour=discord.Colour.red(),
         )
 
-        embed.add_field(name=("Channel"), value=sent_in_channel)
+        embed.add_field(name="Channel", value=sent_in_channel)
         action = discord.AuditLogAction.message_delete
         perp = None
         async for _log in self.bot.discord_bot.guild.audit_logs(limit=2, action=action):
@@ -70,11 +70,10 @@ class AdvancedAdminLog(BaseModule):
                 perp = f"{_log.user}({_log.user.id})"
                 break
         if perp:
-            embed.add_field(name=("Deleted by"), value=perp)
-        embed.set_footer(text=("User ID: ") + str(author_id))
-        
+            embed.add_field(name="Deleted by", value=perp)
+        embed.set_footer(text="User ID: " + str(author_id))
         embed.set_author(
-            name=("{member} ({m_id})- Deleted Message").format(member=author, m_id=author.id),
+            name="{member} ({m_id})- Deleted Message".format(member=author, m_id=author.id),
             icon_url=str(author.avatar_url),
         )
         await self.bot.say(channel, embed=embed)
@@ -95,13 +94,10 @@ class AdvancedAdminLog(BaseModule):
         author = self.bot.discord_bot.get_member(int(payload.data["author"]["id"]))
         message = await sent_in_channel.fetch_message(int(message_id))
         if not guild_id or self.bot.discord_bot.guild.id != int(guild_id):
-            log.info("Wrong Guild!")
-            log.info(guild_id)
-            log.info(self.bot.discord_bot.guild.id)
             return
 
         with DBManager.create_session_scope() as db_session:
-            db_message = Message._get(db_session, message_id)
+            db_message = Message._get(db_session, str(message_id))
             if not db_message:
                 return
             content = json.loads(db_message.content)
@@ -111,11 +107,11 @@ class AdvancedAdminLog(BaseModule):
             colour=discord.Colour.red(),
         )
         jump_url = f"[Click to see new message]({message.jump_url})"
-        embed.add_field(name=_("After Message:"), value=jump_url)
-        embed.add_field(name=_("Channel:"), value=sent_in_channel.mention)
-        embed.set_footer(text=_("User ID: ") + str(author.id))
+        embed.add_field(name="After Message:", value=jump_url)
+        embed.add_field(name="Channel:", value=sent_in_channel.mention)
+        embed.set_footer(text="User ID: " + str(author.id))
         embed.set_author(
-            name=_("{member} ({m_id}) - Edited Message").format(
+            name="{member} ({m_id}) - Edited Message".format(
                 member=author, m_id=author.id
             ),
             icon_url=str(author.avatar_url),
