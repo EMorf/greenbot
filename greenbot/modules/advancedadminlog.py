@@ -36,6 +36,8 @@ class AdvancedAdminLog(BaseModule):
         ),
         ModuleSetting(key="log_edit_message", label="Log Edit Message Event", type="boolean", placeholder="", default=True),
         ModuleSetting(key="log_delete_message", label="Log Delete Message Event", type="boolean", placeholder="", default=True),
+        ModuleSetting(key="log_member_update", label="Log Member Update Event", type="boolean", placeholder="", default=True),
+        ModuleSetting(key="log_member_update_nickname", label="Log Member Update Nickname Event", type="boolean", placeholder="", default=True),
     ]
 
     def __init__(self, bot):
@@ -106,7 +108,7 @@ class AdvancedAdminLog(BaseModule):
         if int(author_id) == self.bot.discord_bot.client.user.id:
             return
         embed = discord.Embed(
-            description=content[-2],
+            description=f"Old Message: {content[-2]}",
             colour=discord.Colour.red(),
         )
         jump_url = f"[Click to see new message]({message.jump_url})"
@@ -121,12 +123,67 @@ class AdvancedAdminLog(BaseModule):
         )
         await self.bot.say(channel, embed=embed)
 
+    async def member_update(self, before, after):
+        if not self.settings["log_member_update"]:
+            return
+        channel, _ = await self.bot.functions.func_get_channel(args=[int(self.settings["output_channel"])])
+        embed = discord.Embed(colour=discord.Color.green())
+        emb_msg = "{member} ({m_id}) updated".format(member=before, m_id=before.id)
+        embed.set_author(name=emb_msg, icon_url=before.avatar_url)
+        member_updates = {"nick": "Nickname:", "roles": "Roles:"}
+        perp = None
+        reason = None
+        worth_sending = False
+        for attr, name in member_updates.items():
+            if attr == "nick" and not self.settings["log_member_update"]:
+                continue
+            before_attr = getattr(before, attr)
+            after_attr = getattr(after, attr)
+            if before_attr != after_attr:
+                worth_sending = True
+                if attr == "roles":
+                    b = set(before.roles)
+                    a = set(after.roles)
+                    before_roles = [list(b - a)][0]
+                    after_roles = [list(a - b)][0]
+                    if before_roles:
+                        for role in before_roles:
+                            embed.description = role.mention + " Role removed."
+                    if after_roles:
+                        for role in after_roles:
+                            embed.description = role.mention + " Role applied."
+                        action = discord.AuditLogAction.member_role_update
+                        async for log in self.bot.discord_bot.guild.audit_logs(limit=5, action=action):
+                            if log.target.id == before.id:
+                                perp = log.user
+                                if log.reason:
+                                    reason = log.reason
+                                break
+                else:
+                    action = discord.AuditLogAction.member_update
+                    async for log in self.bot.discord_bot.guild.audit_logs(limit=5, action=action):
+                        if log.target.id == before.id:
+                            perp = log.user
+                            if log.reason:
+                                reason = log.reason
+                            break
+                    embed.add_field(name="Before " + name, value=str(before_attr)[:1024])
+                    embed.add_field(name="After " + name, value=str(after_attr)[:1024])
+        if not worth_sending:
+            return
+        if perp:
+            embed.add_field(name="Updated by ", value=perp.mention)
+        if reason:
+            embed.add_field(name="Reason", value=reason)
+        await self.bot.say(channel=channel, embed=embed)
+        
     def enable(self, bot):
         if not bot:
             return
 
         HandlerManager.add_handler("discord_raw_message_edit", self.message_edit)
         HandlerManager.add_handler("discord_raw_message_delete", self.message_delete)
+        HandlerManager.add_handler("discord_member_update", self.member_update)
 
     def disable(self, bot):
         if not bot:
@@ -134,3 +191,4 @@ class AdvancedAdminLog(BaseModule):
 
         HandlerManager.remove_handler("discord_raw_message_edit", self.message_edit)
         HandlerManager.remove_handler("discord_raw_message_delete", self.message_delete)
+        HandlerManager.remove_handler("discord_member_update", self.member_update)
