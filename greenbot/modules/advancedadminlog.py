@@ -952,7 +952,7 @@ class AdvancedAdminLog(BaseModule):
             title="Invite Deleted",
             colour=await self.get_event_colour(guild, "invite_deleted"),
         )
-        worth_updating = True # False
+        worth_updating = False
         for attr, name in invite_attrs.items():
             before_attr = getattr(invite, attr)
             if before_attr:
@@ -960,7 +960,7 @@ class AdvancedAdminLog(BaseModule):
                 embed.add_field(name=name, value=str(before_attr))
         if not worth_updating:
             return
-        self.bot.say(channel=out_channel, embed=embed)
+        await self.bot.say(channel=out_channel, embed=embed)
 
     async def get_permission_change(self, before, after):
         p_msg = ""
