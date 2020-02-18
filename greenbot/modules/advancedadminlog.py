@@ -76,7 +76,6 @@ class AdvancedAdminLog(BaseModule):
         action = discord.AuditLogAction.message_delete
         perp = None
         async for _log in self.bot.discord_bot.guild.audit_logs(limit=2, action=action):
-            log.info(_log)
             same_chan = _log.extra.channel.id == sent_in_channel.id
             if _log.target.id == int(author_id) and same_chan:
                 perp = f"{_log.user}({_log.user.id})"
@@ -542,7 +541,6 @@ class AdvancedAdminLog(BaseModule):
         reason = None
         action = discord.AuditLogAction.channel_create
         async for _log in guild.audit_logs(limit=5, action=action):
-            log.info(_log)
             if _log.target.id == channel.id:
                 perp = _log.user
                 if _log.reason:
@@ -575,7 +573,6 @@ class AdvancedAdminLog(BaseModule):
         reason = None
         action = discord.AuditLogAction.channel_delete
         async for _log in guild.audit_logs(limit=5, action=action):
-            log.info(_log)
             if _log.target.id == channel.id:
                 perp = _log.user
                 if _log.reason:
