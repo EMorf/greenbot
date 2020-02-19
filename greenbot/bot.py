@@ -171,7 +171,7 @@ class Bot:
             return None
         return await self.discord_bot.private_message(user, message, embed, ignore_escape)
 
-    async def say(self, channel, message=None, embed=None, ignore_escap=False):
+    async def say(self, channel, message=None, embed=None, ignore_escape=False):
         if message is None and embed is None:
             log.error("sent invalid message")
             return None
