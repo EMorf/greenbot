@@ -278,15 +278,15 @@ class AdvancedAdminLog(BaseModule):
                     if after_roles:
                         for role in after_roles:
                             embed.description = role.mention + " Role applied."
-                        action = discord.AuditLogAction.member_role_update
-                        async for _log in self.bot.discord_bot.guild.audit_logs(
-                            limit=5, action=action
-                        ):
-                            if _log.target.id == before.id:
-                                perp = _log.user
-                                if _log.reason:
-                                    reason = _log.reason
-                                break
+                    action = discord.AuditLogAction.member_role_update
+                    async for _log in self.bot.discord_bot.guild.audit_logs(
+                        limit=5, action=action
+                    ):
+                        if _log.target.id == before.id:
+                            perp = _log.user
+                            if _log.reason:
+                                reason = _log.reason
+                            break
                 else:
                     action = discord.AuditLogAction.member_update
                     async for _log in self.bot.discord_bot.guild.audit_logs(
