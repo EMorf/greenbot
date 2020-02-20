@@ -1110,6 +1110,7 @@ class AdvancedAdminLog(BaseModule):
         jump_url = f"[Jump to message]({message.jump_url})" if message else "Message was deleted!"
         embed.add_field(name="Channel:", value=f"{sent_in_channel.mention} ({sent_in_channel})\n{jump_url}")
         embed.add_field(name="ID", value=f"```User ID = {author_id}\nMessage ID = {message_id}\nChannel ID = {channel_id}```")
+        await self.bot.say(channel=channel, embed=embed)
         
     def enable(self, bot):
         if not bot:
