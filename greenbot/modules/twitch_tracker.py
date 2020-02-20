@@ -94,7 +94,7 @@ class TwitchTracker(BaseModule):
             return []
         if len(streamers) > 100:
             final_response = final_response + self.get_response_from_twitch(streamers[100:])
-        final_response += requests.get(f'https://api.twitch.tv/helix/streams?user_login={streamers[0]}' + '&user_login='.join(streamers[1:]), headers=self.headers).json("data")
+        final_response += requests.get(f'https://api.twitch.tv/helix/streams?user_login={streamers[0]}' + '&user_login='.join(streamers[1:]), headers=self.headers).json()["data"]
         return final_response
 
     def enable(self, bot):
