@@ -58,9 +58,8 @@ class TwitchTracker(BaseModule):
 
     def load_commands(self, **options):
         if self.bot:
-            settings_streamers = self.settings["channels"].split(" ")
             return_twitch_streamers_tracked = {}
-            for streamer in settings_streamers:
+            for streamer in self.settings["channels"].split(" "):
                 return_twitch_streamers_tracked[streamer.lower()] = self.twitch_streamers_tracked.get(streamer.lower(), False)
             self.redis.set("twitch-streams-tracked", json.dumps(return_twitch_streamers_tracked))
             self.twitch_streamers_tracked = return_twitch_streamers_tracked
@@ -70,24 +69,27 @@ class TwitchTracker(BaseModule):
         return {"Client-ID": self.settings["client_id"]}
 
     async def process_checker(self):
-        response = self.get_response_from_twitch(self.settings["channels"].split(" "))
+        channels = self.get_response_from_twitch(self.settings["channels"].split(" "))
+        users = self.get_users([x for x in channels])
         channels_updated = []
-        for channel in response:
+        for channel in channels:
             if channel["type"] != "live" or self.twitch_streamers_tracked[channel["user_name"].lower()]:
                 continue
             self.twitch_streamers_tracked[channel["user_name"].lower()] = True
-            await self.broadcast_live(channel["user_name"], channel["title"])
+            await self.broadcast_live(streamer_name=channel["user_name"], stream_title=channel["title"], image_url=channel["thumbnail_url"], icon_url=users[channel["user_name"].lower()])
             channels_updated.append(channel["user_name"].lower())
         for streamer in self.twitch_streamers_tracked:
             if streamer not in channels_updated:
                 self.twitch_streamers_tracked[streamer] = False
         self.redis.set("twitch-streams-tracked", json.dumps(self.twitch_streamers_tracked))
 
-    async def broadcast_live(self, streamer_name, stream_title):
-        data = discord.Embed(description=f"Streamer {streamer_name} went live!", colour=discord.Colour.from_rgb(128, 0, 128), url=f"https://twitch.tv/{streamer_name.lower()}")
-        data.add_field(name=("Title"), value=stream_title)
+    async def broadcast_live(self, streamer_name, stream_title, image_url, icon_url):
+        data = discord.Embed(description=f"[**{stream_title}**](https://twitch.tv/{streamer_name.lower()})", colour=discord.Colour.from_rgb(128, 0, 128))
+        data.timestamp = utils.now()
+        data.set_image(image_url.format(width=1920, height=1080))
+        data.set_author(name=f"{streamer_name} is now live on twitch!", url=f"https://twitch.tv/{streamer_name.lower()}", icon_url=icon_url)
         channel, _  = await self.bot.functions.func_get_channel(args=[int(self.settings["output_channel"])])
-        await self.bot.say(channel, embed=data)
+        await self.bot.say(channel, message=f"@everyone {streamer_name} is now live on twitch!", embed=data)
 
     def get_response_from_twitch(self, streamers):
         final_response = []
@@ -96,6 +98,15 @@ class TwitchTracker(BaseModule):
         if len(streamers) > 100:
             final_response = final_response + self.get_response_from_twitch(streamers[100:])
         final_response += requests.get(f'https://api.twitch.tv/helix/streams?user_login={streamers[0]}' + '&user_login='.join(streamers[1:]), headers=self.headers).json()["data"]
+        return final_response
+
+    def get_users(self, streamers):
+        final_response = {}
+        if not streamers:
+            return {}
+        if len(streamers) > 100:
+            final_response.update(self.get_users(streamers[100:]))
+        final_response.update({ item["login"]: item for item in requests.get(f'https://api.twitch.tv/helix/users?login={streamers[0]}' + '&login='.join(streamers[1:]), headers=self.headers).json()["data"] })
         return final_response
 
     def enable(self, bot):
