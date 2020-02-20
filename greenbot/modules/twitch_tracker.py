@@ -70,7 +70,7 @@ class TwitchTracker(BaseModule):
 
     async def process_checker(self):
         channels = self.get_response_from_twitch(self.settings["channels"].split(" "))
-        users = self.get_users([x for x in channels])
+        users = self.get_users(channels.keys())
         channels_updated = []
         for channel in channels:
             if channel["type"] != "live" or self.twitch_streamers_tracked[channel["user_name"].lower()]:
@@ -106,11 +106,7 @@ class TwitchTracker(BaseModule):
             return {}
         if len(streamers) > 100:
             final_response.update(self.get_users(streamers[100:]))
-        url = f'https://api.twitch.tv/helix/users?login={streamers[0]}' + '&login='.join(streamers[1:])
-        log.info(url)
-        items = requests.get(url, headers=self.headers).json()
-        log.info(items)
-        final_response.update({ item["login"]: item for item in items["data"] })
+        final_response.update({ item["login"]: item for item in requests.get(f'https://api.twitch.tv/helix/users?login={streamers[0]}' + '&login='.join(streamers[1:]), headers=self.headers).json()["data"] })
         return final_response
 
     def enable(self, bot):
