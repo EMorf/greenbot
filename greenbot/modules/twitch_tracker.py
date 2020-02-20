@@ -86,7 +86,8 @@ class TwitchTracker(BaseModule):
     async def broadcast_live(self, streamer_name, stream_title):
         data = discord.Embed(description=f"Streamer {streamer_name} went live!", colour=discord.Colour.from_rgb(128, 0, 128), url=f"https://twitch.tv/{streamer_name.lower()}")
         data.add_field(name=("Title"), value=stream_title)
-        await self.bot.say(self.bot.functions.func_get_channel(int(self.settings["output_channel"])), embed=data)
+        channel, _  = self.bot.functions.func_get_channel(int(self.settings["output_channel"]))
+        await self.bot.say(channel, embed=data)
 
     def get_response_from_twitch(self, streamers):
         final_response = []
