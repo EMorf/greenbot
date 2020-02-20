@@ -1079,12 +1079,12 @@ class AdvancedAdminLog(BaseModule):
         embed.set_author(
             name=f"Message Query Result",
         )
-        log.info(args)
-        if not args:
+        _args = message.split(" ") if message != "" else []
+        if not _args:
             embed.description = f"Invalid Message ID"
             await self.bot.say(channel=channel, embed=embed)
             return
-        message_id = args[0]
+        message_id = _args[0]
         with DBManager.create_session_scope() as db_session:
             db_message = Message._get(db_session, str(message_id))
             if db_message:
