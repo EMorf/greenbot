@@ -62,6 +62,7 @@ class TwitchTracker(BaseModule):
             self.redis.set("twitch-streams-tracked", json.dumps({}))
             self.twitch_streamers_tracked = json.dumps({})
         self.twitch_streamers_tracked = json.loads(self.twitch_streamers_tracked)
+        self.process_messages_job = None
         
 
     def load_commands(self, **options):
@@ -145,7 +146,7 @@ class TwitchTracker(BaseModule):
         )
 
     def disable(self, bot):
-        if not bot:
+        if not bot or not self.process_messages_job::
             return
         self.process_messages_job.remove()
         self.process_messages_job = None
