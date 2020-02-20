@@ -67,6 +67,7 @@ class TwitchTracker(BaseModule):
     def load_commands(self, **options):
         if self.bot:
             return_twitch_streamers_tracked = {}
+            log.info(self.twitch_streamers_tracked)
             for streamer in self.settings["channels"].split(" "):
                 return_twitch_streamers_tracked[streamer.lower()] = self.twitch_streamers_tracked.get(streamer.lower(), False)
             self.redis.set("twitch-streams-tracked", json.dumps(return_twitch_streamers_tracked))
