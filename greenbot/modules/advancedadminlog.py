@@ -226,16 +226,16 @@ class AdvancedAdminLog(BaseModule):
         if int(author_id) == self.bot.discord_bot.client.user.id:
             return
         embed = discord.Embed(
-            description=f"Old Message: {content[-2]}",
+            description=f"{author} updated their message in {sent_in_channel}",
             colour=await self.get_event_colour(author.guild, "message_edit"),
             timestamp=utils.now(),
         )
-        jump_url = f"[Click to see new message]({message.jump_url})"
-        embed.add_field(name="After Message:", value=jump_url)
-        embed.add_field(name="Channel:", value=sent_in_channel.mention)
-        embed.set_footer(text="User ID: " + str(author.id))
+        embed.add_field(name="Now:", value=f"{content[-1]}")
+        embed.add_field(name="Preious:", value=f"{content[-2]}")       
+        embed.add_field(name="Channel:", value=f"{sent_in_channel.mention} ({sent_in_channel})\n[Jump to message]({message.jump_url})")
+        embed.set_footer(text=f"User ID: {author.id} Message ID: {message.id} Channel ID {sent_in_channel.id}")
         embed.set_author(
-            name=f"{author} ({author.id}) - Edited Message",
+            name=f"{author} ({author.id})",
             icon_url=str(author.avatar_url),
         )
         await self.bot.say(out_channel, embed=embed)
