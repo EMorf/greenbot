@@ -93,7 +93,7 @@ class TwitchTracker(BaseModule):
         games = self.get_games_playing(game_ids)
         users = self.get_users([channel["user_name"].lower() for channel in channels])
         channels_updated = []
-        log.info(channels)
+        log.info([channel["user_name"].lower() for channel in channels])
         for channel in channels:
             if channel["type"] != "live":
                 continue
@@ -122,7 +122,8 @@ class TwitchTracker(BaseModule):
         if not streamers:
             return []
         if len(streamers) > 100:
-            final_response = final_response + self.get_response_from_twitch(streamers[100:])
+            final_response = final_response + self.get_response_from_twitch(streamers[100:])    
+        log.info(f'https://api.twitch.tv/helix/streams?user_login={streamers[0]}' + '&user_login='.join(streamers[1:]))
         final_response += requests.get(f'https://api.twitch.tv/helix/streams?user_login={streamers[0]}' + '&user_login='.join(streamers[1:]), headers=self.headers).json()["data"]
         return final_response
 
