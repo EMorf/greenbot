@@ -233,9 +233,9 @@ class AdvancedAdminLog(BaseModule):
         embed.add_field(name="Now:", value=f"{content[-1]}")
         embed.add_field(name="Preious:", value=f"{content[-2]}")       
         embed.add_field(name="Channel:", value=f"{sent_in_channel.mention} ({sent_in_channel})\n[Jump to message]({message.jump_url})")
-        embed.set_footer(text=f"User ID: {author.id} Message ID: {message.id} Channel ID {sent_in_channel.id}")
+        embed.add_field(name="ID", value=f"```User ID = {author.id}\nMessage ID = {message.id}\nChannel ID = {sent_in_channel.id}```")
         embed.set_author(
-            name=f"{author} ({author.id})",
+            name=f"{author}",
             icon_url=str(author.avatar_url),
         )
         await self.bot.say(out_channel, embed=embed)
