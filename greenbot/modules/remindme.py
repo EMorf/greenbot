@@ -94,7 +94,7 @@ class RemindMe(BaseModule):
         ModuleSetting(
             key="max_reminders_per_user",
             label="Maximum reminders per user",
-            type="int",
+            type="number",
             placeholder="",
             default=3,
         ),
