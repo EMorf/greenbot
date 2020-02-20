@@ -108,7 +108,7 @@ class TwitchTracker(BaseModule):
             final_response.update(self.get_users(streamers[100:]))
         url = f'https://api.twitch.tv/helix/users?login={streamers[0]}' + '&login='.join(streamers[1:])
         log.info(url)
-        items = requests.get(, headers=self.headers).json()
+        items = requests.get(url, headers=self.headers).json()
         log.info(items)
         final_response.update({ item["login"]: item for item in items["data"] })
         return final_response
