@@ -182,8 +182,8 @@ class AdvancedAdminLog(BaseModule):
             colour=await self.get_event_colour(author.guild, "message_delete"),
             timestamp=utils.now(),
         )
-        embed.add_field(name="Message", value=content[-1])
-        embed.add_field(name="Channel", value=sent_in_channel)
+        embed.add_field(name="Message", value=content[-1], inline=False)
+        embed.add_field(name="Channel", value=sent_in_channel, inline=False)
         action = discord.AuditLogAction.message_delete
         perp = None
         async for _log in self.bot.discord_bot.guild.audit_logs(limit=2, action=action):
@@ -192,7 +192,7 @@ class AdvancedAdminLog(BaseModule):
                 perp = f"{_log.user}({_log.user.id})"
                 break
         if perp:
-            embed.add_field(name="Deleted by", value=perp)
+            embed.add_field(name="Deleted by", value=perp, inline=False)
         embed.set_footer(text="User ID: " + str(author_id))
         embed.set_author(
             name=f"{author} ({author.id})- Deleted Message",
@@ -237,10 +237,10 @@ class AdvancedAdminLog(BaseModule):
             colour=await self.get_event_colour(author.guild, "message_edit"),
             timestamp=utils.now(),
         )
-        embed.add_field(name="Now:", value=f"{content[-1]}")
-        embed.add_field(name="Previous:", value=f"{content[-2]}")       
-        embed.add_field(name="Channel:", value=f"{sent_in_channel.mention} ({sent_in_channel})\n[Jump to message]({message.jump_url})")
-        embed.add_field(name="ID", value=f"```User ID = {author.id}\nMessage ID = {message.id}\nChannel ID = {sent_in_channel.id}```")
+        embed.add_field(name="Now:", value=f"{content[-1]}", inline=False)
+        embed.add_field(name="Previous:", value=f"{content[-2]}", inline=False)       
+        embed.add_field(name="Channel:", value=f"{sent_in_channel.mention} ({sent_in_channel})\n[Jump to message]({message.jump_url})", inline=False)
+        embed.add_field(name="ID", value=f"```User ID = {author.id}\nMessage ID = {message.id}\nChannel ID = {sent_in_channel.id}```", inline=False)
         embed.set_author(
             name=f"{author} ({author.id})",
             icon_url=str(author.avatar_url),
@@ -305,15 +305,15 @@ class AdvancedAdminLog(BaseModule):
                                 reason = _log.reason
                             break
                     embed.add_field(
-                        name="Before " + name, value=str(before_attr)[:1024]
+                        name="Before " + name, value=str(before_attr)[:1024], inline=False
                     )
-                    embed.add_field(name="After " + name, value=str(after_attr)[:1024])
+                    embed.add_field(name="After " + name, value=str(after_attr)[:1024], inline=False)
         if not worth_sending:
             return
         if perp:
-            embed.add_field(name="Updated by ", value=perp.mention)
+            embed.add_field(name="Updated by ", value=perp.mention, inline=False)
         if reason:
-            embed.add_field(name="Reason", value=reason)
+            embed.add_field(name="Reason", value=reason, inline=False)
         await self.bot.say(channel=out_channel, embed=embed)
 
     async def role_update(self, before, after):
@@ -342,9 +342,9 @@ class AdvancedAdminLog(BaseModule):
         else:
             embed.set_author(name=f"Updated {before.name} ({before.id}) role ")
         if perp:
-            embed.add_field(name="Updated by ", value=perp.mention)
+            embed.add_field(name="Updated by ", value=perp.mention, inline=False)
         if reason:
-            embed.add_field(name="Reason ", value=reason)
+            embed.add_field(name="Reason ", value=reason, inline=False)
         role_updates = {
             "name": "Name:",
             "color": "Colour:",
@@ -361,12 +361,12 @@ class AdvancedAdminLog(BaseModule):
                     before_attr = "None"
                 if after_attr == "":
                     after_attr = "None"
-                embed.add_field(name="Before " + name, value=str(before_attr))
-                embed.add_field(name="After " + name, value=str(after_attr))
+                embed.add_field(name="Before " + name, value=str(before_attr), inline=False)
+                embed.add_field(name="After " + name, value=str(after_attr), inline=False)
         p_msg = await self.get_role_permission_change(before, after)
         if p_msg != "":
             worth_updating = True
-            embed.add_field(name="Permissions", value=p_msg[:1024])
+            embed.add_field(name="Permissions", value=p_msg[:1024], inline=False)
         if not worth_updating:
             return
         await self.bot.say(channel=out_channel, embed=embed)
@@ -394,9 +394,9 @@ class AdvancedAdminLog(BaseModule):
         )
         embed.set_author(name=f"Role created {role.name} ({role.id})")
         if perp:
-            embed.add_field(name="Created by", value=perp.mention)
+            embed.add_field(name="Created by", value=perp.mention, inline=False)
         if reason:
-            embed.add_field(name="Reason ", value=reason)
+            embed.add_field(name="Reason ", value=reason, inline=False)
         await self.bot.say(channel=out_channel, embed=embed)
 
     async def role_delete(self, role):
@@ -422,9 +422,9 @@ class AdvancedAdminLog(BaseModule):
         )
         embed.set_author(name=f"Role deleted {role.name} ({role.id})")
         if perp:
-            embed.add_field(name="Deleted by", value=perp.mention)
+            embed.add_field(name="Deleted by", value=perp.mention, inline=False)
         if reason:
-            embed.add_field(name="Reason ", value=reason)
+            embed.add_field(name="Reason ", value=reason, inline=False)
         await self.bot.say(channel=out_channel, embed=embed)
 
     async def voice_change(self, member, before, after):
@@ -485,9 +485,9 @@ class AdvancedAdminLog(BaseModule):
                     reason = _log.reason
                 break
         if perp:
-            embed.add_field(name="Updated by", value=perp.mention)
+            embed.add_field(name="Updated by", value=perp.mention, inline=False)
         if reason:
-            embed.add_field(name="Reason ", value=reason)
+            embed.add_field(name="Reason ", value=reason, inline=False)
         await self.bot.say(channel=out_channel, embed=embed)
 
     async def member_join(self, member):
@@ -511,8 +511,8 @@ class AdvancedAdminLog(BaseModule):
             colour=await self.get_event_colour(guild, "user_join"),
             timestamp=member.joined_at if member.joined_at else utils.now(),
         )
-        embed.add_field(name="Total Users:", value=str(users))
-        embed.add_field(name="Account created on:", value=created_on)
+        embed.add_field(name="Total Users:", value=str(users), inline=False)
+        embed.add_field(name="Account created on:", value=created_on, inline=False)
         embed.set_footer(text="User ID: " + str(member.id))
         embed.set_author(
             name=f"{member} ({member.id}) has joined the guild",
@@ -554,13 +554,13 @@ class AdvancedAdminLog(BaseModule):
                     reason = _log.reason
                     banned = True
                     break
-        embed.add_field(name="Total Users:", value=str(len(guild.members)))
+        embed.add_field(name="Total Users:", value=str(len(guild.members)), inline=False)
         if perp:
             embed.add_field(
-                name="Kicked By" if not banned else "Banned By", value=perp.mention
+                name="Kicked By" if not banned else "Banned By", value=perp.mention, inline=False
             )
         if reason:
-            embed.add_field(name="Reason", value=str(reason))
+            embed.add_field(name="Reason", value=str(reason), inline=False)
         embed.set_footer(text="User ID: " + str(member.id))
         embed.set_author(
             name=f"{member} ({member.id}) has left the guild",
@@ -644,17 +644,17 @@ class AdvancedAdminLog(BaseModule):
                     if after_attr == "":
                         after_attr = "None"
                     embed.add_field(
-                        name="Before " + name, value=str(before_attr)[:1024]
+                        name="Before " + name, value=str(before_attr)[:1024], inline=False
                     )
-                    embed.add_field(name="After " + name, value=str(after_attr)[:1024])
+                    embed.add_field(name="After " + name, value=str(after_attr)[:1024], inline=False)
             if before.is_nsfw() != after.is_nsfw():
                 worth_updating = True
-                embed.add_field(name="Before " + "NSFW", value=str(before.is_nsfw()))
-                embed.add_field(name="After " + "NSFW", value=str(after.is_nsfw()))
+                embed.add_field(name="Before " + "NSFW", value=str(before.is_nsfw()), inline=False)
+                embed.add_field(name="After " + "NSFW", value=str(after.is_nsfw()), inline=False)
             p_msg = await self.get_permission_change(before, after)
             if p_msg != "":
                 worth_updating = True
-                embed.add_field(name="Permissions", value=p_msg[:1024])
+                embed.add_field(name="Permissions", value=p_msg[:1024], inline=False)
 
         if type(before) == discord.VoiceChannel:
             voice_updates = {
@@ -669,17 +669,17 @@ class AdvancedAdminLog(BaseModule):
                 after_attr = getattr(after, attr)
                 if before_attr != after_attr:
                     worth_updating = True
-                    embed.add_field(name="Before " + name, value=str(before_attr))
-                    embed.add_field(name="After " + name, value=str(after_attr))
+                    embed.add_field(name="Before " + name, value=str(before_attr), inline=False)
+                    embed.add_field(name="After " + name, value=str(after_attr), inline=False)
             p_msg = await self.get_permission_change(before, after)
             if p_msg != "":
                 worth_updating = True
-                embed.add_field(name="Permissions", value=p_msg[:1024])
+                embed.add_field(name="Permissions", value=p_msg[:1024], inline=False)
 
         if perp:
-            embed.add_field(name="Updated by ", value=perp.mention)
+            embed.add_field(name="Updated by ", value=perp.mention, inline=False)
         if reason:
-            embed.add_field(name="Reason ", value=reason)
+            embed.add_field(name="Reason ", value=reason, inline=False)
         if not worth_updating:
             return
         await self.bot.say(channel=out_channel, embed=embed)
@@ -711,11 +711,11 @@ class AdvancedAdminLog(BaseModule):
                 if _log.reason:
                     reason = _log.reason
                 break
-        embed.add_field(name="Type", value=channel_type)
+        embed.add_field(name="Type", value=channel_type, inline=False)
         if perp:
-            embed.add_field(name="Created by ", value=perp.mention)
+            embed.add_field(name="Created by ", value=perp.mention, inline=False)
         if reason:
-            embed.add_field(name="Reason ", value=reason)
+            embed.add_field(name="Reason ", value=reason, inline=False)
         await self.bot.say(channel=out_channel, embed=embed)
 
     async def channel_delete(self, channel):
@@ -745,12 +745,12 @@ class AdvancedAdminLog(BaseModule):
                 if _log.reason:
                     reason = _log.reason
                 break
-        embed.add_field(name="Type", value=channel_type)
+        embed.add_field(name="Type", value=channel_type, inline=False)
         if perp:
-            embed.add_field(name="Deleted by ", value=perp.mention)
+            embed.add_field(name="Deleted by ", value=perp.mention, inline=False)
         if reason:
-            embed.add_field(name="Reason ", value=reason)
-        await self.bot.say(channel=out_channel, embed=embed)
+            embed.add_field(name="Reason ", value=reason, inline=False)
+        await self.bot.say(channel=out_channel, embed=embed, inline=False)
 
     async def guild_update(self, before, after):
         if not self.settings["log_guild_update"]:
@@ -783,8 +783,8 @@ class AdvancedAdminLog(BaseModule):
             after_attr = getattr(after, attr)
             if before_attr != after_attr:
                 worth_updating = True
-                embed.add_field(name="Before " + name, value=str(before_attr))
-                embed.add_field(name="After " + name, value=str(after_attr))
+                embed.add_field(name="Before " + name, value=str(before_attr), inline=False)
+                embed.add_field(name="After " + name, value=str(after_attr), inline=False)
         if not worth_updating:
             return
         perps = []
@@ -798,10 +798,10 @@ class AdvancedAdminLog(BaseModule):
                 reasons.append(_log.reason)
         if perps:
             embed.add_field(
-                name="Updated by", value=", ".join(p.mention for p in perps)
+                name="Updated by", value=", ".join(p.mention for p in perps), inline=False
             )
         if reasons:
-            embed.add_field(name="Reasons ", value=", ".join(str(r) for r in reasons))
+            embed.add_field(name="Reasons ", value=", ".join(str(r) for r in reasons), inline=False)
         await self.bot.say(channel=out_channel, embed=embed)
 
     async def emoji_update(self, guild, before, after):
@@ -901,9 +901,9 @@ class AdvancedAdminLog(BaseModule):
                     reason = _log.reason
                 break
         if perp:
-            embed.add_field(name="Updated by ", value=perp.mention)
+            embed.add_field(name="Updated by ", value=perp.mention, inline=False)
         if reason:
-            embed.add_field(name="Reason ", value=reason)
+            embed.add_field(name="Reason ", value=reaso, inline=Falsen)
         self.bot.say(channel=out_channel, embed=embed)
 
     async def invite_create(self, invite):
@@ -930,7 +930,7 @@ class AdvancedAdminLog(BaseModule):
             before_attr = getattr(invite, attr)
             if before_attr:
                 worth_updating = True
-                embed.add_field(name=name, value=str(before_attr))
+                embed.add_field(name=name, value=str(before_attr), inline=False)
         if not worth_updating:
             return
         await self.bot.say(channel=out_channel, embed=embed)
@@ -960,7 +960,7 @@ class AdvancedAdminLog(BaseModule):
             before_attr = getattr(invite, attr)
             if before_attr:
                 worth_updating = True
-                embed.add_field(name=name, value=str(before_attr))
+                embed.add_field(name=name, value=str(before_attr), inline=False)
         if not worth_updating:
             return
         await self.bot.say(channel=out_channel, embed=embed)
@@ -1105,10 +1105,10 @@ class AdvancedAdminLog(BaseModule):
         except (discord.NotFound, discord.Forbidden, discord.HTTPException):
             message = None
 
-        embed.add_field(name="Message History:", value="\n".join(content))
+        embed.add_field(name="Message History:", value="\n".join(content), inline=False)
         jump_url = f"[Jump to message]({message.jump_url})" if message else "Message was deleted!"
-        embed.add_field(name="Channel:", value=f"{sent_in_channel.mention} ({sent_in_channel})\n{jump_url}")
-        embed.add_field(name="ID", value=f"```User ID = {author_id}\nMessage ID = {message_id}\nChannel ID = {channel_id}```")
+        embed.add_field(name="Channel:", value=f"{sent_in_channel.mention} ({sent_in_channel})\n{jump_url}", inline=False)
+        embed.add_field(name="ID", value=f"```User ID = {author_id}\nMessage ID = {message_id}\nChannel ID = {channel_id}```", inline=False)
         await self.bot.say(channel=channel, embed=embed)
         
     def enable(self, bot):
