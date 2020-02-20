@@ -1,6 +1,7 @@
 import logging
 import requests
 import json
+import itertools
 import discord
 
 from greenbot import utils
@@ -68,28 +69,39 @@ class TwitchTracker(BaseModule):
     def headers(self):
         return {"Client-ID": self.settings["client_id"]}
 
+    def get_games_playing(self, game_ids):
+        final_response = {}
+        if not game_ids:
+            return {}
+        if len(game_ids) > 100:
+            final_response.update(self.get_games_playing(game_ids[100:]))
+        final_response.update({ item["id"]: item for item in requests.get(f'https://api.twitch.tv/helix/games?id={game_ids[0]}' + '&id='.join(game_ids[1:]), headers=self.headers).json()["data"] })
+        return final_response
+
     async def process_checker(self):
         channels = self.get_response_from_twitch(self.settings["channels"].split(" "))
+        game_ids = list(id for id,_ in itertools.groupby(channel["game_id"] for channel in channels))
+        games = self.get_games_playing(game_ids)
         users = self.get_users([channel["user_name"].lower() for channel in channels])
         channels_updated = []
         for channel in channels:
             if channel["type"] != "live" or self.twitch_streamers_tracked[channel["user_name"].lower()]:
                 continue
             self.twitch_streamers_tracked[channel["user_name"].lower()] = True
-            await self.broadcast_live(streamer_name=channel["user_name"], stream_title=channel["title"], image_url=channel["thumbnail_url"], icon_url=users[channel["user_name"].lower()]["profile_image_url"])
+            await self.broadcast_live(streamer_name=channel["user_name"], stream_title=channel["title"], image_url=channel["thumbnail_url"], icon_url=users[channel["user_name"].lower()]["profile_image_url"], game=games[channel["game_id"]], viewers=channel["viewer_count"])
             channels_updated.append(channel["user_name"].lower())
         for streamer in self.twitch_streamers_tracked:
             if streamer not in channels_updated:
                 self.twitch_streamers_tracked[streamer] = False
         self.redis.set("twitch-streams-tracked", json.dumps(self.twitch_streamers_tracked))
 
-    async def broadcast_live(self, streamer_name, stream_title, image_url, icon_url):
-        data = discord.Embed(description=f"[**{stream_title}**](https://twitch.tv/{streamer_name.lower()})", colour=discord.Colour.from_rgb(128, 0, 128))
+    async def broadcast_live(self, streamer_name, stream_title, image_url, icon_url, game, viewers):
+        data = discord.Embed(description=f"[**{stream_title}**](https://twitch.tv/{streamer_name.lower()})\n\nPlaying {game} for {viewers} viewers\n[Watch Stream](https://twitch.tv/{streamer_name.lower()})", colour=discord.Colour.from_rgb(128, 0, 128))
         data.timestamp = utils.now()
         data.set_image(url=image_url.format(width=1920, height=1080))
         data.set_author(name=f"{streamer_name} is now live on twitch!", url=f"https://twitch.tv/{streamer_name.lower()}", icon_url=icon_url)
         channel, _  = await self.bot.functions.func_get_channel(args=[int(self.settings["output_channel"])])
-        await self.bot.say(channel, message=f"@everyone {streamer_name} is now live on twitch!", embed=data)
+        await self.bot.say(channel, message=f"{streamer_name} is now live on twitch!", embed=data)
 
     def get_response_from_twitch(self, streamers):
         final_response = []
@@ -115,7 +127,7 @@ class TwitchTracker(BaseModule):
         ScheduleManager.execute_now(self.process_checker)
         self.process_messages_job = ScheduleManager.execute_every(
             300, self.process_checker
-        )  # Checks every hour
+        )
 
     def disable(self, bot):
         if not bot:
