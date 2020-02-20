@@ -7,6 +7,7 @@ from greenbot.managers.db import DBManager
 from greenbot.managers.handler import HandlerManager
 from greenbot.modules import BaseModule
 from greenbot.modules import ModuleSetting
+from greenbot.models.command import Command
 from greenbot.models.message import Message
 
 import greenbot.utils as utils
@@ -32,6 +33,13 @@ class AdvancedAdminLog(BaseModule):
             key="output_channel",
             label="Channels to send logs to",
             type="text",
+            placeholder="",
+            default="",
+        ),
+        ModuleSetting(
+            key="level_to_query",
+            label="Level required to query",
+            type="number",
             placeholder="",
             default="",
         ),
@@ -171,11 +179,10 @@ class AdvancedAdminLog(BaseModule):
         )
         author = self.bot.discord_bot.get_member(int(author_id))
         embed = discord.Embed(
-            description=content[-1],
             colour=await self.get_event_colour(author.guild, "message_delete"),
             timestamp=utils.now(),
         )
-
+        embed.add_field(name="Message", value=content[-1])
         embed.add_field(name="Channel", value=sent_in_channel)
         action = discord.AuditLogAction.message_delete
         perp = None
@@ -235,7 +242,7 @@ class AdvancedAdminLog(BaseModule):
         embed.add_field(name="Channel:", value=f"{sent_in_channel.mention} ({sent_in_channel})\n[Jump to message]({message.jump_url})")
         embed.add_field(name="ID", value=f"```User ID = {author.id}\nMessage ID = {message.id}\nChannel ID = {sent_in_channel.id}```")
         embed.set_author(
-            name=f"{author}",
+            name=f"{author} ({author.id})",
             icon_url=str(author.avatar_url),
         )
         await self.bot.say(out_channel, embed=embed)
@@ -1056,6 +1063,53 @@ class AdvancedAdminLog(BaseModule):
         colour = defaults[event_type]
         return colour
 
+    def load_commands(self, **options):
+        self.commands["message"] = Command.raw_command(
+            self.querymessage,
+            level=self.settings["level_to_query"],
+            can_execute_with_whisper=True,
+            description="Queries a message",
+        )
+
+    async def querymessage(self, bot, author, channel, message, args):
+        embed = discord.Embed(
+            colour=await self.get_event_colour(author.guild, "message_edit"),
+            timestamp=utils.now(),
+        )
+        embed.set_author(
+            name=f"Message Query Result",
+        )
+        if not args:
+            embed.description = f"Invalid Message ID"
+            await self.bot.say(channel=channel, embed=embed)
+            return
+        message_id = args[0]
+        with DBManager.create_session_scope() as db_session:
+            db_message = Message._get(db_session, str(message_id))
+            if db_message:
+                content = json.loads(db_message.content)
+                author_id = db_message.user_id
+                channel_id = db_message.channel_id
+        
+        if not db_message:
+            embed.description = f"Message not found with message id {message_id}"
+            await self.bot.say(channel=channel, embed=embed)
+            return
+        sent_in_channel, _ = await self.bot.functions.func_get_channel(
+            args=[int(channel_id)]
+        )
+
+        try:
+            message = await sent_in_channel.fetch_message(int(message_id))
+        except (discord.NotFound, discord.Forbidden, discord.HTTPException):
+            message = None
+
+        embed.add_field(name="Message History:", value="\n".join(content))
+        embed.add_field(name="Previous:", value=f"{content[-2]}")
+        jump_url = f"[Jump to message]({message.jump_url})" if message else "Message was deleted!"
+        embed.add_field(name="Channel:", value=f"{sent_in_channel.mention} ({sent_in_channel})\n{jump_url}")
+        embed.add_field(name="ID", value=f"```User ID = {author_id}\nMessage ID = {message_id}\nChannel ID = {channel_id}```")
+        
     def enable(self, bot):
         if not bot:
             return
