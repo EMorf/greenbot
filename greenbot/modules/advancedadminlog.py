@@ -40,8 +40,8 @@ class AdvancedAdminLog(BaseModule):
             key="level_to_query",
             label="Level required to query",
             type="number",
-            placeholder="",
-            default="",
+            placeholder=500,
+            default=500,
         ),
         ModuleSetting(
             key="log_edit_message",
@@ -1066,7 +1066,7 @@ class AdvancedAdminLog(BaseModule):
     def load_commands(self, **options):
         self.commands["message"] = Command.raw_command(
             self.querymessage,
-            level=self.settings["level_to_query"],
+            level=int(self.settings["level_to_query"]),
             can_execute_with_whisper=True,
             description="Queries a message",
         )
