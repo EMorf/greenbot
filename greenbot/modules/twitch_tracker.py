@@ -68,11 +68,9 @@ class TwitchTracker(BaseModule):
     def load_commands(self, **options):
         if self.bot:
             return_twitch_streamers_tracked = {}
-            log.info(self.twitch_streamers_tracked)
             for streamer in self.settings["channels"].split(" "):
                 return_twitch_streamers_tracked[streamer.lower()] = self.twitch_streamers_tracked.get(streamer.lower(), False)
             self.redis.set("twitch-streams-tracked", json.dumps(return_twitch_streamers_tracked))
-            log.info(return_twitch_streamers_tracked)
             self.twitch_streamers_tracked = return_twitch_streamers_tracked
 
     @property
@@ -94,7 +92,6 @@ class TwitchTracker(BaseModule):
         games = self.get_games_playing(game_ids)
         users = self.get_users([channel["user_name"].lower() for channel in channels])
         channels_updated = []
-        log.info([channel["user_name"].lower() for channel in channels])
         for channel in channels:
             if channel["type"] != "live":
                 continue
@@ -119,12 +116,10 @@ class TwitchTracker(BaseModule):
 
     def get_response_from_twitch(self, streamers):
         final_response = []
-        log.info(streamers[0])
         if not streamers:
             return []
         if len(streamers) > 100:
             final_response = final_response + self.get_response_from_twitch(streamers[100:])    
-        log.info(f'https://api.twitch.tv/helix/streams?user_login={streamers[0]}' + '&user_login='.join(streamers[1:]))
         final_response += requests.get(f'https://api.twitch.tv/helix/streams?user_login=' + '&user_login='.join(streamers), headers=self.headers).json()["data"]
         return final_response
 
