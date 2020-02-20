@@ -76,7 +76,7 @@ class TwitchTracker(BaseModule):
             if channel["type"] != "live" or self.twitch_streamers_tracked[channel["user_name"].lower()]:
                 continue
             self.twitch_streamers_tracked[channel["user_name"].lower()] = True
-            await self.broadcast_live(streamer_name=channel["user_name"], stream_title=channel["title"], image_url=channel["thumbnail_url"], icon_url=users[channel["user_name"].lower()])
+            await self.broadcast_live(streamer_name=channel["user_name"], stream_title=channel["title"], image_url=channel["thumbnail_url"], icon_url=users[channel["user_name"].lower()]["profile_image_url"])
             channels_updated.append(channel["user_name"].lower())
         for streamer in self.twitch_streamers_tracked:
             if streamer not in channels_updated:
@@ -86,7 +86,6 @@ class TwitchTracker(BaseModule):
     async def broadcast_live(self, streamer_name, stream_title, image_url, icon_url):
         data = discord.Embed(description=f"[**{stream_title}**](https://twitch.tv/{streamer_name.lower()})", colour=discord.Colour.from_rgb(128, 0, 128))
         data.timestamp = utils.now()
-        log.info(image_url.format(width=1920, height=1080))
         data.set_image(url=image_url.format(width=1920, height=1080))
         data.set_author(name=f"{streamer_name} is now live on twitch!", url=f"https://twitch.tv/{streamer_name.lower()}", icon_url=icon_url)
         channel, _  = await self.bot.functions.func_get_channel(args=[int(self.settings["output_channel"])])
