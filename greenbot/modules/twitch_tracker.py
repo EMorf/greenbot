@@ -71,7 +71,7 @@ class TwitchTracker(BaseModule):
             for streamer in self.settings["channels"].split(" "):
                 return_twitch_streamers_tracked[streamer.lower()] = self.twitch_streamers_tracked.get(streamer.lower(), False)
             self.redis.set("twitch-streams-tracked", json.dumps(return_twitch_streamers_tracked))
-            log.info(json.dumps(return_twitch_streamers_tracked))
+            log.info(return_twitch_streamers_tracked)
             self.twitch_streamers_tracked = return_twitch_streamers_tracked
 
     @property
@@ -95,7 +95,10 @@ class TwitchTracker(BaseModule):
         channels_updated = []
         log.info(channels)
         for channel in channels:
-            if channel["type"] != "live" or self.twitch_streamers_tracked[channel["user_name"].lower()]:
+            if channel["type"] != "live":
+                continue
+            if self.twitch_streamers_tracked[channel["user_name"].lower()]:
+                channels_updated.append(channel["user_name"].lower())
                 continue
             self.twitch_streamers_tracked[channel["user_name"].lower()] = True
             await self.broadcast_live(streamer_name=channel["user_name"], stream_title=channel["title"], image_url=channel["thumbnail_url"], icon_url=users[channel["user_name"].lower()]["profile_image_url"], game=games[channel["game_id"]]["name"], viewers=channel["viewer_count"])
