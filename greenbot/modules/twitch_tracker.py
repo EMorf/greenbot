@@ -93,6 +93,7 @@ class TwitchTracker(BaseModule):
         games = self.get_games_playing(game_ids)
         users = self.get_users([channel["user_name"].lower() for channel in channels])
         channels_updated = []
+        log.info(channels)
         for channel in channels:
             if channel["type"] != "live" or self.twitch_streamers_tracked[channel["user_name"].lower()]:
                 continue
