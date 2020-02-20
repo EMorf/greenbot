@@ -29,8 +29,11 @@ log = logging.getLogger(__name__)
 
 def custom_exception_handler(loop, context):
     # first, handle with default handler
-    log.error(type(context))
-    log.error(context)
+    if "exception" in context:
+        if context["exception"] == AssertionError:
+            return
+    log.error(context["message"])
+    return
 
 
 class Bot:
