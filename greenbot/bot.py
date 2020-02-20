@@ -31,6 +31,7 @@ def custom_exception_handler(loop, context):
     # first, handle with default handler
     if "exception" in context:
         if context["exception"] == AssertionError:
+            log.error("error ignored")
             return
     log.error(context["message"])
     return
