@@ -146,7 +146,7 @@ class TwitchTracker(BaseModule):
         )
 
     def disable(self, bot):
-        if not bot or not self.process_messages_job::
+        if not bot or not self.process_messages_job:
             return
         self.process_messages_job.remove()
         self.process_messages_job = None
