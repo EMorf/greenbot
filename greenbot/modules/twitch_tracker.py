@@ -112,7 +112,7 @@ class TwitchTracker(BaseModule):
 
     def get_response_from_twitch(self, streamers):
         final_response = []
-        if not streamers:
+        if not streamers or streamers[0] == "":
             return []
         if len(streamers) > 100:
             final_response = final_response + self.get_response_from_twitch(streamers[100:])
