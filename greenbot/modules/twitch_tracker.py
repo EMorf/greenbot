@@ -84,7 +84,7 @@ class TwitchTracker(BaseModule):
             return {}
         if len(game_ids) > 100:
             final_response.update(self.get_games_playing(game_ids[100:]))
-        final_response.update({ item["id"]: item for item in requests.get(f'https://api.twitch.tv/helix/games?id={game_ids[0]}' + '&id='.join(game_ids[1:]), headers=self.headers).json()["data"] })
+        final_response.update({ item["id"]: item for item in requests.get(f'https://api.twitch.tv/helix/games?id=' + '&id='.join(game_ids), headers=self.headers).json()["data"] })
         return final_response
 
     async def process_checker(self):
@@ -124,7 +124,7 @@ class TwitchTracker(BaseModule):
         if len(streamers) > 100:
             final_response = final_response + self.get_response_from_twitch(streamers[100:])    
         log.info(f'https://api.twitch.tv/helix/streams?user_login={streamers[0]}' + '&user_login='.join(streamers[1:]))
-        final_response += requests.get(f'https://api.twitch.tv/helix/streams?user_login={streamers[0]}' + '&user_login='.join(streamers[1:]), headers=self.headers).json()["data"]
+        final_response += requests.get(f'https://api.twitch.tv/helix/streams?user_login=' + '&user_login='.join(streamers), headers=self.headers).json()["data"]
         return final_response
 
     def get_users(self, streamers):
@@ -133,7 +133,7 @@ class TwitchTracker(BaseModule):
             return {}
         if len(streamers) > 100:
             final_response.update(self.get_users(streamers[100:]))
-        final_response.update({ item["login"]: item for item in requests.get(f'https://api.twitch.tv/helix/users?login={streamers[0]}' + '&login='.join(streamers[1:]), headers=self.headers).json()["data"] })
+        final_response.update({ item["login"]: item for item in requests.get(f'https://api.twitch.tv/helix/users?login=' + '&login='.join(streamers), headers=self.headers).json()["data"] })
         return final_response
 
     def enable(self, bot):
