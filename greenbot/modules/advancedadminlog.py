@@ -1079,6 +1079,7 @@ class AdvancedAdminLog(BaseModule):
         embed.set_author(
             name=f"Message Query Result",
         )
+        log.info(args)
         if not args:
             embed.description = f"Invalid Message ID"
             await self.bot.say(channel=channel, embed=embed)
