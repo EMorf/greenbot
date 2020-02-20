@@ -70,7 +70,7 @@ class TwitchTracker(BaseModule):
 
     async def process_checker(self):
         channels = self.get_response_from_twitch(self.settings["channels"].split(" "))
-        users = self.get_users(channels.keys())
+        users = self.get_users([channel["user_name"].lower() for channel in channels])
         channels_updated = []
         for channel in channels:
             if channel["type"] != "live" or self.twitch_streamers_tracked[channel["user_name"].lower()]:
