@@ -210,14 +210,24 @@ class Memes(BaseModule):
         await role.edit(colour=dcol)
 
     def load_commands(self, **options):
-        self.commands["modpride"] = Command.raw_command(
-            self.modpride,
-            delay_all=0,
-            delay_user=0,
-            cost=self.settings["cost_mod_pride"],
-            can_execute_with_whisper=False,
-            description="KappaPride Mods",
-        )
+        if self.settings["mod_role_id"]:
+            self.commands["modpride"] = Command.raw_command(
+                self.modpride,
+                delay_all=0,
+                delay_user=0,
+                cost=self.settings["cost_mod_pride"],
+                can_execute_with_whisper=False,
+                description="KappaPride Mods",
+            )
+        if self.settings["dank_role_id"]:
+            self.commands["dank"] = Command.raw_command(
+                self.modpride,
+                delay_all=self.settings["dank_cooldown"],
+                delay_user=self.settings["dank_cooldown"],
+                cost=self.settings["cost_dank"],
+                can_execute_with_whisper=False,
+                description="Messes with the dank roles color",
+            )
         self.commands["vroom"] = Command.raw_command(
             self.vroom,
             delay_all=0,
@@ -225,14 +235,7 @@ class Memes(BaseModule):
             can_execute_with_whisper=False,
             description="VROOOOOOOOOOM",
         )
-        self.commands["dank"] = Command.raw_command(
-            self.modpride,
-            delay_all=self.settings["dank_cooldown"],
-            delay_user=self.settings["dank_cooldown"],
-            cost=self.settings["cost_dank"],
-            can_execute_with_whisper=False,
-            description="Messes with the dank roles color",
-        )
+        
 
     def enable(self, bot):
         if not bot:
