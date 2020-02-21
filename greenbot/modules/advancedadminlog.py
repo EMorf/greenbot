@@ -177,7 +177,12 @@ class AdvancedAdminLog(BaseModule):
         sent_in_channel, _ = await self.bot.functions.func_get_channel(
             args=[int(payload.channel_id)]
         )
-        if str(sent_in_channel.id) in self.settings["ingore_channels"].split(" "):
+        channels = (
+            self.settings["ingore_channels"].split(" ")
+            if self.settings["ingore_channels"] != ""
+            else []
+        )
+        if len(channels) > 0 and str(sent_in_channel.id) not in channels:
             return
         author = self.bot.discord_bot.get_member(int(author_id))
         embed = discord.Embed(
@@ -211,14 +216,12 @@ class AdvancedAdminLog(BaseModule):
         sent_in_channel, _ = await self.bot.functions.func_get_channel(
             args=[int(payload.data["channel_id"])]
         )
-        if str(sent_in_channel.id) in self.settings["ingore_channels"].split(" "):
-            return
         channels = (
             self.settings["ingore_channels"].split(" ")
             if self.settings["ingore_channels"] != ""
             else []
         )
-        if len(channels) > 0 and sent_in_channel not in channels:
+        if len(channels) > 0 and str(sent_in_channel.id) not in channels:
             return
         message_id = payload.message_id
         guild_id = payload.data.get("guild_id", None)
