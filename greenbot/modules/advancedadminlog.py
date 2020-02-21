@@ -334,6 +334,8 @@ class AdvancedAdminLog(BaseModule):
                 if _log.reason:
                     reason = _log.reason
                 break
+        if perp == self.bot.discord_bot.client.user:
+            return
         embed = discord.Embed(
             description=after.mention, colour=after.colour, timestamp=utils.now()
         )
@@ -903,7 +905,7 @@ class AdvancedAdminLog(BaseModule):
         if perp:
             embed.add_field(name="Updated by ", value=perp.mention, inline=False)
         if reason:
-            embed.add_field(name="Reason ", value=reaso, inline=Falsen)
+            embed.add_field(name="Reason ", value=reason, inline=False)
         self.bot.say(channel=out_channel, embed=embed)
 
     async def invite_create(self, invite):
