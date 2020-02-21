@@ -595,7 +595,6 @@ class AdvancedAdminLog(BaseModule):
         worth_updating = False
         action = discord.AuditLogAction.channel_update
         async for _log in guild.audit_logs(limit=5, action=action):
-            log.info(_log)
             if _log.target.id == before.id:
                 perp = _log.user
                 if _log.reason:
@@ -604,7 +603,6 @@ class AdvancedAdminLog(BaseModule):
         if not perp:
             action = discord.AuditLogAction.overwrite_create
             async for _log in guild.audit_logs(limit=5, action=action):
-                log.info(_log)
                 if _log.target.id == before.id:
                     perp = _log.user
                     if _log.reason:
@@ -613,7 +611,6 @@ class AdvancedAdminLog(BaseModule):
             if not perp:
                 action = discord.AuditLogAction.overwrite_update
                 async for _log in guild.audit_logs(limit=5, action=action):
-                    log.info(_log)
                     if _log.target.id == before.id:
                         perp = _log.user
                         if _log.reason:
@@ -622,7 +619,6 @@ class AdvancedAdminLog(BaseModule):
             if not perp:
                 action = discord.AuditLogAction.overwrite_delete
                 async for _log in guild.audit_logs(limit=5, action=action):
-                    log.info(_log)
                     if _log.target.id == before.id:
                         perp = _log.user
                         if _log.reason:
