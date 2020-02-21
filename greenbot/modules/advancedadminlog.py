@@ -902,7 +902,7 @@ class AdvancedAdminLog(BaseModule):
             embed.add_field(name="Updated by ", value=perp.mention, inline=False)
         if reason:
             embed.add_field(name="Reason ", value=reason, inline=False)
-        self.bot.say(channel=out_channel, embed=embed)
+        await self.bot.say(channel=out_channel, embed=embed)
 
     async def invite_create(self, invite):
         if not self.settings["log_invite_create"]:
