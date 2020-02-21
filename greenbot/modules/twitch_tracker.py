@@ -57,12 +57,13 @@ class TwitchTracker(BaseModule):
         self.bot = bot
         self.process_checker_job = None
         self.redis = RedisManager.get()
-        self.twitch_streamers_tracked = self.redis.get(f"{self.bot.bot_name}:twitch-streams-tracked")
-        if not self.twitch_streamers_tracked:
-            self.redis.set(f"{self.bot.bot_name}:twitch-streams-tracked", json.dumps({}))
-            self.twitch_streamers_tracked = json.dumps({})
-        self.twitch_streamers_tracked = json.loads(self.twitch_streamers_tracked)
-        self.process_messages_job = None
+        if self.bot:
+            self.twitch_streamers_tracked = self.redis.get(f"{self.bot.bot_name}:twitch-streams-tracked")
+            if not self.twitch_streamers_tracked:
+                self.redis.set(f"{self.bot.bot_name}:twitch-streams-tracked", json.dumps({}))
+                self.twitch_streamers_tracked = json.dumps({})
+            self.twitch_streamers_tracked = json.loads(self.twitch_streamers_tracked)
+            self.process_messages_job = None
         
 
     def load_commands(self, **options):
