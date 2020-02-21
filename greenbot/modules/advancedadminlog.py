@@ -432,7 +432,7 @@ class AdvancedAdminLog(BaseModule):
     async def voice_change(self, member, before, after):
         if not self.settings["log_voice_change"]:
             return
-        guild = before.guild
+        guild = member.guild
         if guild != self.bot.discord_bot.guild:
             return
         out_channel, _ = await self.bot.functions.func_get_channel(
