@@ -11,7 +11,7 @@ import greenbot.web.utils
 from greenbot.managers.adminlog import AdminLogManager
 from greenbot.managers.db import DBManager
 from greenbot.models.command import Command
-from greenbot.models.command import CommandData
+from greenbot.models.command import CommandData 
 from greenbot.models.module import ModuleManager
 from greenbot.managers.sock import SocketClientManager
 from greenbot.utils import find
@@ -190,7 +190,7 @@ class APICommandUpdate(Resource):
             command.set(**options)
             command.data.set(**options)
 
-            if len(old_message) > 0 and old_message != new_message:
+            if old_message and len(old_message) > 0 and old_message != new_message:
                 log_msg = f'The !{command.command.split("|")[0]} command has been updated from "{old_message}" to "{new_message}"'
             else:
                 log_msg = (
