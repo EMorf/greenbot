@@ -177,6 +177,8 @@ class AdvancedAdminLog(BaseModule):
         sent_in_channel, _ = await self.bot.functions.func_get_channel(
             args=[int(payload.channel_id)]
         )
+        if str(sent_in_channel.id) in self.settings["ingore_channels"].split(" "):
+            return
         author = self.bot.discord_bot.get_member(int(author_id))
         embed = discord.Embed(
             colour=await self.get_event_colour(author.guild, "message_delete"),
@@ -209,6 +211,8 @@ class AdvancedAdminLog(BaseModule):
         sent_in_channel, _ = await self.bot.functions.func_get_channel(
             args=[int(payload.data["channel_id"])]
         )
+        if str(sent_in_channel.id) in self.settings["ingore_channels"].split(" "):
+            return
         channels = (
             self.settings["ingore_channels"].split(" ")
             if self.settings["ingore_channels"] != ""
