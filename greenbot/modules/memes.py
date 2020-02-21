@@ -159,6 +159,13 @@ class Memes(BaseModule):
             default=0,
         ),
         ModuleSetting(
+            key="emote_for_vroom",
+            label="Emote used for vroom",
+            type="text",
+            placeholder=":wheelchair:",
+            default=":wheelchair:",
+        ),
+        ModuleSetting(
             key="max_vroom_races",
             label="Max vroom races",
             type="number",
@@ -192,7 +199,7 @@ class Memes(BaseModule):
             m = await self.bot.say(channel=channel, message="﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏")
             self.vroom_races.append(m)
             await asyncio.sleep(0.5)
-            await m.edit(content=":wheelchair:﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏")
+            await m.edit(content=f"{self.settings['emote_for_vroom']}﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏")
             for _ in range(19):
                 newtick = m.content[:-1]
                 newtick = "﹏" + newtick
