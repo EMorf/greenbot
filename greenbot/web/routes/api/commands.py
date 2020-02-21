@@ -13,7 +13,7 @@ from greenbot.managers.db import DBManager
 from greenbot.models.command import Command
 from greenbot.models.command import CommandData
 from greenbot.models.module import ModuleManager
-from greenbot.models.sock import SocketClientManager
+from greenbot.managers.sock import SocketClientManager
 from greenbot.utils import find
 
 log = logging.getLogger(__name__)

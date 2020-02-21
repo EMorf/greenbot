@@ -9,7 +9,7 @@ import greenbot.web.utils
 from greenbot.managers.adminlog import AdminLogManager
 from greenbot.managers.db import DBManager
 from greenbot.models.module import Module
-from greenbot.models.sock import SocketClientManager
+from greenbot.managers.sock import SocketClientManager
 from greenbot.modules.base import ModuleType
 from greenbot.utils import find
 

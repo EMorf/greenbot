@@ -141,7 +141,7 @@ class RemindMe(BaseModule):
     async def create_reminder(self, bot, author, channel, message, args):
         command_args = message.split(" ") if message else []
         try:
-            reminders_list = json.loads(self.redis.get("remind-me-reminders"))
+            reminders_list = json.loads(self.redis.get(f"{self.bot.bot_name}:remind-me-reminders"))
             """
             { 
                 user_id: [
@@ -156,7 +156,7 @@ class RemindMe(BaseModule):
             }
             """
         except:
-            self.redis.set("remind-me-reminders", json.dumps({}))
+            self.redis.set(f"{self.bot.bot_name}:remind-me-reminders", json.dumps({}))
             reminders_list = {}
         user_reminders = (
             reminders_list[str(author.id)] if str(author.id) in reminders_list else []
@@ -196,7 +196,7 @@ class RemindMe(BaseModule):
         }
         user_reminders.append(reminder)
         reminders_list[str(author.id)] = user_reminders
-        self.redis.set("remind-me-reminders", json.dumps(reminders_list))
+        self.redis.set(f"{self.bot.bot_name}:remind-me-reminders", json.dumps(reminders_list))
         self.reminder_tasks[salt] = ScheduleManager.execute_delayed(
             time_delta.total_seconds(),
             self.execute_reminder,
@@ -205,7 +205,7 @@ class RemindMe(BaseModule):
 
     async def forgetme(self, bot, author, channel, message, args):
         try:
-            reminders_list = json.loads(self.redis.get("remind-me-reminders"))
+            reminders_list = json.loads(self.redis.get(f"{self.bot.bot_name}:remind-me-reminders"))
             """
             { 
                 user_id: [
@@ -221,7 +221,7 @@ class RemindMe(BaseModule):
             }
             """
         except:
-            self.redis.set("remind-me-reminders", json.dumps({}))
+            self.redis.set(f"{self.bot.bot_name}:remind-me-reminders", json.dumps({}))
             reminders_list = {}
         user_reminders = reminders_list[str(author.id)] if str(author.id) else []
         for reminder in user_reminders:
@@ -235,7 +235,7 @@ class RemindMe(BaseModule):
             except Exception as e:
                 log.error(f"Failed to delete message from bot: {e}")
         reminders_list[str(author.id)] = []
-        self.redis.set("remind-me-reminders", json.dumps(reminders_list))
+        self.redis.set(f"{self.bot.bot_name}:remind-me-reminders", json.dumps(reminders_list))
         await self.bot.say(channel, f"{author.mention} you have been forgotten")
 
     def load_commands(self, **options):
@@ -289,7 +289,7 @@ class RemindMe(BaseModule):
         except Exception as e:
             log.error(f"Failed to delete message from bot: {e}")
         try:
-            reminders_list = json.loads(self.redis.get("remind-me-reminders"))
+            reminders_list = json.loads(self.redis.get(f"{self.bot.bot_name}:remind-me-reminders"))
             """
             { 
                 user_id: [
@@ -305,7 +305,7 @@ class RemindMe(BaseModule):
             }
             """
         except:
-            self.redis.set("remind-me-reminders", json.dumps({}))
+            self.redis.set(f"{self.bot.bot_name}:remind-me-reminders", json.dumps({}))
             reminders_list = {}
         user_reminders = (
             reminders_list[str(user_id)] if str(user_id) in reminders_list else []
@@ -315,13 +315,13 @@ class RemindMe(BaseModule):
                 user_reminders.remove(_reminder)
                 break
         reminders_list[str(user_id)] = user_reminders
-        self.redis.set("remind-me-reminders", json.dumps(reminders_list))
+        self.redis.set(f"{self.bot.bot_name}:remind-me-reminders", json.dumps(reminders_list))
 
     def enable(self, bot):
         if not bot:
             return
         try:
-            reminders_list = json.loads(self.redis.get("remind-me-reminders"))
+            reminders_list = json.loads(self.redis.get(f"{self.bot.bot_name}:remind-me-reminders"))
             """
             { 
                 user_id: [
@@ -337,7 +337,7 @@ class RemindMe(BaseModule):
             }
             """
         except:
-            self.redis.set("remind-me-reminders", json.dumps({}))
+            self.redis.set(f"{self.bot.bot_name}:remind-me-reminders", json.dumps({}))
             reminders_list = {}
         new_reminders_list = {}
         for user_id in reminders_list:
@@ -360,7 +360,7 @@ class RemindMe(BaseModule):
                     args=[salt, user_id, reminder],
                 )
             new_reminders_list[user_id] = new_user_reminders
-        self.redis.set("remind-me-reminders", json.dumps(new_reminders_list))
+        self.redis.set(f"{self.bot.bot_name}:remind-me-reminders", json.dumps(new_reminders_list))
 
     def disable(self, bot):
         if not bot:

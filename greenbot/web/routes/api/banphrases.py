@@ -10,7 +10,7 @@ from greenbot.managers.adminlog import AdminLogManager
 from greenbot.managers.db import DBManager
 from greenbot.models.banphrase import Banphrase
 from greenbot.models.banphrase import BanphraseManager
-from greenbot.models.sock import SocketClientManager
+from greenbot.managers.sock import SocketClientManager
 
 log = logging.getLogger(__name__)
 

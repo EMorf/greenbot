@@ -34,7 +34,7 @@ def init(args):
     from greenbot.managers.redis import RedisManager
     from greenbot.managers.schedule import ScheduleManager
     from greenbot.models.module import ModuleManager
-    from greenbot.models.sock import SocketClientManager
+    from greenbot.managers.sock import SocketClientManager
     from greenbot.utils import load_config
     from greenbot.web.models import errors
     from greenbot.bothelper import BotHelper

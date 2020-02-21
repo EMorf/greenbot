@@ -8,7 +8,7 @@ from flask import session
 
 from greenbot.managers.adminlog import AdminLogManager
 from greenbot.managers.db import DBManager
-from greenbot.models.sock import SocketClientManager
+from greenbot.managers.sock import SocketClientManager
 from greenbot.models.timer import Timer
 from greenbot.web.utils import requires_level
 

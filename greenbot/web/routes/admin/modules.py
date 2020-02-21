@@ -7,7 +7,7 @@ from greenbot.managers.adminlog import AdminLogManager
 from greenbot.managers.db import DBManager
 from greenbot.models.module import Module
 from greenbot.models.module import ModuleManager
-from greenbot.models.sock import SocketClientManager
+from greenbot.managers.sock import SocketClientManager
 from greenbot.utils import find
 from greenbot.web.utils import requires_level
 

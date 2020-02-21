@@ -11,7 +11,7 @@ from greenbot.managers.adminlog import AdminLogManager
 from greenbot.managers.db import DBManager
 from greenbot.models.banphrase import Banphrase
 from greenbot.models.banphrase import BanphraseData
-from greenbot.models.sock import SocketClientManager
+from greenbot.managers.sock import SocketClientManager
 from greenbot.web.utils import requires_level
 
 log = logging.getLogger(__name__)

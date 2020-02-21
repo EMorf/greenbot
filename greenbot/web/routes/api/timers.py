@@ -8,7 +8,7 @@ import greenbot.utils
 import greenbot.web.utils
 from greenbot.managers.adminlog import AdminLogManager
 from greenbot.managers.db import DBManager
-from greenbot.models.sock import SocketClientManager
+from greenbot.managers.sock import SocketClientManager
 from greenbot.models.timer import Timer
 
 log = logging.getLogger(__name__)

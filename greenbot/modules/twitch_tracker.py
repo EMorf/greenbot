@@ -57,9 +57,9 @@ class TwitchTracker(BaseModule):
         self.bot = bot
         self.process_checker_job = None
         self.redis = RedisManager.get()
-        self.twitch_streamers_tracked = self.redis.get("twitch-streams-tracked")
+        self.twitch_streamers_tracked = self.redis.get(f"{self.bot.bot_name}:twitch-streams-tracked")
         if not self.twitch_streamers_tracked:
-            self.redis.set("twitch-streams-tracked", json.dumps({}))
+            self.redis.set(f"{self.bot.bot_name}:twitch-streams-tracked", json.dumps({}))
             self.twitch_streamers_tracked = json.dumps({})
         self.twitch_streamers_tracked = json.loads(self.twitch_streamers_tracked)
         self.process_messages_job = None
@@ -70,7 +70,7 @@ class TwitchTracker(BaseModule):
             return_twitch_streamers_tracked = {}
             for streamer in self.settings["channels"].split(" "):
                 return_twitch_streamers_tracked[streamer.lower()] = self.twitch_streamers_tracked.get(streamer.lower(), False)
-            self.redis.set("twitch-streams-tracked", json.dumps(return_twitch_streamers_tracked))
+            self.redis.set(f"{self.bot.bot_name}:twitch-streams-tracked", json.dumps(return_twitch_streamers_tracked))
             self.twitch_streamers_tracked = return_twitch_streamers_tracked
 
     @property
@@ -104,7 +104,7 @@ class TwitchTracker(BaseModule):
         for streamer in self.twitch_streamers_tracked:
             if streamer not in channels_updated:
                 self.twitch_streamers_tracked[streamer] = False
-        self.redis.set("twitch-streams-tracked", json.dumps(self.twitch_streamers_tracked))
+        self.redis.set(f"{self.bot.bot_name}:twitch-streams-tracked", json.dumps(self.twitch_streamers_tracked))
 
     async def broadcast_live(self, streamer_name, stream_title, image_url, icon_url, game, viewers):
         data = discord.Embed(description=f"[**{stream_title}**](https://twitch.tv/{streamer_name.lower()})\n\nPlaying {game} for {viewers} viewers\n[Watch Stream](https://twitch.tv/{streamer_name.lower()})", colour=discord.Colour.from_rgb(128, 0, 128))

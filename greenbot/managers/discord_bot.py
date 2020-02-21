@@ -239,16 +239,16 @@ class DiscordBotManager:
         self.redis = redis
 
         self.guild = None
-        if not self.redis.get("timeouts-discord") or not json.loads(
-            self.redis.get("timeouts-discord")
+        if not self.redis.get(f"{self.bot.bot_name}:timeouts-discord") or not json.loads(
+            self.redis.get(f"{self.bot.bot_name}:timeouts-discord")
         ):
-            self.redis.set("timeouts-discord", json.dumps({}))
+            self.redis.set(f"{self.bot.bot_name}:timeouts-discord", json.dumps({}))
 
         HandlerManager.add_handler("discord_ready", self.initial_unbans)
 
     async def initial_unbans(self):
         try:
-            data = json.loads(self.redis.get("timeouts-discord"))
+            data = json.loads(self.redis.get(f"{self.bot.bot_name}:timeouts-discord"))
             for user in data:
                 unban_date = data[user]["unban_date"]
                 if ":" in unban_date[-5:]:
@@ -270,7 +270,7 @@ class DiscordBotManager:
                 )
         except Exception as e:
             log.exception(e)
-            self.redis.set("timeouts-discord", json.dumps({}))
+            self.redis.set(f"{self.bot.bot_name}:timeouts-discord", json.dumps({}))
 
     def get_role_id(self, role_name):
         for role in self.guild.roles:
@@ -314,7 +314,7 @@ class DiscordBotManager:
             )
             if timeout_in_seconds > 0:
                 reason = f"{reason} for {timeout_in_seconds} seconds"
-                timeouts = json.loads(self.redis.get("timeouts-discord"))
+                timeouts = json.loads(self.redis.get(f"{self.bot.bot_name}:timeouts-discord"))
                 timeouts[str(user.id)] = {
                     "discord_id": str(user.id),
                     "unban_date": str(
@@ -322,7 +322,7 @@ class DiscordBotManager:
                     ),
                     "reason": str(reason),
                 }
-                self.redis.set("timeouts-discord", json.dumps(timeouts))
+                self.redis.set(f"{self.bot.bot_name}:timeouts-discord", json.dumps(timeouts))
                 ScheduleManager.execute_delayed(
                     delay=timeout_in_seconds,
                     method=self.unban,
@@ -345,10 +345,10 @@ class DiscordBotManager:
             user = await self.client.fetch_user(int(user_id))
         except:
             return False
-        timeouts = json.loads(self.redis.get("timeouts-discord"))
+        timeouts = json.loads(self.redis.get(f"{self.bot.bot_name}:timeouts-discord"))
         if str(user_id) in timeouts:
             del timeouts[str(user_id)]
-            self.redis.set("timeouts-discord", json.dumps(timeouts))
+            self.redis.set(f"{self.bot.bot_name}:timeouts-discord", json.dumps(timeouts))
         try:
             ban = await self.guild.fetch_ban(user)
             if ban:
