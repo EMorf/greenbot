@@ -191,6 +191,7 @@ class AdvancedAdminLog(BaseModule):
         )
         embed.add_field(name="Message", value=content[-1], inline=False)
         embed.add_field(name="Channel", value=sent_in_channel, inline=False)
+        embed.add_field(name="ID", value=f"```Message ID: {message_id}\nUser ID: {author_id}\nChannel ID: {sent_in_channel.id}```", inline=False)
         action = discord.AuditLogAction.message_delete
         perp = None
         async for _log in self.bot.discord_bot.guild.audit_logs(limit=2, action=action):
