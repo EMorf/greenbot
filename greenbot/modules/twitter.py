@@ -2,7 +2,7 @@ import logging
 
 import json
 import tweepy
-import multiprocessing
+import threading
 from datetime import datetime
 
 from greenbot import utils
@@ -79,10 +79,11 @@ class Twitter(BaseModule):
         if not self.bot:
             return
         if self.process:
-            self.process.terminate()
+            self.process.stop()
+            self.process.join()
             self.process = None
         self.stream = tweepy.Stream(self.bot.twitter_manager.api.auth, self.bot.twitter_manager.tweets_listener)
-        self.process = multiprocessing.Process(target=self.stream.filter, kwargs={"follow": self.get_users_to_follow(self.settings["users"].split(" ")), "languages": ["en"]})
+        self.process = Process(self.stream, self.get_users_to_follow(self.settings["users"].split(" ")))
         self.process.start()
 
     def get_users_to_follow(self, usernames):
@@ -99,6 +100,28 @@ class Twitter(BaseModule):
         if self.stream:
             self.stream.disconnect()
         HandlerManager.remove_handler("twitter_on_status", self.on_status)
-        self.process.terminate()
-        self.process = None
+        self.process.stop()
+        self.process.join()
 
+
+class Process(threading.Thread): 
+  
+    # Thread class with a _stop() method.  
+    # The thread itself has to check 
+    # regularly for the stopped() condition. 
+  
+    def __init__(self, stream, follow,*args, **kwargs): 
+        super(Process, self).__init__(*args, **kwargs) 
+        self._stop = threading.Event() 
+        self.stream = stream
+        self.follow = follow
+  
+    # function using _stop function 
+    def stop(self): 
+        self._stop.set() 
+  
+    def stopped(self): 
+        return self._stop.isSet() 
+  
+    def run(self): 
+        self.stream.filter(follow=self.follow, languages=["en"])
