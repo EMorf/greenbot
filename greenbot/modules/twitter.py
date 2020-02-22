@@ -87,6 +87,7 @@ class Twitter(BaseModule):
         final_return = []
         if len(usernames) > 100:
             final_return += self.get_users_to_follow(usernames[:100])
+        log.info(usernames)
         return final_return + self.bot.twitter_manager.api.lookup_users(screen_names=usernames[100:])
 
     def enable(self, bot):
