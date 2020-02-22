@@ -257,16 +257,18 @@ class DiscordBotManager:
                     )
                 unban_date = datetime.strptime(unban_date, "%Y-%m-%d %H:%M:%S.%f%z")
                 time_now = utils.now()
+                resp_timeout = data.get("resp_timeout", "")
+                resp_timeout += " after " if resp_timeout else ""
                 if unban_date < time_now:
                     ScheduleManager.execute_now(
                         method=self.unban,
-                        args=[data[user]["discord_id"], "Unbanned by timer"],
+                        args=[data[user]["discord_id"], f"Unbanned by timer{resp_timeout}"],
                     )
                     continue
                 ScheduleManager.execute_delayed(
                     delay=(unban_date - time_now).seconds,
                     method=self.unban,
-                    args=[data[user]["discord_id"], "Unbanned by timer"],
+                    args=[data[user]["discord_id"], f"Unbanned by timer{resp_timeout}"],
                 )
         except Exception as e:
             log.exception(e)
@@ -309,24 +311,26 @@ class DiscordBotManager:
         except Exception as e:
             pass
         try:
+            resp_timeout = utils.seconds_to_resp(timeout_in_seconds)
+            reason += f" for {resp_timeout}!" if timeout_in_seconds > 0 else " Permanently!"
             await self.guild.ban(
                 user=user, reason=reason, delete_message_days=delete_message_days
             )
             if timeout_in_seconds > 0:
-                reason = f"{reason} for {timeout_in_seconds} seconds"
                 timeouts = json.loads(self.redis.get(f"{self.bot.bot_name}:timeouts-discord"))
                 timeouts[str(user.id)] = {
                     "discord_id": str(user.id),
                     "unban_date": str(
                         utils.now() + timedelta(seconds=timeout_in_seconds)
                     ),
+                    "resp_timeout": resp_timeout,
                     "reason": str(reason),
                 }
                 self.redis.set(f"{self.bot.bot_name}:timeouts-discord", json.dumps(timeouts))
                 ScheduleManager.execute_delayed(
                     delay=timeout_in_seconds,
                     method=self.unban,
-                    args=[user.id, "Unbanned by timer"],
+                    args=[user.id, f"Unbanned by timer after {resp_timeout}"],
                 )
         except:
             return False
