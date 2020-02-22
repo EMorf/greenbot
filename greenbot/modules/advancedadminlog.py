@@ -553,14 +553,14 @@ class AdvancedAdminLog(BaseModule):
         reason = None
         banned = False
         action = discord.AuditLogAction.kick
-        async for _log in guild.audit_logs(limit=5, action=action):
+        async for _log in guild.audit_logs(limit=5, action=action, after=(utils.now() - datetime.timedelta(seconds=60))):
             if _log.target.id == member.id:
                 perp = _log.user
                 reason = _log.reason
                 break
         if not perp:
             action = discord.AuditLogAction.ban
-            async for _log in guild.audit_logs(limit=5, action=action):
+            async for _log in guild.audit_logs(limit=5, action=action, after=(utils.now() - datetime.timedelta(seconds=60))):
                 if _log.target.id == member.id:
                     perp = _log.user
                     reason = _log.reason
