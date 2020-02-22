@@ -243,6 +243,8 @@ class DiscordBotManager:
             self.redis.get(f"{self.bot.bot_name}:timeouts-discord")
         ):
             self.redis.set(f"{self.bot.bot_name}:timeouts-discord", json.dumps({}))
+        HandlerManager.add_handler("discord_ready", self.initial_unbans)
+        HandlerManager.add_handler("discord_error", self.error)
 
     async def error(self, event, *args, **kwargs):
         log.error(event)
