@@ -246,4 +246,6 @@ class HandlerManager:
             if res is False and stop_on_false is True:
                 # Abort if handler returns false and stop_on_false is enabled
                 return False
+        if event_name == "twitter_on_status":
+            log.info("Trigger Complete")
         return True

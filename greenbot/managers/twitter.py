@@ -6,7 +6,7 @@ from greenbot.managers.handler import HandlerManager
 log = logging.getLogger(__name__)
 
 
-class MyStreamListener(tweepy.  StreamListener):
+class MyStreamListener(tweepy.StreamListener):
     def __init__(self, bot, api):
         self.api = api
         self.bot = bot
