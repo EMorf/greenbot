@@ -37,7 +37,7 @@ class Functions:
     async def func_ban_member(self, args, extra={}):
         if len(args) == 0:
             return "Invalid User", None
-        member = self.filters.get_member(args[0][3:][:-1])
+        member = await self.bot.discord_bot.get_user(args[0][3:][:-1])
         author = extra["author"]
         if not member:
             return "Member not found", None
