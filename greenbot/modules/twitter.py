@@ -2,6 +2,7 @@ import logging
 
 import json
 import tweepy
+import multiprocessing
 from datetime import datetime
 
 from greenbot import utils
@@ -57,6 +58,7 @@ class Twitter(BaseModule):
         self.bot = bot
         self.redis = RedisManager.get()
         self.stream = None
+        self.process = None
         if not self.bot:
             return
         self.stream = tweepy.Stream(self.bot.twitter_manager.api.auth, self.bot.twitter_manager.tweets_listener)
@@ -77,6 +79,11 @@ class Twitter(BaseModule):
     def load_commands(self, **options):
         if not self.bot:
             return
+        if self.process:
+            self.process.terminate()
+            self.process = None
+        self.process = multiprocessing.Process(target=self.stream.filter, kwargs={"follow": self.get_users_to_follow(self.settings["users"].split(" ")), "languages": ["en"]})
+        self.process.start()
 
     def get_users_to_follow(self, usernames):
         return [str(self.bot.twitter_manager.api.get_user(username).id) for username in usernames]
@@ -84,10 +91,7 @@ class Twitter(BaseModule):
     def enable(self, bot):
         if not bot:
             return
-        if self.settings["users"]:
-            self.stream.filter(follow=self.get_users_to_follow(self.settings["users"].split(" ")), languages=["en"], is_async=True)
         HandlerManager.add_handler("twitter_on_status", self.on_status)
-
 
     def disable(self, bot):
         if not bot:
@@ -95,3 +99,6 @@ class Twitter(BaseModule):
         if self.stream:
             self.stream.disconnect()
         HandlerManager.remove_handler("twitter_on_status", self.on_status)
+        self.process.terminate()
+        self.process = None
+
