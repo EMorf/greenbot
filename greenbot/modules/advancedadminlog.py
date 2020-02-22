@@ -552,20 +552,13 @@ class AdvancedAdminLog(BaseModule):
         perp = None
         reason = None
         banned = False
-        action = discord.AuditLogAction.kick
-        async for _log in guild.audit_logs(limit=5, action=action, after=(datetime.datetime.utcnow() - datetime.timedelta(seconds=60))):
+        async for _log in guild.audit_logs(limit=5):
+            if _log.action not in [discord.AuditLogAction.kick, discord.AuditLogAction.ban]:
+                continue
             if _log.target.id == member.id:
                 perp = _log.user
                 reason = _log.reason
                 break
-        if not perp:
-            action = discord.AuditLogAction.ban
-            async for _log in guild.audit_logs(limit=5, action=action, after=(datetime.datetime.utcnow() - datetime.timedelta(seconds=60))):
-                if _log.target.id == member.id:
-                    perp = _log.user
-                    reason = _log.reason
-                    banned = True
-                    break
         embed.add_field(name="Total Users:", value=str(len(guild.members)), inline=False)
         if perp:
             embed.add_field(
