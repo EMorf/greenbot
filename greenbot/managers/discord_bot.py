@@ -244,18 +244,11 @@ class DiscordBotManager:
         ):
             self.redis.set(f"{self.bot.bot_name}:timeouts-discord", json.dumps({}))
 
-        HandlerManager.add_handler("discord_ready", self.initial_unbans)
-
     async def initial_unbans(self):
         try:
             data = json.loads(self.redis.get(f"{self.bot.bot_name}:timeouts-discord"))
-            for user in data:
-                unban_date = data[user]["unban_date"]
-                if ":" in unban_date[-5:]:
-                    unban_date = (
-                        f"{unban_date[:-5]}{unban_date[-5:-3]}{unban_date[-2:]}"
-                    )
-                unban_date = datetime.strptime(unban_date, "%Y-%m-%d %H:%M:%S.%f%z")
+            for user in data: 
+                unban_date = datetime.strptime(utils.parse_date(data[user]["unban_date"]), "%Y-%m-%d %H:%M:%S.%f%z")
                 time_now = utils.now()
                 resp_timeout = data.get("resp_timeout", "")
                 resp_timeout += " after " if resp_timeout else ""
@@ -273,6 +266,7 @@ class DiscordBotManager:
         except Exception as e:
             log.exception(e)
             self.redis.set(f"{self.bot.bot_name}:timeouts-discord", json.dumps({}))
+        self.schedule_task_periodically(30, self.remove_level)
 
     def get_role_id(self, role_name):
         for role in self.guild.roles:

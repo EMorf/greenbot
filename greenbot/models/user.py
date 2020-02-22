@@ -52,6 +52,10 @@ class User(Base):
     def _get_users_with_points(db_session, points):
         return db_session.query(User).filter(User.points >= points).all()
 
+    @staticmethod
+    def _get_users_above_level(db_session, level):
+        return db_session.query(User).filter(User.level > level).all()
+
     @contextmanager
     def spend_currency_context(self, points):
         try:

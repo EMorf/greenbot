@@ -1,9 +1,7 @@
 import logging
 
 import json
-import random
 import discord
-import string
 from datetime import datetime
 
 from greenbot import utils
@@ -14,15 +12,6 @@ from greenbot.modules import BaseModule
 from greenbot.modules import ModuleSetting
 
 log = logging.getLogger(__name__)
-
-def random_string(length=10):
-    return "".join(random.choice(string.ascii_lowercase) for i in range(length))
-
-
-def parse_date(string):
-    if ":" in string[-5:]:
-        string = f"{string[:-5]}{string[-5:-3]}{string[-2:]}"
-    return datetime.strptime(string, "%Y-%m-%d %H:%M:%S.%f%z")
 
 
 class RemindMe(BaseModule):
@@ -125,7 +114,7 @@ class RemindMe(BaseModule):
             channel,
             f"If anyone else wants to be reminded click the {self.settings['emoji']}",
         )
-        salt = random_string()
+        salt = utils.random_string()
         await bot_message.add_reaction(self.settings["emoji"])
         reminder = {
             "message_id": bot_message.id,
@@ -214,8 +203,8 @@ class RemindMe(BaseModule):
                 if sender and sender not in users:
                     users.append(sender)
                 for user in users:
-                    date_of_reminder = parse_date(reminder["date_of_reminder"])
-                    date_reminder_set = parse_date(reminder["date_reminder_set"])
+                    date_of_reminder = utils.parse_date(reminder["date_of_reminder"])
+                    date_reminder_set = utils.parse_date(reminder["date_reminder_set"])
                     seconds = int(
                         round((date_of_reminder - date_reminder_set).total_seconds())
                     )
@@ -286,11 +275,8 @@ class RemindMe(BaseModule):
             new_user_reminders = []
             for reminder in user_reminders:
                 salt = reminder["salt"]
-                date_of_reminder = reminder["date_of_reminder"]
-                if ":" in date_of_reminder[-5:]:
-                    date_of_reminder = f"{date_of_reminder[:-5]}{date_of_reminder[-5:-3]}{date_of_reminder[-2:]}"
                 date_of_reminder = datetime.strptime(
-                    date_of_reminder, "%Y-%m-%d %H:%M:%S.%f%z"
+                    utils.parse_date(reminder["date_of_reminder"]), "%Y-%m-%d %H:%M:%S.%f%z"
                 )
                 if date_of_reminder < utils.now():
                     continue

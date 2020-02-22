@@ -102,7 +102,7 @@ class Bot:
         return self.discord_bot.client.user.id
 
     async def wait_discord_load(self):
-
+        self.roles = {} 
         self.socket_manager = SocketManager(self.bot_name, self.execute_now)
         self.message_manager = MessageManager(self)
         self.module_manager = ModuleManager(self.socket_manager, bot=self).load()

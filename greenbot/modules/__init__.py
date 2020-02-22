@@ -8,6 +8,7 @@ from greenbot.modules.advancedadminlog import AdvancedAdminLog
 from greenbot.modules.activitytracker import ActivityTracker
 from greenbot.modules.memes import Memes
 from greenbot.modules.remindme import RemindMe
+from greenbot.modules.role_to_level import RoleToLevel
 from greenbot.modules.twitch_tracker import TwitchTracker
 
 available_modules = [
@@ -17,5 +18,6 @@ available_modules = [
     BasicCommandsModule,
     Memes,
     RemindMe,
+    RoleToLevel,
     TwitchTracker,
 ]
