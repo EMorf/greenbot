@@ -44,7 +44,7 @@ class CustomClient(discord.Client):
 
     async def on_error(self, event, *args, **kwargs):
         log.error(traceback.format_exc())
-        await HandlerManager.trigger("discord_error", event=event, *args, **kwargs)
+        log.error(event)
 
     async def on_socket_raw_receive(self, payload):
         await HandlerManager.trigger("discord_error", payload=payload)
@@ -244,10 +244,6 @@ class DiscordBotManager:
         ):
             self.redis.set(f"{self.bot.bot_name}:timeouts-discord", json.dumps({}))
         HandlerManager.add_handler("discord_ready", self.initial_unbans)
-        HandlerManager.add_handler("discord_error", self.error)
-
-    async def error(self, event, *args, **kwargs):
-        log.error(event)
 
     async def initial_unbans(self):
         try:
