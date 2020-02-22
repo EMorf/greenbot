@@ -231,7 +231,7 @@ class HandlerManager:
             log.error(f"remove_handler No handler for {event} found.")
 
     @staticmethod
-    async def trigger(event_name, stop_on_false=True, *args, **kwargs):
+    async def trigger(event_name, stop_on_false=True, event=None, *args, **kwargs):
         log.info(f"{event_name} Trigger Called")
         if event_name not in HandlerManager.handlers:
             log.error(f"No handler set for event {event_name}")
@@ -240,7 +240,7 @@ class HandlerManager:
         for handler, _ in HandlerManager.handlers[event_name]:
             res = None
             try:
-                res = await handler(*args, **kwargs)
+                res = await handler(event=event,*args, **kwargs) if event else await handler(*args, **kwargs)
             except:
                 log.exception(f"Unhandled exception from {handler} in {event_name}")
 
