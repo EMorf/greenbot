@@ -118,4 +118,4 @@ class ScheduleManager:
 
     @staticmethod
     def run_async_task(method, *args, **kwargs):
-        ScheduleManager.bot.private_loop.ensure_future(method(*args, **kwargs))
+        ScheduleManager.bot.private_loop.run_until_complete(method(*args, **kwargs))

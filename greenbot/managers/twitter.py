@@ -13,7 +13,7 @@ class MyStreamListener(tweepy.StreamListener):
         self.me = api.me()
 
     def on_status(self, tweet):
-        self.bot.private_loop.ensure_future(HandlerManager.trigger("twitter_on_status", tweet=tweet))
+        self.bot.private_loop.run_until_complete(HandlerManager.trigger("twitter_on_status", tweet=tweet))
 
     def on_error(self, status):
         log.error("Error detected")
