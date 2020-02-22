@@ -49,7 +49,8 @@ class Dispatch:
 
         action = {"type": type, "message": response}
 
-        options["channels"] = json.dumps(options.get("channels", []))
+        if "channels" in options:
+            options["channels"] = json.dumps(options["channels"])
 
         command, new_command, alias_matched = bot.commands.create_command(
             alias_str, action=action, **options
@@ -119,13 +120,8 @@ class Dispatch:
             elif not type == command.action.subtype:
                 options["action"] = {"type": type, "message": command.action.response}
 
-            options["extra_extra_args"] = {
-                "channels": " ".join(
-                    options["channels"] if "channels" in options else []
-                )
-            }
             if "channels" in options:
-                del options["channels"]
+                options["channels"] = json.dumps(options["channels"])
 
             bot.commands.edit_command(command, **options)
             await bot.private_message(author, f"Updated the command (ID: {command.id})")
@@ -180,13 +176,8 @@ class Dispatch:
                 "functions": response.split(" "),
             }
 
-            options["extra_extra_args"] = {
-                "channels": " ".join(
-                    options["channels"] if "channels" in options else []
-                )
-            }
             if "channels" in options:
-                del options["channels"]
+                options["channels"] = json.dumps(options["channels"])
 
             command, new_command, alias_matched = bot.commands.create_command(
                 alias_str, action=action, **options
@@ -246,13 +237,8 @@ class Dispatch:
                 "functions": response.split(" "),
             }
 
-            options["extra_extra_args"] = {
-                "channels": " ".join(
-                    options["channels"] if "channels" in options else []
-                )
-            }
             if "channels" in options:
-                del options["channels"]
+                options["channels"] = json.dumps(options["channels"])
 
             command = bot.commands.get(alias, None)
 
