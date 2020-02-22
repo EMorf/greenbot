@@ -13,10 +13,10 @@ class MyStreamListener(tweepy.  StreamListener):
         self.me = api.me()
 
     def on_connect(self):
-        self.info("Twitter connected")
+        log.info("Twitter connected")
 
     def on_disconnect(self, notice):
-        self.info("Twitter disconnected")
+        log.info("Twitter disconnected")
 
     def on_status(self, tweet):
         log.info("tweet recieved")
