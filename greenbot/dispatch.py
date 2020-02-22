@@ -1,5 +1,6 @@
 import logging
 import re
+import json
 
 from greenbot.managers.adminlog import AdminLogManager
 from greenbot.managers.db import DBManager
@@ -46,13 +47,9 @@ class Dispatch:
         elif options["reply"] is True:
             type = "reply"
 
-        options["extra_extra_args"] = {
-            "channels": " ".join(options["channels"] if "channels" in options else [])
-        }
-        if "channels" in options:
-            del options["channels"]
-
         action = {"type": type, "message": response}
+
+        options["channels"] = json.dumps(options.get("channels", []))
 
         command, new_command, alias_matched = bot.commands.create_command(
             alias_str, action=action, **options

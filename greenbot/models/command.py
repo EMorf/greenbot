@@ -219,7 +219,7 @@ class Command(Base):
     cost = Column(INT, nullable=False, default=0)
     can_execute_with_whisper = Column(BOOLEAN)
     long_description = ""
-
+    channels = Column(TEXT, nullable=False)
     data = relationship("CommandData", uselist=False, cascade="", lazy="joined")
     examples = relationship("CommandExample", uselist=True, cascade="", lazy="noload")
 
@@ -375,13 +375,8 @@ class Command(Base):
 
         cd_modifier = 0.2 if args["user_level"] >= 500 else 1.0
 
-        if (
-            self.extra_args
-            and "channels" in self.extra_args
-            and len(self.extra_args["channels"]) > 0
-        ):
-            if str(channel.id) not in self.extra_args["channels"]:
-                return False
+        if str(channel.id) not in self.channels:
+            return False
 
         cur_time = greenbot.utils.now().timestamp()
         time_since_last_run = (cur_time - self.last_run) / cd_modifier
