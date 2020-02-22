@@ -32,7 +32,8 @@ class RoleToLevel(BaseModule):
         super().__init__(bot)
         self.bot = bot
         self.redis = RedisManager.get()
-        self.bot.roles = {}
+        if self.bot:
+            self.bot.roles = {}
 
     async def add_role_level(self, bot, author, channel, message, args):
         command_args = message.split(" ") if message else []
