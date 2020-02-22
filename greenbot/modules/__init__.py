@@ -10,6 +10,7 @@ from greenbot.modules.memes import Memes
 from greenbot.modules.remindme import RemindMe
 from greenbot.modules.role_to_level import RoleToLevel
 from greenbot.modules.twitch_tracker import TwitchTracker
+from greenbot.modules.twitter import Twitter
 
 available_modules = [
     AdminCommandsModule,
@@ -20,4 +21,5 @@ available_modules = [
     RemindMe,
     RoleToLevel,
     TwitchTracker,
+    Twitter,
 ]
