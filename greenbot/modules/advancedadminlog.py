@@ -185,6 +185,8 @@ class AdvancedAdminLog(BaseModule):
         if len(channels) > 0 and str(sent_in_channel.id) in channels:
             return
         author = self.bot.discord_bot.get_member(int(author_id))
+        if author == self.bot.discord_bot.client.user:
+            return
         embed = discord.Embed(
             colour=await self.get_event_colour(author.guild, "message_delete"),
             timestamp=utils.now(),
