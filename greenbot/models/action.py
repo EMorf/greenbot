@@ -335,7 +335,7 @@ class MessageAction(BaseAction):
         resp, embed = apply_substitutions(resp, self.subs, bot, extra)
 
         if resp is None:
-            return None
+            return None, None
 
         for sub in self.argument_subs:
             needle = sub.needle
@@ -640,14 +640,12 @@ async def run_functions(
         )
         resp, embed = await func.cb(final_args, extra)
         if num_urlfetch_subs == 0:
-
-            return (
+            if private_message:
                 await bot.private_message(user=author, message=resp, embed=embed)
-                if private_message
-                else await bot.say(channel=channel, message=resp, embed=embed)
-            )
+            else:
+                await bot.say(channel=channel, message=resp, embed=embed)
 
-        return ScheduleManager.execute_now(
+        ScheduleManager.execute_now(
             urlfetch_msg,
             args=[],
             kwargs={
@@ -679,6 +677,7 @@ class ReplyAction(MessageAction):
                 self.num_urlfetch_subs,
                 args["whisper"],
             )
+            return True
 
         resp, embed = self.get_response(bot, extra)
         if not resp and not embed:
@@ -722,6 +721,7 @@ class PrivateMessageAction(MessageAction):
                 self.num_urlfetch_subs,
                 True,
             )
+            return True
 
         if not resp and embed:
             return False
