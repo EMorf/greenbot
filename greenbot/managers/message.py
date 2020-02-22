@@ -37,7 +37,7 @@ class MessageManager:
                     continue
 
                 if role in member.roles:
-                    user_level = max(user_level, self.bot.roles[role_id])
+                    user_level = max(int(user_level), int(self.bot.roles[role_id]))
         await HandlerManager.trigger(
             "parse_command_from_message",
             message=message,
