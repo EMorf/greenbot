@@ -2,6 +2,7 @@ import logging
 
 import json
 import tweepy
+import sys
 import threading
 from datetime import datetime
 
@@ -79,12 +80,15 @@ class Twitter(BaseModule):
         if not self.bot:
             return
         if self.process:
-            self.process.stop()
+            self.process.kill()
             self.process.join()
             self.process = None
         self.stream = tweepy.Stream(self.bot.twitter_manager.api.auth, self.bot.twitter_manager.tweets_listener)
-        self.process = Process(self.stream, self.get_users_to_follow(self.settings["users"].split(" ")))
+        self.process = Process(target=self.start_thread)
         self.process.start()
+
+    def start_thread(self):
+        self.stream.filter(follow=self.get_users_to_follow(self.settings["users"].split(" ")), languages=["en"])
 
     def get_users_to_follow(self, usernames):
         return [str(self.bot.twitter_manager.api.get_user(username).id) for username in usernames]
@@ -100,7 +104,7 @@ class Twitter(BaseModule):
         if self.stream:
             self.stream.disconnect()
         HandlerManager.remove_handler("twitter_on_status", self.on_status)
-        self.process.stop()
+        self.process.kill()
         self.process.join()
 
 
@@ -110,18 +114,36 @@ class Process(threading.Thread):
     # The thread itself has to check 
     # regularly for the stopped() condition. 
   
-    def __init__(self, stream, follow,*args, **kwargs): 
-        super(Process, self).__init__(*args, **kwargs) 
+    def __init__(self,*args, **kwargs): 
+        threading.Thread.__init__(self, *args, **kwargs)
+        self.killed = False
         self._stop = threading.Event() 
         self.stream = stream
         self.follow = follow
   
     # function using _stop function 
-    def stop(self): 
-        self._stop.set() 
+    def start(self): 
+        self.__run_backup = self.run 
+        self.run = self.__run       
+        threading.Thread.start(self) 
   
-    def stopped(self): 
-        return self._stop.isSet() 
+    def __run(self): 
+        sys.settrace(self.globaltrace) 
+        self.__run_backup() 
+        self.run = self.__run_backup 
   
-    def run(self): 
-        self.stream.filter(follow=self.follow, languages=["en"])
+    def globaltrace(self, frame, event, arg): 
+        if event == 'call': 
+            return self.localtrace 
+        else: 
+            return None
+  
+    def localtrace(self, frame, event, arg): 
+        if self.killed: 
+            if event == 'line': 
+                raise SystemExit() 
+        return self.localtrace 
+  
+    def kill(self): 
+        self.killed = True
+        
