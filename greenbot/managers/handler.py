@@ -232,7 +232,7 @@ class HandlerManager:
 
     @staticmethod
     async def trigger(event_name, stop_on_false=True, event=None, *args, **kwargs):
-        log.info(f"{event_name} Trigger Called")
+        # log.info(f"{event_name} Trigger Called")
         if event_name not in HandlerManager.handlers:
             log.error(f"No handler set for event {event_name}")
             return False
