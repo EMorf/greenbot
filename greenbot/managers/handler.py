@@ -232,6 +232,7 @@ class HandlerManager:
 
     @staticmethod
     async def trigger(event_name, stop_on_false=True, *args, **kwargs):
+        log.info("Trigger Called")
         if event_name not in HandlerManager.handlers:
             log.error(f"No handler set for event {event_name}")
             return False
@@ -246,6 +247,4 @@ class HandlerManager:
             if res is False and stop_on_false is True:
                 # Abort if handler returns false and stop_on_false is enabled
                 return False
-        if event_name == "twitter_on_status":
-            log.info("Trigger Complete")
         return True
