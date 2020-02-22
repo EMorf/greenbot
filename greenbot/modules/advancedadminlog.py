@@ -729,7 +729,7 @@ class AdvancedAdminLog(BaseModule):
             embed.add_field(name="Deleted by ", value=perp.mention, inline=False)
         if reason:
             embed.add_field(name="Reason ", value=reason, inline=False)
-        await self.bot.say(channel=out_channel, embed=embed, inline=False)
+        await self.bot.say(channel=out_channel, embed=embed)
 
     async def guild_update(self, before, after):
         if not self.settings["log_guild_update"]:

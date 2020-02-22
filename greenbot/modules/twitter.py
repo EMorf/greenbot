@@ -74,7 +74,7 @@ class Twitter(BaseModule):
         )
         message = self.settings["output_format"].format(username=username, tweet_url=tweet_url)
         log.info(message)
-        await self.bot.say(channel=out_channel, message=message)
+        await self.bot.say(channel=out_channel, message=message, ignore_escape=True)
 
     def load_commands(self, **options):
         if not self.bot:
