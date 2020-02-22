@@ -51,8 +51,11 @@ class RoleToLevel(BaseModule):
         if str(role.id) in self.bot.roles:
             await self.bot.say(channel, f"Level, {self.bot.roles.get(str(role.id))} has already been assigned to a {role.mention}")
             return
-
-        self.bot.roles[str(role.id)] = command_args[1]
+        level = int(command_args[1])
+        if level >= args["user_level"]:
+            await self.bot.say(channel, f"You cant set a level higher then your current level")
+            return
+        self.bot.roles[str(role.id)] = level
         self.redis.set(f"{self.bot.bot_name}:role-level", json.dumps(self.bot.roles))
         await self.bot.say(channel, f"Level, {command_args[1]} assigned to role, {role.mention}")
 
