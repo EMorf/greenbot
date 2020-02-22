@@ -70,7 +70,9 @@ class Twitter(BaseModule):
         out_channel, _ = await self.bot.functions.func_get_channel(
             args=[int(self.settings["output_channel"])]
         )
-        await self.bot.say(channel=out_channel, message=self.settings["output_format"].format(username=username, tweet_url=tweet_url))
+        message = self.settings["output_format"].format(username=username, tweet_url=tweet_url)
+        log.info(message)
+        await self.bot.say(channel=out_channel, message=message)
 
     def load_commands(self, **options):
         if not self.bot:
@@ -84,6 +86,7 @@ class Twitter(BaseModule):
             return
         if self.settings["users"]:
             self.stream.filter(follow=self.get_users_to_follow(self.settings["users"].split(" ")), languages=["en"], is_async=True)
+            log.info("Twitter running!")
         HandlerManager.add_handler("twitter_on_status", self.on_status)
 
 
