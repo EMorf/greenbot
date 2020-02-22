@@ -57,6 +57,9 @@ class Twitter(BaseModule):
         self.bot = bot
         self.redis = RedisManager.get()
         self.stream = None
+        if not self.bot:
+            return
+        self.stream = tweepy.Stream(self.bot.twitter_manager.api.auth, self.bot.twitter_manager.tweets_listener)
 
     async def on_status(self, tweet):
         if tweet.in_reply_to_status_id is not None:
@@ -73,11 +76,11 @@ class Twitter(BaseModule):
         if not self.bot:
             return
         if self.settings["users"]:
-            if self.stream():
+            if self.stream:
                 self.stream.disconnect()
             self.stream.filter(follow=self.get_users_to_follow(self.settings["users"].split(" ")), languages=["en"], is_async=True)
         else:
-            if self.stream():
+            if self.stream:
                 self.stream.disconnect()
 
     def get_users_to_follow(self, usernames):
@@ -89,7 +92,6 @@ class Twitter(BaseModule):
     def enable(self, bot):
         if not bot:
             return
-        self.stream = tweepy.Stream(self.bot.twitter_manager.api.auth, self.bot.twitter_manager.tweets_listener)
         HandlerManager.add_handler("twitter_on_status", self.on_status)
 
     def disable(self, bot):
