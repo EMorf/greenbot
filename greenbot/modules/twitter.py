@@ -84,11 +84,7 @@ class Twitter(BaseModule):
                 self.stream.disconnect()
 
     def get_users_to_follow(self, usernames):
-        final_return = []
-        if len(usernames) > 100:
-            final_return += self.get_users_to_follow(usernames[:100])
-        log.info(usernames)
-        return final_return + self.bot.twitter_manager.api.lookup_users(screen_names=usernames[100:])
+        return [str(self.bot.twitter_manager.api.get_user(username).id) for username in usernames]
 
     def enable(self, bot):
         if not bot:
