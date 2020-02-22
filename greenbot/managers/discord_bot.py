@@ -244,6 +244,9 @@ class DiscordBotManager:
         ):
             self.redis.set(f"{self.bot.bot_name}:timeouts-discord", json.dumps({}))
 
+    async def error(self, event, *args, **kwargs):
+        log.error(event)
+
     async def initial_unbans(self):
         try:
             data = json.loads(self.redis.get(f"{self.bot.bot_name}:timeouts-discord"))
@@ -266,7 +269,6 @@ class DiscordBotManager:
         except Exception as e:
             log.exception(e)
             self.redis.set(f"{self.bot.bot_name}:timeouts-discord", json.dumps({}))
-        self.schedule_task_periodically(30, self.remove_level)
 
     def get_role_id(self, role_name):
         for role in self.guild.roles:
