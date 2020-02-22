@@ -246,6 +246,7 @@ class Command(Base):
         self.can_execute_with_whisper = False
         self.run_through_banphrases = False
         self.command = None
+        self.channels = "[]"
 
         self.last_run = 0
         self.last_run_by_user = {}
@@ -276,6 +277,7 @@ class Command(Base):
         self.enabled = options.get("enabled", self.enabled)
         self.cost = int(self.cost)
         self.cost = options.get("cost", self.cost)
+        self.channels = options.get("channels", self.channels)
         if self.cost < 0:
             self.cost = 0
         self.can_execute_with_whisper = options.get(
@@ -486,6 +488,7 @@ class Command(Base):
             "main_alias": self.main_alias,
             "aliases": self.command.split("|"),
             "description": self.description,
+            "channels": self.channels,
             "long_description": self.long_description,
             "cd_all": self.delay_all,
             "cd_user": self.delay_user,
