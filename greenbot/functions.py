@@ -3,6 +3,7 @@ import discord
 
 from greenbot.managers.db import DBManager
 from greenbot.models.user import User
+from greenbot import utils
 
 log = logging.getLogger("greenbot")
 
@@ -54,14 +55,13 @@ class Functions:
                 return "You cannot ban someone who has the same level as you :)", None
             elif author_user.level < member_user.level:
                 return "You cannot ban someone who is a higher level than you :)", None
-
-        try:
-            timeout_in_seconds = int(args[1] if len(args) > 2 and args[1] != "" else 0)
-        except ValueError:
+        time_to_parse = utils.parse_timedelta(args[1] if len(args) > 2 and args[1] != "" else 0)
+        if not time_to_parse:
             return (
                 f"Invalid timeout in seconds {args[1] if len(args) > 2 and args[1] != '' else 0}!",
                 None,
             )
+        timeout_in_seconds = time_to_parse.total_seconds()
 
         try:
             delete_message_days = int(args[2] if len(args) > 3 and args[2] != "" else 0)

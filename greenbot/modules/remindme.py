@@ -4,75 +4,16 @@ import json
 import random
 import discord
 import string
-from datetime import timedelta
-import regex as re
 from datetime import datetime
 
-from sqlalchemy.orm import joinedload
-
 from greenbot import utils
-from greenbot.exc import InvalidPointAmount
-from greenbot.managers.db import DBManager
 from greenbot.managers.schedule import ScheduleManager
 from greenbot.managers.redis import RedisManager
 from greenbot.models.command import Command
-from greenbot.models.message import Message
-from greenbot.models.user import User
 from greenbot.modules import BaseModule
 from greenbot.modules import ModuleSetting
 
 log = logging.getLogger(__name__)
-
-TIME_RE_STRING = r"\s?".join(
-    [
-        r"((?P<weeks>\d+?)\s?(weeks?|w))?",
-        r"((?P<days>\d+?)\s?(days?|d))?",
-        r"((?P<hours>\d+?)\s?(hours?|hrs|hr?))?",
-        r"((?P<minutes>\d+?)\s?(minutes?|mins?|m(?!o)))?",  # prevent matching "months"
-        r"((?P<seconds>\d+)\s?(seconds?|secs?|s?))?",
-    ]
-)
-
-TIME_RE = re.compile(TIME_RE_STRING, re.I)
-
-
-def parse_timedelta(
-    argument, maximum=None, minimum=None, allowed_units=None,
-):
-    matches = TIME_RE.match(argument)
-    allowed_units = allowed_units or ["weeks", "days", "hours", "minutes", "seconds"]
-    if matches:
-        params = {k: int(v) for k, v in matches.groupdict().items() if v is not None}
-        for k in params.keys():
-            if k not in allowed_units:
-                return None
-        if params:
-            delta = timedelta(**params)
-            if maximum and maximum < delta:
-                return None
-            if minimum and delta < minimum:
-                return None
-            return delta
-    return None
-
-
-def seconds_to_resp(seconds):
-    time_data = {
-        "week": int(seconds // 604800),
-        "day": int((seconds % 604800) // 86400),
-        "hour": int((seconds % 86400) // 3600),
-        "minute": int((seconds % 3600) // 60),
-        "second": int(seconds % 60),
-    }
-    response = []
-    for item in time_data:
-        if time_data[item] > 0:
-            response.append(
-                f"{time_data[item]} {item}{'s' if time_data[item] > 1 else ''}"
-            )
-    response_str = ", ".join(response[:-1])
-    return response_str + f"{'and ' if response_str != '' else ''}{response[-1]}"
-
 
 def random_string(length=10):
     return "".join(random.choice(string.ascii_lowercase) for i in range(length))
@@ -170,7 +111,7 @@ class RemindMe(BaseModule):
         if len(command_args) == 0:
             await self.bot.say(channel, embed=self.help)
             return False
-        time_delta = parse_timedelta(command_args[0])
+        time_delta = utils.parse_timedelta(command_args[0])
         if not time_delta:
             await self.bot.say(
                 channel, f"{author.mention} invalid time: {command_args[0]}"
@@ -178,7 +119,7 @@ class RemindMe(BaseModule):
             return False
         await self.bot.say(
             channel,
-            f"{author.mention} ill remind you that in {seconds_to_resp(time_delta.total_seconds())}",
+            f"{author.mention} ill remind you that in {utils.seconds_to_resp(time_delta.total_seconds())}",
         )
         bot_message = await self.bot.say(
             channel,
@@ -278,7 +219,7 @@ class RemindMe(BaseModule):
                     seconds = int(
                         round((date_of_reminder - date_reminder_set).total_seconds())
                     )
-                    response_str = seconds_to_resp(seconds)
+                    response_str = utils.seconds_to_resp(seconds)
                     await self.bot.private_message(
                         user,
                         f"Hello! You asked me to remind you {response_str} ago:\n{message}",
