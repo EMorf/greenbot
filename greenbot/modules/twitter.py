@@ -117,7 +117,6 @@ class Process(threading.Thread):
     def __init__(self,*args, **kwargs): 
         threading.Thread.__init__(self, *args, **kwargs)
         self.killed = False
-        self._stop = threading.Event()
   
     # function using _stop function 
     def start(self): 
