@@ -219,7 +219,7 @@ class Command(Base):
     cost = Column(INT, nullable=False, default=0)
     can_execute_with_whisper = Column(BOOLEAN)
     long_description = ""
-    channels = Column(TEXT, nullable=False)
+    channels = Column(TEXT, nullable=False, default="[]")
     data = relationship("CommandData", uselist=False, cascade="", lazy="joined")
     examples = relationship("CommandExample", uselist=True, cascade="", lazy="noload")
 
@@ -375,7 +375,7 @@ class Command(Base):
 
         cd_modifier = 0.2 if args["user_level"] >= 500 else 1.0
 
-        if str(channel.id) not in self.channels:
+        if str(channel.id) not in json.loads(self.channels):
             return False
 
         cur_time = greenbot.utils.now().timestamp()
