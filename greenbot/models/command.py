@@ -376,8 +376,8 @@ class Command(Base):
             return False
 
         cd_modifier = 0.2 if args["user_level"] >= 500 else 1.0
-
-        if str(channel.id) not in json.loads(self.channels):
+        load_channels = json.loads(self.channels)
+        if str(channel.id) not in load_channels and load_channels:
             return False
 
         cur_time = greenbot.utils.now().timestamp()
