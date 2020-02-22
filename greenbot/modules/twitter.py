@@ -86,7 +86,6 @@ class Twitter(BaseModule):
             return
         if self.settings["users"]:
             self.stream.filter(follow=self.get_users_to_follow(self.settings["users"].split(" ")), languages=["en"], is_async=True)
-            log.info("Twitter running!")
         HandlerManager.add_handler("twitter_on_status", self.on_status)
 
 
