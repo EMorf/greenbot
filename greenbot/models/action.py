@@ -358,7 +358,7 @@ class MessageAction(BaseAction):
         raise NotImplementedError("Please implement the run method.")
 
 
-def urlfetch_msg(method, message, num_urlfetch_subs, bot, extra={}, args=[], kwargs={}):
+async def urlfetch_msg(method, message, num_urlfetch_subs, bot, extra={}, args=[], kwargs={}):
     urlfetch_subs = get_urlfetch_substitutions(message)
 
     if len(urlfetch_subs) > num_urlfetch_subs:
@@ -644,14 +644,13 @@ async def run_functions(
                 await bot.private_message(user=author, message=resp, embed=embed)
             else:
                 await bot.say(channel=channel, message=resp, embed=embed)
-
+            continue
         ScheduleManager.execute_now(
             urlfetch_msg,
             args=[],
             kwargs={
                 "args": [author if private_message else channel],
-                "kwargs": {},
-                "method": bot.private_message if private_message else bot.say,
+                "kwargs": {"method": bot.private_message if private_message else bot.say},
                 "bot": bot,
                 "extra": extra,
                 "message": resp,
@@ -693,8 +692,7 @@ class ReplyAction(MessageAction):
             args=[],
             kwargs={
                 "args": [author if args["whisper"] else channel],
-                "kwargs": {},
-                "method": bot.private_message if args["whisper"] else bot.say,
+                "kwargs": {"method": bot.private_message if args["whisper"] else bot.say},
                 "bot": bot,
                 "extra": extra,
                 "message": resp,
@@ -734,8 +732,7 @@ class PrivateMessageAction(MessageAction):
             args=[],
             kwargs={
                 "args": [author],
-                "kwargs": {},
-                "method": bot.private_message,
+                "kwargs": {"method": bot.private_message},
                 "bot": bot,
                 "extra": extra,
                 "message": resp,
