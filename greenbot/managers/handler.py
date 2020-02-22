@@ -191,6 +191,11 @@ class HandlerManager:
         # discord.on_relationship_update(before, after)
         HandlerManager.create_handler("discord_relationship_update")
 
+        #Twitter
+
+        # tweepy.StreamListener.on_status(tweet)
+        HandlerManager.create_handler("twitter_on_status")
+
     @staticmethod
     def create_handler(event):
         """ Create an empty list for the given event """

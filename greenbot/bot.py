@@ -17,6 +17,7 @@ from greenbot.managers.message import MessageManager
 from greenbot.managers.handler import HandlerManager
 from greenbot.managers.discord_bot import DiscordBotManager
 from greenbot.managers.command import CommandManager
+from greenbot.managers.twitter import TwitterManager
 from greenbot.migration.db import DatabaseMigratable
 from greenbot.migration.migrate import Migration
 from greenbot.functions import Functions
@@ -94,6 +95,7 @@ class Bot:
             redis=RedisManager.get(),
             private_loop=self.private_loop,
         )
+        self.twitter_manager = TwitterManager(self, self.config["twitter"]) if utils.contains_value(["consumer_key", "consumer_secret", "access_token", "access_token_secret"], self.config["twitter"]) else None
         self.filters = Filters(self, self.discord_bot)
         self.functions = Functions(self, self.filters)
 
