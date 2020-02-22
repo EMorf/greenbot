@@ -16,7 +16,8 @@ class MyStreamListener(tweepy.StreamListener):
         self.bot.private_loop.create_task(HandlerManager.trigger("twitter_on_status", tweet=tweet))
 
     def on_error(self, status):
-        log.error("Error detected")
+        log.error("Disconnected from Twitter")
+        return False
 
 class TwitterManager:
 

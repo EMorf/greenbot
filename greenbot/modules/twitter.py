@@ -61,7 +61,6 @@ class Twitter(BaseModule):
         self.process = None
         if not self.bot:
             return
-        self.stream = tweepy.Stream(self.bot.twitter_manager.api.auth, self.bot.twitter_manager.tweets_listener)
 
     async def on_status(self, tweet):
         if tweet.in_reply_to_status_id is not None:
@@ -82,6 +81,7 @@ class Twitter(BaseModule):
         if self.process:
             self.process.terminate()
             self.process = None
+        self.stream = tweepy.Stream(self.bot.twitter_manager.api.auth, self.bot.twitter_manager.tweets_listener)
         self.process = multiprocessing.Process(target=self.stream.filter, kwargs={"follow": self.get_users_to_follow(self.settings["users"].split(" ")), "languages": ["en"]})
         self.process.start()
 
