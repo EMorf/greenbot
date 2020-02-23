@@ -68,6 +68,8 @@ class Twitter(BaseModule):
             if not self.settings["send_replies"]:
                 return
         username = tweet.author.screen_name
+        if username not in self.settings["users"].split(" "):
+            return
         tweet_url = f"https://twitter.com/{username}/status/{tweet.id}"
         out_channel, _ = await self.bot.functions.func_get_channel(
             args=[int(self.settings["output_channel"])]
