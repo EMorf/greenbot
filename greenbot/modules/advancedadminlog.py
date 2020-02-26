@@ -545,7 +545,7 @@ class AdvancedAdminLog(BaseModule):
         )
 
         embed = discord.Embed(
-            description=member.mention,
+            description=f"@{member}",
             colour=await self.get_event_colour(guild, "user_left"),
             timestamp=utils.now(),
         )
@@ -568,7 +568,7 @@ class AdvancedAdminLog(BaseModule):
             embed.add_field(name="Reason", value=str(reason), inline=False)
         embed.set_footer(text="User ID: " + str(member.id))
         embed.set_author(
-            name=f"{member} ({member.id}) has left the guild",
+            name=f"{member} has left the guild",
             url=member.avatar_url,
             icon_url=member.avatar_url,
         )
