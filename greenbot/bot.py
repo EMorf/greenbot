@@ -220,8 +220,9 @@ class Bot:
     async def remove_role(self, user, role, reason=None):
         return await self.discord_bot.remove_role(user, role, reason)
 
-    def quit(self, bot, author, channel, message, args):
-        self.quit_bot()
+    async def quit(self, bot, author, channel, message, args):
+        await self.private_message(user=author, message="Quitting the bot!")
+        await self._quit_bot()
 
     def quit_bot(self):
         self.private_loop.create_task(self._quit_bot())
