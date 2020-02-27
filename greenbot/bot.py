@@ -142,8 +142,7 @@ class Bot:
     def execute_every(self, period, function, *args, **kwargs):
         ScheduleManager.execute_every(period, function, *args, **kwargs)
 
-    async def _quit_bot(self):
-        await HandlerManager.trigger("on_quit")
+    def quit_bot(self):
         self.module_manager.disable_all()
         try:
             ScheduleManager.base_scheduler.print_jobs()
@@ -224,10 +223,7 @@ class Bot:
 
     async def quit(self, bot, author, channel, message, args):
         await self.private_message(user=author, message="Quitting the bot!")
-        await self._quit_bot()
-
-    def quit_bot(self):
-        self.private_loop.create_task(self._quit_bot())
+        self.quit_bot()
 
     def apply_filter(self, resp, f):
         available_filters = {
