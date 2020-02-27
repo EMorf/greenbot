@@ -41,7 +41,7 @@ def run(args):
 
     def on_sigterm(signal, frame):
         greenbot.quit_bot()
-        sys.exit(0)
+        sys.exit(1)
 
     signal.signal(signal.SIGTERM, on_sigterm)
 

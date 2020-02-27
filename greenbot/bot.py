@@ -149,7 +149,7 @@ class Bot:
             ScheduleManager.base_scheduler.shutdown(wait=False)
         except:
             log.exception("Error while shutting down the apscheduler")
-        await self.private_loop.stop
+        self.private_loop.call_soon_threadsafe(self.private_loop.stop)
         self.socket_manager.quit()
 
     def connect(self):
