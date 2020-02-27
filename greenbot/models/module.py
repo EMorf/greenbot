@@ -48,6 +48,10 @@ class ModuleManager:
         if socket_manager:
             socket_manager.add_handler("module.update", self.on_module_update)
 
+    def disable_all(self):
+        for module in self.modules:
+            module.disable(self)
+
     def get_module(self, module_id):
         return find(lambda m: m.ID == module_id, self.all_modules)
 

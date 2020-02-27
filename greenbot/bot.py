@@ -149,6 +149,7 @@ class Bot:
             ScheduleManager.base_scheduler.shutdown(wait=False)
         except:
             log.exception("Error while shutting down the apscheduler")
+        self.module_manager.disable_all()
         self.private_loop.call_soon_threadsafe(self.private_loop.stop)
         self.socket_manager.quit()
 
