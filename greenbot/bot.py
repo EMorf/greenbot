@@ -152,6 +152,7 @@ class Bot:
             log.exception("Error while shutting down the apscheduler")
         self.private_loop.call_soon_threadsafe(self.private_loop.stop)
         self.socket_manager.quit()
+        sys.exit()
 
     def connect(self):
         self.discord_bot.connect()
