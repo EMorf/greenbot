@@ -144,12 +144,12 @@ class Bot:
 
     async def _quit_bot(self):
         await HandlerManager.trigger("on_quit")
+        self.module_manager.disable_all()
         try:
             ScheduleManager.base_scheduler.print_jobs()
             ScheduleManager.base_scheduler.shutdown(wait=False)
         except:
             log.exception("Error while shutting down the apscheduler")
-        self.module_manager.disable_all()
         self.private_loop.call_soon_threadsafe(self.private_loop.stop)
         self.socket_manager.quit()
 
