@@ -408,7 +408,7 @@ class Dispatch:
                 )
                 return False
 
-            if args["user_level"] < 2000:
+            if args["user_level"] < 1500:
                 if command.action is not None and not command.action.type == "message":
                     await bot.private_message(
                         author,

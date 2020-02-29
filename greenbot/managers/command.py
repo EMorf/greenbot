@@ -121,7 +121,7 @@ class CommandManager(UserDict):
                 ),
                 "funccommand": Command.dispatch_command(
                     "add_funccommand",
-                    level=2000,
+                    level=1500,
                     description="Add a command that uses a command",
                 ),
             },
@@ -141,7 +141,7 @@ class CommandManager(UserDict):
                 ),
                 "funccommand": Command.dispatch_command(
                     "edit_funccommand",
-                    level=2000,
+                    level=1500,
                     description="Add a command that uses a command",
                 ),
             },

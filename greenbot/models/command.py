@@ -223,7 +223,7 @@ class Command(Base):
     data = relationship("CommandData", uselist=False, cascade="", lazy="joined")
     examples = relationship("CommandExample", uselist=True, cascade="", lazy="noload")
 
-    BYPASS_DELAY_LEVEL = 2000
+    BYPASS_DELAY_LEVEL = 1500
 
     DEFAULT_CD_ALL = 5
     DEFAULT_CD_USER = 15
