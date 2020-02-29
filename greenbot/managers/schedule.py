@@ -39,7 +39,6 @@ class ScheduleManager:
 
     @staticmethod
     def execute_now(method, args=[], kwargs={}, scheduler=None):
-        log.info(method.__name__)
         if scheduler is None:
             scheduler = ScheduleManager.base_scheduler
 
@@ -61,7 +60,6 @@ class ScheduleManager:
 
     @staticmethod
     def execute_delayed(delay, method, args=[], kwargs={}, scheduler=None):
-        log.info(method.__name__)
         if scheduler is None:
             scheduler = ScheduleManager.base_scheduler
 
@@ -91,7 +89,6 @@ class ScheduleManager:
     def execute_every(
         interval, method, args=[], kwargs={}, scheduler=None, jitter=None
     ):
-        log.info(method.__name__)
         if scheduler is None:
             scheduler = ScheduleManager.base_scheduler
 
