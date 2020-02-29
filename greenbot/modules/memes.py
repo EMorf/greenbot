@@ -228,7 +228,7 @@ class Memes(BaseModule):
             )
         if self.settings["dank_role_id"]:
             self.commands["dank"] = Command.raw_command(
-                self.modpride,
+                self.dank,
                 delay_all=self.settings["dank_cooldown"],
                 delay_user=self.settings["dank_cooldown"],
                 cost=self.settings["cost_dank"],
