@@ -173,7 +173,7 @@ class Dispatch:
             action = {
                 "type": type,
                 "message": None,
-                "functions": response.split(" "),
+                "functions": response,
             }
 
             if "channels" in options:
@@ -234,7 +234,7 @@ class Dispatch:
             options["action"] = {
                 "type": type,
                 "message": None,
-                "functions": response.split(" "),
+                "functions": response,
             }
 
             if "channels" in options:
@@ -274,15 +274,17 @@ class Dispatch:
                 return False
 
             existing_alias = message_parts[0]
+            if existing_alias not in bot.commands:
+                existing_alias += " " + message_parts[1]
+                if existing_alias not in bot.commands:
+                    await bot.private_message(
+                        author, f'No command called "{existing_alias}" found'
+                    )
+                    return False
+                message_parts = message_parts[1:]
             new_aliases = re.split(r"\|| ", " ".join(message_parts[1:]))
             added_aliases = []
             already_used_aliases = []
-
-            if existing_alias not in bot.commands:
-                await bot.private_message(
-                    author, f'No command called "{existing_alias}" found'
-                )
-                return False
 
             command = bot.commands[existing_alias]
 
@@ -299,7 +301,7 @@ class Dispatch:
                     already_used_aliases.append(alias)
                 else:
                     added_aliases.append(alias)
-                    bot.commands[alias] = command
+                    bot.commands[command._parent_command + alias] = command
 
             if len(added_aliases) > 0:
                 new_aliases = f"{command.command}|{'|'.join(added_aliases)}"
@@ -324,55 +326,49 @@ class Dispatch:
     @staticmethod
     async def remove_alias(bot, author, channel, message, args):
         """Dispatch method for removing aliases from a command.
-        Usage: !remove alias EXISTING_ALIAS_1 EXISTING_ALIAS_2"""
+        Usage: !remove alias EXISTING_ALIAS_1"""
         if message:
             aliases = re.split(r"\|| ", message.lower())
             if len(aliases) < 1:
                 await bot.private_message(author, "Usage: !remove alias EXISTINGALIAS")
                 return False
+            alias = " ".join(aliases)
+            if alias not in bot.commands:
+                await bot.private_message(
+                    author, f"{alias} is not currently an alias",
+                )
+                return
 
-            num_removed = 0
-            commands_not_found = []
-            for alias in aliases:
-                if alias not in bot.commands:
-                    commands_not_found.append(alias)
-                    continue
+            command = bot.commands[alias]
 
-                command = bot.commands[alias]
+            # error out on commands that are not from the DB, e.g. module commands like !8ball that cannot have
+            # aliases registered. (command.command and command.data are None on those commands)
+            if command.data is None or command.command is None:
+                await bot.private_message(
+                    author, "That command cannot have aliases removed from."
+                )
+                return False
 
-                # error out on commands that are not from the DB, e.g. module commands like !8ball that cannot have
-                # aliases registered. (command.command and command.data are None on those commands)
-                if command.data is None or command.command is None:
-                    await bot.private_message(
-                        author, "That command cannot have aliases removed from."
-                    )
-                    return False
+            current_aliases = command.command.split("|")
+            current_aliases.remove(alias.replace(command._parent_command, ""))
 
-                current_aliases = command.command.split("|")
-                current_aliases.remove(alias)
+            if len(current_aliases) == 0:
+                await bot.private_message(
+                    author,
+                    f"{alias} is the only remaining alias for this command and can't be removed.",
+                )
+                return
 
-                if len(current_aliases) == 0:
-                    await bot.private_message(
-                        author,
-                        f"{alias} is the only remaining alias for this command and can't be removed.",
-                    )
-                    continue
+            new_aliases = "|".join(current_aliases)
+            bot.commands.edit_command(command, command=new_aliases)
 
-                new_aliases = "|".join(current_aliases)
-                bot.commands.edit_command(command, command=new_aliases)
+            del bot.commands[alias]
+            log_msg = (
+                f"The alias {alias} has been removed from {new_aliases.split('|')[0]}"
+            )
+            AdminLogManager.add_entry("Alias removed", str(author.id), log_msg)
 
-                num_removed += 1
-                del bot.commands[alias]
-                log_msg = f"The alias {alias} has been removed from {new_aliases.split('|')[0]}"
-                AdminLogManager.add_entry("Alias removed", str(author.id), log_msg)
-
-            whisper_str = ""
-            if num_removed > 0:
-                whisper_str = f"Successfully removed {num_removed} aliases."
-            if len(commands_not_found) > 0:
-                whisper_str += f" Aliases {', '.join(commands_not_found)} not found"
-            if len(whisper_str) > 0:
-                await bot.private_message(author, whisper_str)
+            await bot.private_message(author, f"Successfully removed aliase {alias}.")
         else:
             await bot.private_message(author, "Usage: !remove alias EXISTINGALIAS")
 
@@ -387,7 +383,11 @@ class Dispatch:
                 pass
 
             if id is None:
-                potential_cmd = "".join(message.split(" ")[:1]).lower().replace("!", "")
+                split = message.split(" ")
+                potential_cmd = "".join(split[:1]).lower().replace("!", "")
+                if potential_cmd in bot.commands:
+                    command = bot.commands[potential_cmd]
+                potential_cmd += " " + split[1] if len(split) > 1 else ""
                 if potential_cmd in bot.commands:
                     command = bot.commands[potential_cmd]
             else:

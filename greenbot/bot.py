@@ -95,16 +95,39 @@ class Bot:
             redis=RedisManager.get(),
             private_loop=self.private_loop,
         )
-        self.twitter_manager = TwitterManager(self, self.config["twitter"]) if utils.contains_value(["consumer_key", "consumer_secret", "access_token", "access_token_secret"], self.config["twitter"]) else None
+        self.twitter_manager = (
+            TwitterManager(self, self.config["twitter"])
+            if utils.contains_value(
+                [
+                    "consumer_key",
+                    "consumer_secret",
+                    "access_token",
+                    "access_token_secret",
+                ],
+                self.config["twitter"],
+            )
+            else None
+        )
         self.filters = Filters(self, self.discord_bot)
         self.functions = Functions(self, self.filters)
+
+    def psudo_level_member(self, member):
+        user_level = 100
+        for role_id in self.roles.keys():
+            role = self.filters.get_role(role_id, None, {})
+            if not role:
+                continue
+
+            if role in member.roles:
+                user_level = max(int(user_level), int(self.roles[role_id]))
+        return user_level
 
     @property
     def bot_id(self):
         return self.discord_bot.client.user.id
 
     async def wait_discord_load(self):
-        self.roles = {} 
+        self.roles = {}
         self.socket_manager = SocketManager(self.bot_name, self.execute_now)
         self.message_manager = MessageManager(self)
         self.module_manager = ModuleManager(self.socket_manager, bot=self).load()
@@ -173,10 +196,14 @@ class Bot:
     async def kick(self, user, reason=None):
         return await self.discord_bot.kick(user=user, reason=reason)
 
-    async def private_message(self, user, message=None, embed=None, ignore_escape=False):
+    async def private_message(
+        self, user, message=None, embed=None, ignore_escape=False
+    ):
         if message is None and embed is None:
             return None
-        return await self.discord_bot.private_message(user, message, embed, ignore_escape)
+        return await self.discord_bot.private_message(
+            user, message, embed, ignore_escape
+        )
 
     async def say(self, channel, message=None, embed=None, ignore_escape=False):
         if message is None and embed is None:
@@ -192,28 +219,36 @@ class Bot:
             msg_lower_parts = msg_lower.split(" ")
             trigger = msg_lower_parts[0][1:]
             msg_raw_parts = content.split(" ")
+            if trigger not in self.commands:
+                if len(msg_lower_parts) < 1:
+                    return
+                trigger += " " + msg_lower_parts[1] if len(msg_lower_parts) > 1 else ""
+                if trigger not in self.commands:
+                    return
+                msg_lower_parts = (
+                    msg_lower_parts[1:] if len(msg_lower_parts) > 1 else []
+                )
             remaining_message = (
                 " ".join(msg_raw_parts[1:]) if len(msg_raw_parts) > 1 else ""
             )
-            if trigger in self.commands:
-                command = self.commands[trigger]
-                extra_args = {
-                    "trigger": trigger,
-                    "message_raw": message,
-                    "user_level": user_level,
-                    "whisper": not not_whisper,
-                }
-                try:
-                    await command.run(
-                        bot=self,
-                        author=author,
-                        channel=channel if not_whisper else None,
-                        message=remaining_message,
-                        args=extra_args,
-                    )
-                except Exception as e:
-                    log.error(f"Error thrown on command {trigger}")
-                    log.exception(e)
+            command = self.commands[trigger]
+            extra_args = {
+                "trigger": trigger,
+                "message_raw": message,
+                "user_level": user_level,
+                "whisper": not not_whisper,
+            }
+            try:
+                await command.run(
+                    bot=self,
+                    author=author,
+                    channel=channel if not_whisper else None,
+                    message=remaining_message,
+                    args=extra_args,
+                )
+            except Exception as e:
+                log.error(f"Error thrown on command {trigger}")
+                log.exception(e)
 
     async def add_role(self, user, role, reason=None):
         return await self.discord_bot.add_role(user, role)

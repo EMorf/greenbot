@@ -71,7 +71,9 @@ class RemindMe(BaseModule):
     async def create_reminder(self, bot, author, channel, message, args):
         command_args = message.split(" ") if message else []
         try:
-            reminders_list = json.loads(self.redis.get(f"{self.bot.bot_name}:remind-me-reminders"))
+            reminders_list = json.loads(
+                self.redis.get(f"{self.bot.bot_name}:remind-me-reminders")
+            )
             """
             { 
                 user_id: [
@@ -126,7 +128,9 @@ class RemindMe(BaseModule):
         }
         user_reminders.append(reminder)
         reminders_list[str(author.id)] = user_reminders
-        self.redis.set(f"{self.bot.bot_name}:remind-me-reminders", json.dumps(reminders_list))
+        self.redis.set(
+            f"{self.bot.bot_name}:remind-me-reminders", json.dumps(reminders_list)
+        )
         self.reminder_tasks[salt] = ScheduleManager.execute_delayed(
             time_delta.total_seconds(),
             self.execute_reminder,
@@ -135,7 +139,9 @@ class RemindMe(BaseModule):
 
     async def forgetme(self, bot, author, channel, message, args):
         try:
-            reminders_list = json.loads(self.redis.get(f"{self.bot.bot_name}:remind-me-reminders"))
+            reminders_list = json.loads(
+                self.redis.get(f"{self.bot.bot_name}:remind-me-reminders")
+            )
             """
             { 
                 user_id: [
@@ -165,7 +171,9 @@ class RemindMe(BaseModule):
             except Exception as e:
                 log.error(f"Failed to delete message from bot: {e}")
         reminders_list[str(author.id)] = []
-        self.redis.set(f"{self.bot.bot_name}:remind-me-reminders", json.dumps(reminders_list))
+        self.redis.set(
+            f"{self.bot.bot_name}:remind-me-reminders", json.dumps(reminders_list)
+        )
         await self.bot.say(channel, f"{author.mention} you have been forgotten")
 
     def load_commands(self, **options):
@@ -219,7 +227,9 @@ class RemindMe(BaseModule):
         except Exception as e:
             log.error(f"Failed to delete message from bot: {e}")
         try:
-            reminders_list = json.loads(self.redis.get(f"{self.bot.bot_name}:remind-me-reminders"))
+            reminders_list = json.loads(
+                self.redis.get(f"{self.bot.bot_name}:remind-me-reminders")
+            )
             """
             { 
                 user_id: [
@@ -245,13 +255,17 @@ class RemindMe(BaseModule):
                 user_reminders.remove(_reminder)
                 break
         reminders_list[str(user_id)] = user_reminders
-        self.redis.set(f"{self.bot.bot_name}:remind-me-reminders", json.dumps(reminders_list))
+        self.redis.set(
+            f"{self.bot.bot_name}:remind-me-reminders", json.dumps(reminders_list)
+        )
 
     def enable(self, bot):
         if not bot:
             return
         try:
-            reminders_list = json.loads(self.redis.get(f"{self.bot.bot_name}:remind-me-reminders"))
+            reminders_list = json.loads(
+                self.redis.get(f"{self.bot.bot_name}:remind-me-reminders")
+            )
             """
             { 
                 user_id: [
@@ -276,7 +290,8 @@ class RemindMe(BaseModule):
             for reminder in user_reminders:
                 salt = reminder["salt"]
                 date_of_reminder = datetime.strptime(
-                    utils.parse_date(reminder["date_of_reminder"]), "%Y-%m-%d %H:%M:%S.%f%z"
+                    utils.parse_date(reminder["date_of_reminder"]),
+                    "%Y-%m-%d %H:%M:%S.%f%z",
                 )
                 if date_of_reminder < utils.now():
                     continue
@@ -287,7 +302,9 @@ class RemindMe(BaseModule):
                     args=[salt, user_id, reminder],
                 )
             new_reminders_list[user_id] = new_user_reminders
-        self.redis.set(f"{self.bot.bot_name}:remind-me-reminders", json.dumps(new_reminders_list))
+        self.redis.set(
+            f"{self.bot.bot_name}:remind-me-reminders", json.dumps(new_reminders_list)
+        )
 
     def disable(self, bot):
         if not bot:

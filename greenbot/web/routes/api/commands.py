@@ -11,7 +11,7 @@ import greenbot.web.utils
 from greenbot.managers.adminlog import AdminLogManager
 from greenbot.managers.db import DBManager
 from greenbot.models.command import Command
-from greenbot.models.command import CommandData 
+from greenbot.models.command import CommandData
 from greenbot.models.module import ModuleManager
 from greenbot.managers.sock import SocketClientManager
 from greenbot.utils import find
@@ -162,7 +162,6 @@ class APICommandUpdate(Resource):
                             if name == "functions":
                                 if extra_args["user"].level < 1500:
                                     continue
-                                parsed_value = parsed_value.split(" ")
                             parsed_action[name] = parsed_value
                         command.action_json = json.dumps(parsed_action)
                     else:
@@ -233,9 +232,11 @@ class APICommandCheckAlias(Resource):
         command_aliases = []
 
         for alias, command in command_manager.items():
-            command_aliases.append(alias)
+            command_aliases.append(command._parent_command + alias)
             if command.command and len(command.command) > 0:
-                command_aliases.extend(command.command.split("|"))
+                command_aliases.extend(
+                    [command._parent_command + x for x in command.command.split("|")]
+                )
 
         command_aliases = set(command_aliases)
 

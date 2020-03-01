@@ -12,6 +12,7 @@ from greenbot.modules import ModuleSetting
 
 log = logging.getLogger(__name__)
 
+
 class RoleToLevel(BaseModule):
     ID = __name__.split(".")[-1]
     NAME = "RoleToLevel"
@@ -43,27 +44,38 @@ class RoleToLevel(BaseModule):
             return
 
         try:
-            self.bot.roles = json.loads(self.redis.get(f"{self.bot.bot_name}:role-level"))
+            self.bot.roles = json.loads(
+                self.redis.get(f"{self.bot.bot_name}:role-level")
+            )
         except:
             self.redis.set(f"{self.bot.bot_name}:role-level", json.dumps({}))
             self.bot.roles = {}
-        
+
         if str(role.id) in self.bot.roles:
-            await self.bot.say(channel, f"Level, {self.bot.roles.get(str(role.id))} has already been assigned to a {role.mention}")
+            await self.bot.say(
+                channel,
+                f"Level, {self.bot.roles.get(str(role.id))} has already been assigned to a {role.mention}",
+            )
             return
         level = int(command_args[1])
         if level >= args["user_level"]:
-            await self.bot.say(channel, f"You cant set a level higher then your current level")
+            await self.bot.say(
+                channel, f"You cant set a level higher then your current level"
+            )
             return
         self.bot.roles[str(role.id)] = level
         self.redis.set(f"{self.bot.bot_name}:role-level", json.dumps(self.bot.roles))
-        await self.bot.say(channel, f"Level, {command_args[1]} assigned to role, {role.mention}")
+        await self.bot.say(
+            channel, f"Level, {command_args[1]} assigned to role, {role.mention}"
+        )
 
     async def remove_role_level(self, bot, author, channel, message, args):
         command_args = message.split(" ") if message else []
         if command_args[0] in self.bot.roles:
             del self.bot.roles[str(command_args[0])]
-            self.redis.set(f"{self.bot.bot_name}:role-level", json.dumps(self.bot.roles))
+            self.redis.set(
+                f"{self.bot.bot_name}:role-level", json.dumps(self.bot.roles)
+            )
             await self.bot.say(channel, f"Removed role with id {command_args[0]}")
             return
         role = self.bot.filters.get_role(command_args[0])
@@ -72,11 +84,13 @@ class RoleToLevel(BaseModule):
             return
 
         try:
-            self.bot.roles = json.loads(self.redis.get(f"{self.bot.bot_name}:role-level"))
+            self.bot.roles = json.loads(
+                self.redis.get(f"{self.bot.bot_name}:role-level")
+            )
         except:
             self.redis.set(f"{self.bot.bot_name}:role-level", json.dumps({}))
             self.bot.roles = {}
-        
+
         if str(role.id) not in self.bot.roles:
             await self.bot.say(channel, f"{role.mention} doesnt have a level assigned")
             return
@@ -108,7 +122,9 @@ class RoleToLevel(BaseModule):
         if not bot:
             return
         try:
-            self.bot.roles = json.loads(self.redis.get(f"{self.bot.bot_name}:role-level"))
+            self.bot.roles = json.loads(
+                self.redis.get(f"{self.bot.bot_name}:role-level")
+            )
         except:
             self.redis.set(f"{self.bot.bot_name}:role-level", json.dumps({}))
             self.bot.roles = {}

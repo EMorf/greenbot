@@ -14,6 +14,7 @@ TIME_RE_STRING = r"\s?".join(
 
 TIME_RE = re.compile(TIME_RE_STRING, re.I)
 
+
 def parse_timedelta(
     argument, maximum=None, minimum=None, allowed_units=None,
 ):

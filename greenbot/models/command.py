@@ -68,7 +68,7 @@ def parse_command_for_web(alias, command, list):
         test = re.compile(r"[^\w]")
         first_alias = command.command.split("|")[0]
         command.resolve_string = test.sub("", first_alias.replace(" ", "_"))
-        command.main_alias = "!" + first_alias
+        command.main_alias = "!" + command._parent_command + first_alias
         if not command.parsed_description:
             if command.action is not None:
                 if command.action.type == "message":
@@ -212,6 +212,7 @@ class Command(Base):
     action_json = Column("action", TEXT, nullable=False)
     extra_extra_args = Column("extra_args", TEXT)
     command = Column(TEXT, nullable=False)
+    parent_command = Column(TEXT, nullable=False)
     description = Column(TEXT, nullable=True)
     delay_all = Column(INT, nullable=False, default=5)
     delay_user = Column(INT, nullable=False, default=15)
@@ -246,6 +247,7 @@ class Command(Base):
         self.can_execute_with_whisper = False
         self.run_through_banphrases = False
         self.command = None
+        self.parent_command = None
         self.channels = "[]"
 
         self.last_run = 0
@@ -261,12 +263,13 @@ class Command(Base):
         self.level = options.get("level", self.level)
         if "action" in options:
             self.action_json = json.dumps(options["action"])
-            self.action = ActionParser.parse(self.action_json, command=self.command)
+            self.action = ActionParser.parse(self.action_json)
         if "extra_args" in options:
             self.extra_args = {"command": self}
             self.extra_args.update(options["extra_args"])
             self.extra_extra_args = json.dumps(options["extra_args"])
         self.command = options.get("command", self.command)
+        self.parent_command = options.get("parent_command", self.parent_command)
         self.description = options.get("description", self.description)
         self.delay_all = options.get("delay_all", self.delay_all)
         if self.delay_all < 0:
@@ -288,14 +291,22 @@ class Command(Base):
         self.notify_on_error = options.get("notify_on_error", self.notify_on_error)
 
     def __str__(self):
-        return f"Command(!{self.command})"
+        return f"Command(!{self._parent_command}{self.command})"
+
+    @property
+    def _parent_command(self):
+        return self.parent_command + " " if self.parent_command else ""
+
+    @property
+    def channels_web(self):
+        return " ".join(json.loads(self.channels))
 
     @reconstructor
     def init_on_load(self):
         self.last_run = 0
         self.last_run_by_user = {}
         self.extra_args = {"command": self}
-        self.action = ActionParser.parse(self.action_json, command=self.command)
+        self.action = ActionParser.parse(self.action_json)
         self.run_in_thread = False
         if self.extra_extra_args:
             try:
@@ -310,15 +321,13 @@ class Command(Base):
         cmd = cls()
         if "level" in json_object:
             cmd.level = json_object["level"]
-        cmd.action = ActionParser.parse(data=json_object["action"], command=cmd.command)
+        cmd.action = ActionParser.parse(data=json_object["action"])
         return cmd
 
     @classmethod
     def dispatch_command(cls, cb, **options):
         cmd = cls(**options)
-        cmd.action = ActionParser.parse(
-            '{"type": "func", "cb": "' + cb + '"}', command=cmd.command
-        )
+        cmd.action = ActionParser.parse('{"type": "func", "cb": "' + cb + '"}')
         return cmd
 
     @classmethod
@@ -443,42 +452,6 @@ class Command(Base):
                 self.last_run = cur_time
                 self.last_run_by_user[args["user_level"]] = cur_time
 
-    def autogenerate_examples(self):
-        if (
-            not self.examples
-            and self.id is not None
-            and self.action
-            and self.action.type == "message"
-        ):
-            examples = []
-
-            example = CommandExample(self.id, "Default usage")
-            subtype = self.action.subtype if self.action.subtype != "reply" else "say"
-            example.add_chat_message("say", self.main_alias, "user")
-            clean_response = Substitution.urlfetch_substitution_regex.sub(
-                "(urlfetch)", self.action.response
-            )
-
-            if subtype in ("say", "me"):
-                example.add_chat_message(subtype, clean_response, "bot")
-            elif subtype == "whisper":
-                example.add_chat_message(subtype, clean_response, "bot", "user")
-            examples.append(example)
-
-            if self.can_execute_with_whisper is True:
-                example = CommandExample(self.id, "Default usage through whisper")
-                subtype = (
-                    self.action.subtype if self.action.subtype != "reply" else "say"
-                )
-                example.add_chat_message("whisper", self.main_alias, "user", "bot")
-                if subtype in ("say", "me"):
-                    example.add_chat_message(subtype, clean_response, "bot")
-                elif subtype == "whisper":
-                    example.add_chat_message(subtype, clean_response, "bot", "user")
-                examples.append(example)
-            return examples
-        return self.examples
-
     def jsonify(self):
         """ jsonify will only be called from the web interface.
         we assume that commands have been run throug the parse_command_for_web method """
@@ -486,6 +459,7 @@ class Command(Base):
             "id": self.id,
             "level": self.level,
             "main_alias": self.main_alias,
+            "parent_command": self.parent_command,
             "aliases": self.command.split("|"),
             "description": self.description,
             "channels": self.channels,
@@ -496,7 +470,6 @@ class Command(Base):
             "cost": self.cost,
             "can_execute_with_whisper": self.can_execute_with_whisper,
             "resolve_string": self.resolve_string,
-            "examples": [example.jsonify() for example in self.autogenerate_examples()],
         }
 
         if self.data:

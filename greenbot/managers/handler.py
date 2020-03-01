@@ -191,7 +191,7 @@ class HandlerManager:
         # discord.on_relationship_update(before, after)
         HandlerManager.create_handler("discord_relationship_update")
 
-        #Twitter
+        # Twitter
 
         # tweepy.StreamListener.on_status(tweet)
         HandlerManager.create_handler("twitter_on_status")
@@ -240,7 +240,11 @@ class HandlerManager:
         for handler, _ in HandlerManager.handlers[event_name]:
             res = None
             try:
-                res = await handler(event=event,*args, **kwargs) if event else await handler(*args, **kwargs)
+                res = (
+                    await handler(event=event, *args, **kwargs)
+                    if event
+                    else await handler(*args, **kwargs)
+                )
             except:
                 log.exception(f"Unhandled exception from {handler} in {event_name}")
 

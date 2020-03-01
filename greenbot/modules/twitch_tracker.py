@@ -58,20 +58,28 @@ class TwitchTracker(BaseModule):
         self.process_checker_job = None
         self.redis = RedisManager.get()
         if self.bot:
-            self.twitch_streamers_tracked = self.redis.get(f"{self.bot.bot_name}:twitch-streams-tracked")
+            self.twitch_streamers_tracked = self.redis.get(
+                f"{self.bot.bot_name}:twitch-streams-tracked"
+            )
             if not self.twitch_streamers_tracked:
-                self.redis.set(f"{self.bot.bot_name}:twitch-streams-tracked", json.dumps({}))
+                self.redis.set(
+                    f"{self.bot.bot_name}:twitch-streams-tracked", json.dumps({})
+                )
                 self.twitch_streamers_tracked = json.dumps({})
             self.twitch_streamers_tracked = json.loads(self.twitch_streamers_tracked)
             self.process_messages_job = None
-        
 
     def load_commands(self, **options):
         if self.bot:
             return_twitch_streamers_tracked = {}
             for streamer in self.settings["channels"].split(" "):
-                return_twitch_streamers_tracked[streamer.lower()] = self.twitch_streamers_tracked.get(streamer.lower(), False)
-            self.redis.set(f"{self.bot.bot_name}:twitch-streams-tracked", json.dumps(return_twitch_streamers_tracked))
+                return_twitch_streamers_tracked[
+                    streamer.lower()
+                ] = self.twitch_streamers_tracked.get(streamer.lower(), False)
+            self.redis.set(
+                f"{self.bot.bot_name}:twitch-streams-tracked",
+                json.dumps(return_twitch_streamers_tracked),
+            )
             self.twitch_streamers_tracked = return_twitch_streamers_tracked
 
     @property
@@ -84,12 +92,23 @@ class TwitchTracker(BaseModule):
             return {}
         if len(game_ids) > 100:
             final_response.update(self.get_games_playing(game_ids[100:]))
-        final_response.update({ item["id"]: item for item in requests.get(f'https://api.twitch.tv/helix/games?id=' + '&id='.join(game_ids), headers=self.headers).json()["data"] })
+        final_response.update(
+            {
+                item["id"]: item
+                for item in requests.get(
+                    f"https://api.twitch.tv/helix/games?id=" + "&id=".join(game_ids),
+                    headers=self.headers,
+                ).json()["data"]
+            }
+        )
         return final_response
 
     async def process_checker(self):
         channels = self.get_response_from_twitch(self.settings["channels"].split(" "))
-        game_ids = list(id for id,_ in itertools.groupby(channel["game_id"] for channel in channels))
+        game_ids = list(
+            id
+            for id, _ in itertools.groupby(channel["game_id"] for channel in channels)
+        )
         games = self.get_games_playing(game_ids)
         users = self.get_users([channel["user_name"].lower() for channel in channels])
         channels_updated = []
@@ -100,28 +119,61 @@ class TwitchTracker(BaseModule):
                 channels_updated.append(channel["user_name"].lower())
                 continue
             self.twitch_streamers_tracked[channel["user_name"].lower()] = True
-            await self.broadcast_live(streamer_name=channel["user_name"], stream_title=channel["title"], image_url=channel["thumbnail_url"], icon_url=users[channel["user_name"].lower()]["profile_image_url"], game=games[channel["game_id"]]["name"], viewers=channel["viewer_count"])
+            await self.broadcast_live(
+                streamer_name=channel["user_name"],
+                stream_title=channel["title"],
+                image_url=channel["thumbnail_url"],
+                icon_url=users[channel["user_name"].lower()]["profile_image_url"],
+                game=games[channel["game_id"]]["name"],
+                viewers=channel["viewer_count"],
+            )
             channels_updated.append(channel["user_name"].lower())
         for streamer in self.twitch_streamers_tracked:
             if streamer not in channels_updated:
                 self.twitch_streamers_tracked[streamer] = False
-        self.redis.set(f"{self.bot.bot_name}:twitch-streams-tracked", json.dumps(self.twitch_streamers_tracked))
+        self.redis.set(
+            f"{self.bot.bot_name}:twitch-streams-tracked",
+            json.dumps(self.twitch_streamers_tracked),
+        )
 
-    async def broadcast_live(self, streamer_name, stream_title, image_url, icon_url, game, viewers):
-        data = discord.Embed(description=f"[**{stream_title}**](https://twitch.tv/{streamer_name.lower()})\n\nPlaying {game} for {viewers} viewers\n[Watch Stream](https://twitch.tv/{streamer_name.lower()})", colour=discord.Colour.from_rgb(128, 0, 128))
+    async def broadcast_live(
+        self, streamer_name, stream_title, image_url, icon_url, game, viewers
+    ):
+        data = discord.Embed(
+            description=f"[**{stream_title}**](https://twitch.tv/{streamer_name.lower()})\n\nPlaying {game} for {viewers} viewers\n[Watch Stream](https://twitch.tv/{streamer_name.lower()})",
+            colour=discord.Colour.from_rgb(128, 0, 128),
+        )
         data.timestamp = utils.now()
         data.set_image(url=image_url.format(width=1920, height=1080))
-        data.set_author(name=f"{streamer_name} is now live on twitch!", url=f"https://twitch.tv/{streamer_name.lower()}", icon_url=icon_url)
-        channel, _  = await self.bot.functions.func_get_channel(args=[int(self.settings["output_channel"])])
-        await self.bot.say(channel, message=self.settings["broadcast_message"].format(streamer_name=streamer_name), embed=data)
+        data.set_author(
+            name=f"{streamer_name} is now live on twitch!",
+            url=f"https://twitch.tv/{streamer_name.lower()}",
+            icon_url=icon_url,
+        )
+        channel, _ = await self.bot.functions.func_get_channel(
+            args=[int(self.settings["output_channel"])]
+        )
+        await self.bot.say(
+            channel,
+            message=self.settings["broadcast_message"].format(
+                streamer_name=streamer_name
+            ),
+            embed=data,
+        )
 
     def get_response_from_twitch(self, streamers):
         final_response = []
         if not streamers:
             return []
         if len(streamers) > 100:
-            final_response = final_response + self.get_response_from_twitch(streamers[100:])    
-        final_response += requests.get(f'https://api.twitch.tv/helix/streams?user_login=' + '&user_login='.join(streamers), headers=self.headers).json()["data"]
+            final_response = final_response + self.get_response_from_twitch(
+                streamers[100:]
+            )
+        final_response += requests.get(
+            f"https://api.twitch.tv/helix/streams?user_login="
+            + "&user_login=".join(streamers),
+            headers=self.headers,
+        ).json()["data"]
         return final_response
 
     def get_users(self, streamers):
@@ -130,7 +182,16 @@ class TwitchTracker(BaseModule):
             return {}
         if len(streamers) > 100:
             final_response.update(self.get_users(streamers[100:]))
-        final_response.update({ item["login"]: item for item in requests.get(f'https://api.twitch.tv/helix/users?login=' + '&login='.join(streamers), headers=self.headers).json()["data"] })
+        final_response.update(
+            {
+                item["login"]: item
+                for item in requests.get(
+                    f"https://api.twitch.tv/helix/users?login="
+                    + "&login=".join(streamers),
+                    headers=self.headers,
+                ).json()["data"]
+            }
+        )
         return final_response
 
     def enable(self, bot):
