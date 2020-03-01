@@ -18,24 +18,24 @@ class Filters:
         role = self.discord_bot.get_role(args[0]) or self.discord_bot.get_role_by_name(
             args[0]
         )
-        return getattr(role, key) if key else (role if role else None)
+        return getattr(role, key) if key else (role if role else None), None
 
     def get_role_value(self, args, key, extra):
         role_name = args[0]
         role = self.get_role([role_name], None, extra)
         if not role:
             return f"Role {role_name} not found"
-        return getattr(role, key) if role else None
+        return getattr(role, key) if role else None, None
 
     def get_member(self, args, key, extra):
         member = self.discord_bot.get_member(args[0])
-        return getattr(member, key) if key else (member if member else None)
+        return getattr(member, key) if key else (member if member else None), None
 
     def get_member_value(self, args, key, extra):
         return self.get_member([args[0][3:][:-1]], key, extra)
 
     def get_currency(self, args, key, extra):
-        return self.bot.get_currency().get(key) if key else None
+        return self.bot.get_currency().get(key) if key else None, None
 
     def get_user(self, args, key, extra):
         user = self.get_member([args[0]], None, extra)
@@ -43,7 +43,7 @@ class Filters:
             user = extra["author"]
         with DBManager.create_session_scope() as db_session:
             db_user = User._create_or_get_by_discord_id(db_session, user.id)
-            return getattr(db_user, key) if db_user else None
+            return getattr(db_user, key) if db_user else None, None
 
     def get_user_info(self, args, key, extra):
         user = self.get_member(args[0][3:][:-1], None, extra)
@@ -132,11 +132,11 @@ class Filters:
             data.set_thumbnail(url=avatar)
         else:
             data.set_author(name=name)
-        return data
+        return None, data
 
     def get_role_info(self, args, key, extra):
         role_name = extra["message"]
-        role = self.get_role([role_name], None, extra)
+        role = list(self.get_role([role_name], None, extra))[0]
         if not role:
             return f"Role {role_name} not found"
         data = discord.Embed(colour=role.colour)
@@ -166,7 +166,7 @@ class Filters:
             value="\n".join([str(x) for x in invalid_permissions]),
         )
         data.set_thumbnail(url=extra["message_raw"].guild.icon_url)
-        return data
+        return None, data
 
     def get_commands(self, args, key, extra):
         data = discord.Embed(
@@ -182,7 +182,7 @@ class Filters:
             value="\n".join([str(x) for x in commands[len(commands) // 2 :]]),
         )
         data.set_thumbnail(url=extra["message_raw"].guild.icon_url)
-        return data
+        return None, data
 
     def get_command_info(self, args, key, extra):
         if key not in self.bot.commands:
@@ -213,7 +213,7 @@ class Filters:
             data.add_field(name=("Response"), value=command.action.response)
         data.set_thumbnail(url=extra["message_raw"].guild.icon_url)
 
-        return data
+        return None, data
 
     def get_time_value(self, args, key, extra):
         try:
@@ -225,25 +225,25 @@ class Filters:
 
     def get_channel(self, args, key, extra):
         channel = self.discord_bot.guild.get_channel(args[0])
-        return getattr(channel, key) if key else (channel if channel else None)
+        return getattr(channel, key) if key else (channel if channel else None), None
 
     @staticmethod
     def get_command_value(args, key, extra):
         if key:
             return getattr(extra["command"].data, key)
         else:
-            return extra["command"].data
+            return extra["command"].data, None
 
     @staticmethod
     def get_author_value(args, key, extra):
         if key:
             return getattr(extra["author"], key)
         else:
-            return extra["author"]
+            return extra["author"], None
 
     @staticmethod
     def get_channel_value(args, key, extra):
         if key:
             return getattr(extra["channel"], key)
         else:
-            return extra["channel"]
+            return extra["channel"], None

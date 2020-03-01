@@ -111,6 +111,7 @@ class Substitution:
 
             final_sub = needle
             if filter_name in MappingMethods.subs_methods():
+                log.info(filter_name)
                 embed, resp = MappingMethods.subs_methods()[filter_name](args=array_args, key=key, extra=extra)
                 if embed != None:
                     embeds.append(embed)
