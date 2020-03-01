@@ -443,42 +443,6 @@ class Command(Base):
                 self.last_run = cur_time
                 self.last_run_by_user[args["user_level"]] = cur_time
 
-    def autogenerate_examples(self):
-        if (
-            not self.examples
-            and self.id is not None
-            and self.action
-            and self.action.type == "message"
-        ):
-            examples = []
-
-            example = CommandExample(self.id, "Default usage")
-            subtype = self.action.subtype if self.action.subtype != "reply" else "say"
-            example.add_chat_message("say", self.main_alias, "user")
-            clean_response = Substitution.urlfetch_substitution_regex.sub(
-                "(urlfetch)", self.action.response
-            )
-
-            if subtype in ("say", "me"):
-                example.add_chat_message(subtype, clean_response, "bot")
-            elif subtype == "whisper":
-                example.add_chat_message(subtype, clean_response, "bot", "user")
-            examples.append(example)
-
-            if self.can_execute_with_whisper is True:
-                example = CommandExample(self.id, "Default usage through whisper")
-                subtype = (
-                    self.action.subtype if self.action.subtype != "reply" else "say"
-                )
-                example.add_chat_message("whisper", self.main_alias, "user", "bot")
-                if subtype in ("say", "me"):
-                    example.add_chat_message(subtype, clean_response, "bot")
-                elif subtype == "whisper":
-                    example.add_chat_message(subtype, clean_response, "bot", "user")
-                examples.append(example)
-            return examples
-        return self.examples
-
     def jsonify(self):
         """ jsonify will only be called from the web interface.
         we assume that commands have been run throug the parse_command_for_web method """
@@ -496,7 +460,6 @@ class Command(Base):
             "cost": self.cost,
             "can_execute_with_whisper": self.can_execute_with_whisper,
             "resolve_string": self.resolve_string,
-            "examples": [example.jsonify() for example in self.autogenerate_examples()],
         }
 
         if self.data:
