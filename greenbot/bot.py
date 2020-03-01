@@ -225,9 +225,9 @@ class Bot:
                 trigger += " " + msg_lower_parts[1] if len(msg_lower_parts) > 1 else ""
                 if trigger not in self.commands:
                     return
-                msg_lower_parts = msg_lower_parts[2:] if len(msg_lower_parts) > 2 else []
+                msg_lower_parts = msg_lower_parts[1:] if len(msg_lower_parts) > 1 else []
             remaining_message = (
-                " ".join(msg_raw_parts) if len(msg_raw_parts) > 1 else ""
+                " ".join(msg_raw_parts[1:]) if len(msg_raw_parts) > 1 else ""
             )
             command = self.commands[trigger]
             extra_args = {
