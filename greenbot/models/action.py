@@ -137,7 +137,8 @@ class MappingMethods:
             method_mapping["time"] = bot.filters.get_time_value if bot else None
             method_mapping["command"] = bot.filters.get_command_value if bot else None
             method_mapping["author"] = bot.filters.get_author_value if bot else None
-            method_mapping["channel"] = bot.filters.get_channel_value if bot else None
+            method_mapping["_channel"] = bot.filters.get_channel_value if bot else None
+            method_mapping["channel"] = bot.filters.get_channel if bot else None
         except AttributeError:
             pass
         return method_mapping

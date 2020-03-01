@@ -221,6 +221,10 @@ class Filters:
             log.exception("Unhandled exception in get_time_value")
         return None
 
+    def get_channel(self, args, key):
+        channel = self.discord_bot.guild.get_channel(args[0])
+        return getattr(channel, key) if key else (channel if channel else None)
+
     @staticmethod
     def get_command_value(args, key, extra):
         if key:
