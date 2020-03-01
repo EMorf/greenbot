@@ -18,6 +18,13 @@ class Filters:
         role = self.discord_bot.get_role(args[0]) or self.discord_bot.get_role_by_name(args[0])
         return getattr(role, key) if key else (role if role else None)
 
+    def get_role_value(self, args, key, extra):
+        role_name = args[0]
+        role = self.get_role([role_name], None, extra)
+        if not role:
+            return f"Role {role_name} not found"
+        return getattr(role, key) if role else None
+
     def get_member(self, args, key, extra):
         member = self.discord_bot.get_member(args[0])
         return getattr(member, key) if key else (member if member else None)
@@ -35,13 +42,6 @@ class Filters:
         with DBManager.create_session_scope() as db_session:
             db_user = User._create_or_get_by_discord_id(db_session, user.id)
             return getattr(db_user, key) if db_user else None
-
-    def get_role_value(self, args, key, extra):
-        role_name = args[0]
-        role = self.get_role([role_name], None, extra)
-        if not role:
-            return f"Role {role_name} not found"
-        return getattr(role, key) if role else None
 
     def get_user_info(self, args, key, extra):
         user = self.get_member(args[0][3:][:-1], None, extra)
