@@ -109,7 +109,7 @@ class Functions:
             return "Invalid Comand Args", None
 
         author = extra["author"]
-        member = self.filters.get_member(args[0][3:][:-1])
+        member = self.filters.get_member(args[0][3:][:-1], None, extra)
         if not member:
             return f"Invalid Member, {args[0]}", None
 
@@ -131,7 +131,7 @@ class Functions:
             return "Invalid Comand Args", None
 
         author = extra["author"]
-        member = self.filters.get_member(args[0][3:][:-1])
+        member = self.filters.get_member(args[0][3:][:-1], None, extra)
         if not member:
             return f"Invalid Member {args[0]}", None
 
@@ -152,9 +152,10 @@ class Functions:
         if len(args) != 2:
             return "Invalid Comand Args", None
 
-        member = self.filters.get_member(args[0][3:][:-1])
+        member = self.filters.get_member(args[0][3:][:-1], None, extra)
         if not member:
             return f"Invalid Member {args[0]}", None
+
         level = args[1]
         try:
             level = int(level)
@@ -178,33 +179,40 @@ class Functions:
         if len(args) == 2:
             return "Invalid Comand Args", None
 
-        user_id = args[0][3:][:-1]
+        member = self.filters.get_member(args[0][3:][:-1], None, extra)
+        if not member:
+            return f"Invalid Member {args[0]}", None
+
         try:
             amount = int(args[1])
         except ValueError:
             return f"Invalid points amount, please enter a valid positive integer not {args[0]}", None
 
         with DBManager.create_session_scope() as db_session:
-            user = User._create_or_get_by_discord_id(db_session, str(user_id))
+            user = User._create_or_get_by_discord_id(db_session, str(member.id))
             user.points = amount
         currency = self.bot.get_currency().get("name").capitalize()
-        return f"{currency} balance for <@!{user_id}> set to {amount}", None
+        return f"{currency} balance for {member.mention} set to {amount}", None
 
     async def func_adj_balance(self, args, extra={}):
         if len(args) == 2:
             return "Invalid Comand Args", None
-        user_id = args[0][3:][:-1]
+
+        member = self.filters.get_member(args[0][3:][:-1], None, extra)
+        if not member:
+            return f"Invalid Member {args[0]}", None
+
         try:
             amount = int(args[1])
         except ValueError:
             return f"Invalid points amount, please enter a valid positive integer not {args[0]}", None
 
         with DBManager.create_session_scope() as db_session:
-            user = User._create_or_get_by_discord_id(db_session, str(user_id))
+            user = User._create_or_get_by_discord_id(db_session, str(member.id))
             user.points += amount
         action = "added to" if amount > 0 else "removed from"
         currency = self.bot.get_currency().get("name")
-        return f"{amount} {currency} {action} <@!{user_id}> ", None
+        return f"{amount} {currency} {action} {member.mention} ", None
 
     async def func_output(self, args, extra={}):
         return f"args: {args}\nextra: {extra}", None
