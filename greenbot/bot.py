@@ -95,7 +95,19 @@ class Bot:
             redis=RedisManager.get(),
             private_loop=self.private_loop,
         )
-        self.twitter_manager = TwitterManager(self, self.config["twitter"]) if utils.contains_value(["consumer_key", "consumer_secret", "access_token", "access_token_secret"], self.config["twitter"]) else None
+        self.twitter_manager = (
+            TwitterManager(self, self.config["twitter"])
+            if utils.contains_value(
+                [
+                    "consumer_key",
+                    "consumer_secret",
+                    "access_token",
+                    "access_token_secret",
+                ],
+                self.config["twitter"],
+            )
+            else None
+        )
         self.filters = Filters(self, self.discord_bot)
         self.functions = Functions(self, self.filters)
 
@@ -115,7 +127,7 @@ class Bot:
         return self.discord_bot.client.user.id
 
     async def wait_discord_load(self):
-        self.roles = {} 
+        self.roles = {}
         self.socket_manager = SocketManager(self.bot_name, self.execute_now)
         self.message_manager = MessageManager(self)
         self.module_manager = ModuleManager(self.socket_manager, bot=self).load()
@@ -184,10 +196,14 @@ class Bot:
     async def kick(self, user, reason=None):
         return await self.discord_bot.kick(user=user, reason=reason)
 
-    async def private_message(self, user, message=None, embed=None, ignore_escape=False):
+    async def private_message(
+        self, user, message=None, embed=None, ignore_escape=False
+    ):
         if message is None and embed is None:
             return None
-        return await self.discord_bot.private_message(user, message, embed, ignore_escape)
+        return await self.discord_bot.private_message(
+            user, message, embed, ignore_escape
+        )
 
     async def say(self, channel, message=None, embed=None, ignore_escape=False):
         if message is None and embed is None:

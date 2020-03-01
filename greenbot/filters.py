@@ -15,7 +15,9 @@ class Filters:
         self.discord_bot = discord_bot
 
     def get_role(self, args, key, extra):
-        role = self.discord_bot.get_role(args[0]) or self.discord_bot.get_role_by_name(args[0])
+        role = self.discord_bot.get_role(args[0]) or self.discord_bot.get_role_by_name(
+            args[0]
+        )
         return getattr(role, key) if key else (role if role else None)
 
     def get_role_value(self, args, key, extra):

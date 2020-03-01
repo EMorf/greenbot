@@ -13,7 +13,9 @@ class Functions:
         self.bot = bot
         self.filters = filters
 
-    async def func_kick_member(self, args, extra={}): # !kick <member_mention> <reason....>
+    async def func_kick_member(
+        self, args, extra={}
+    ):  # !kick <member_mention> <reason....>
         if len(args) != 2:
             return "Invalid Comand Args", None
 
@@ -29,8 +31,13 @@ class Functions:
             member_user = User._create_or_get_by_discord_id(
                 db_session, str(member.id), user_name=str(member)
             )
-            if max(author_user.level, self.bot.psudo_level_member(author_user)) <= max(member_user.level, self.bot.psudo_level_member(member_user)):
-                return "You cannot kick someone who has the same or a higher level than you :)", None
+            if max(author_user.level, self.bot.psudo_level_member(author_user)) <= max(
+                member_user.level, self.bot.psudo_level_member(member_user)
+            ):
+                return (
+                    "You cannot kick someone who has the same or a higher level than you :)",
+                    None,
+                )
 
         reason = args[1]
         resp = await self.bot.kick(member, f"{reason}\nKicked by {author}")
@@ -56,8 +63,13 @@ class Functions:
             if author.id == member.id:
                 return "You cannot ban yourself :)", None
 
-            if max(author_user.level, self.bot.psudo_level_member(author_user)) <= max(member_user.level, self.bot.psudo_level_member(member_user)):
-                return "You cannot ban someone who has the same or a higher level than you :)", None
+            if max(author_user.level, self.bot.psudo_level_member(author_user)) <= max(
+                member_user.level, self.bot.psudo_level_member(member_user)
+            ):
+                return (
+                    "You cannot ban someone who has the same or a higher level than you :)",
+                    None,
+                )
 
         time_to_parse = utils.parse_timedelta(args[1])
         if not time_to_parse:
@@ -189,7 +201,10 @@ class Functions:
         try:
             amount = int(args[1])
         except ValueError:
-            return f"Invalid points amount, please enter a valid positive integer not {args[0]}", None
+            return (
+                f"Invalid points amount, please enter a valid positive integer not {args[0]}",
+                None,
+            )
 
         with DBManager.create_session_scope() as db_session:
             user = User._create_or_get_by_discord_id(db_session, str(member.id))
@@ -208,7 +223,10 @@ class Functions:
         try:
             amount = int(args[1])
         except ValueError:
-            return f"Invalid points amount, please enter a valid positive integer not {args[0]}", None
+            return (
+                f"Invalid points amount, please enter a valid positive integer not {args[0]}",
+                None,
+            )
 
         with DBManager.create_session_scope() as db_session:
             user = User._create_or_get_by_discord_id(db_session, str(member.id))

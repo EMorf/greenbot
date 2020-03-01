@@ -23,6 +23,7 @@ def time_method(f):
 
     return wrap
 
+
 def parse_date(string):
     if ":" in string[-5:]:
         string = f"{string[:-5]}{string[-5:-3]}{string[-2:]}"

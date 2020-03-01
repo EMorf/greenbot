@@ -116,6 +116,7 @@ rainbowcolors = [
     0xFF000F,
 ]
 
+
 class Memes(BaseModule):
     ID = __name__.split(".")[-1]
     NAME = "Memes"
@@ -170,7 +171,7 @@ class Memes(BaseModule):
             label="Max vroom races",
             type="number",
             placeholder="",
-            default=3
+            default=3,
         ),
     ]
 
@@ -199,21 +200,31 @@ class Memes(BaseModule):
             m = await self.bot.say(channel=channel, message="﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏")
             self.vroom_races.append(m)
             await asyncio.sleep(0.5)
-            await m.edit(content=f"{self.settings['emote_for_vroom']}﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏")
+            await m.edit(
+                content=f"{self.settings['emote_for_vroom']}﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏"
+            )
             for _ in range(19):
                 newtick = m.content[:-1]
                 newtick = "﹏" + newtick
                 await asyncio.sleep((random.randint(5, 30) / 10))
                 await m.edit(content=newtick)
             elapsed_time = utils.now() - start_time
-            await m.edit(content=f"{author.mention} finished in {round(elapsed_time.total_seconds(), 2)}s")
+            await m.edit(
+                content=f"{author.mention} finished in {round(elapsed_time.total_seconds(), 2)}s"
+            )
             self.vroom_races.remove(m)
         else:
-            await self.bot.say(channel=channel, message=f"{author.mention} there can only be up to {self.settings['max_vroom_races']} races at the same time. Try later...", ignore_escape=True)
+            await self.bot.say(
+                channel=channel,
+                message=f"{author.mention} there can only be up to {self.settings['max_vroom_races']} races at the same time. Try later...",
+                ignore_escape=True,
+            )
 
     async def dank(self, bot, author, channel, message, args):
         role = self.bot.discord_bot.guild.get_role(int(self.settings["dank_role_id"]))
-        dcol = discord.Colour.from_rgb(random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
+        dcol = discord.Colour.from_rgb(
+            random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)
+        )
         await role.edit(colour=dcol)
 
     def load_commands(self, **options):
@@ -242,7 +253,6 @@ class Memes(BaseModule):
             can_execute_with_whisper=False,
             description="VROOOOOOOOOOM",
         )
-        
 
     def enable(self, bot):
         if not bot:

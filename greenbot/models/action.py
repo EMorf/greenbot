@@ -43,9 +43,7 @@ class Function:
         r"(?<!\\)\$\((\w+);\[((((\"([^\"]|\\[\$\"])*\")|(\d+)),?\s?)*)\]\)"
     )
 
-    args_sub_regex = re.compile(
-        r'\"([^\"]*)\"|(?:(?<=,)|^)'
-    )
+    args_sub_regex = re.compile(r"\"([^\"]*)\"|(?:(?<=,)|^)")
 
     @staticmethod
     async def run_functions(_input, args, extra, author, channel, private_message, bot):
@@ -62,7 +60,9 @@ class Function:
                 log.error(f"function {func_name} not found!")
                 continue
 
-            resp, embed = await MappingMethods.func_methods()[func_name](array_args, extra)
+            resp, embed = await MappingMethods.func_methods()[func_name](
+                array_args, extra
+            )
             if private_message:
                 await bot.private_message(user=author, message=resp, embed=embed)
             else:
@@ -71,16 +71,12 @@ class Function:
 
 class Substitution:
     substitution_regex = re.compile(
-        r'(?<!\\)\$\((\w+);\[((((\"([^\"]|\\[\$\"])*\")|(\d+)),?)*)\]:(\w*)\)'
+        r"(?<!\\)\$\((\w+);\[((((\"([^\"]|\\[\$\"])*\")|(\d+)),?)*)\]:(\w*)\)"
     )
 
-    args_sub_regex = re.compile(
-        r'\"([^\"]*)\"|(?:(?<=,)|^)'
-    )
+    args_sub_regex = re.compile(r"\"([^\"]*)\"|(?:(?<=,)|^)")
 
-    user_args_sub_regex = re.compile(
-        r'(?<!\\)\$\((\d+)(\+?)\)'
-    )
+    user_args_sub_regex = re.compile(r"(?<!\\)\$\((\d+)(\+?)\)")
 
     @staticmethod
     def apply_subs(_input, args, extra):
@@ -88,10 +84,20 @@ class Substitution:
         embeds = []
         for user_sub_key in Substitution.user_args_sub_regex.finditer(_input):
             needle = user_sub_key.group(0)
-            index = int(user_sub_key.group(1))-1
+            index = int(user_sub_key.group(1)) - 1
             additions = user_sub_key.group(2)
-            _input = _input.replace(needle, (" ".join(args[index:]) if additions else args[index] if len(args) >= index + 1 else ""), 1)
-            count+=1
+            _input = _input.replace(
+                needle,
+                (
+                    " ".join(args[index:])
+                    if additions
+                    else args[index]
+                    if len(args) >= index + 1
+                    else ""
+                ),
+                1,
+            )
+            count += 1
 
         for sub_key in Substitution.substitution_regex.finditer(_input):
             needle = sub_key.group(0)
@@ -100,16 +106,20 @@ class Substitution:
             key = sub_key.group(8)
             array_args = []
             for arg in Substitution.args_sub_regex.finditer(args):
-                array_args.append(list(Substitution.apply_subs(arg.group(1), args, extra))[0])
+                array_args.append(
+                    list(Substitution.apply_subs(arg.group(1), args, extra))[0]
+                )
 
             final_sub = needle
             if filter_name in MappingMethods.subs_methods():
-                embed, resp = MappingMethods.subs_methods()[filter_name](array_args, key, extra)
-                if (embed != None):
+                embed, resp = MappingMethods.subs_methods()[filter_name](
+                    array_args, key, extra
+                )
+                if embed != None:
                     embeds.append(embed)
                 final_sub = resp
             _input = _input.replace(needle, final_sub, 1)
-            count+=1
+            count += 1
         if count > 0:
             _input, embeds_ = Substitution.apply_subs(_input, args, extra)
             embeds += embeds_
@@ -137,7 +147,9 @@ class MappingMethods:
             method_mapping["userinfo"] = bot.filters.get_user_info if bot else None
             method_mapping["roleinfo"] = bot.filters.get_role_info if bot else None
             method_mapping["commands"] = bot.filters.get_commands if bot else None
-            method_mapping["commandinfo"] = bot.filters.get_command_info if bot else None
+            method_mapping["commandinfo"] = (
+                bot.filters.get_command_info if bot else None
+            )
             method_mapping["time"] = bot.filters.get_time_value if bot else None
             method_mapping["command"] = bot.filters.get_command_value if bot else None
             method_mapping["author"] = bot.filters.get_author_value if bot else None
@@ -155,11 +167,19 @@ class MappingMethods:
             method_mapping["kick"] = bot.functions.func_kick_member if bot else None
             method_mapping["ban"] = bot.functions.func_ban_member if bot else None
             method_mapping["unban"] = bot.functions.func_unban_member if bot else None
-            method_mapping["addrole"] = bot.functions.func_add_role_member if bot else None
-            method_mapping["removerole"] = bot.functions.func_remove_role_member if bot else None
+            method_mapping["addrole"] = (
+                bot.functions.func_add_role_member if bot else None
+            )
+            method_mapping["removerole"] = (
+                bot.functions.func_remove_role_member if bot else None
+            )
             method_mapping["level"] = bot.functions.func_level if bot else None
-            method_mapping["setpoints"] = bot.functions.func_set_balance if bot else None
-            method_mapping["adjpoints"] = bot.functions.func_adj_balance if bot else None
+            method_mapping["setpoints"] = (
+                bot.functions.func_set_balance if bot else None
+            )
+            method_mapping["adjpoints"] = (
+                bot.functions.func_adj_balance if bot else None
+            )
             method_mapping["output"] = bot.functions.func_output if bot else None
             method_mapping["embed"] = bot.functions.func_embed_image if bot else None
         except AttributeError:
@@ -291,7 +311,9 @@ class MessageAction(BaseAction):
         if not self.response:
             return None, None
 
-        return Substitution.apply_subs(self.response, extra["message"].split(" "), extra)
+        return Substitution.apply_subs(
+            self.response, extra["message"].split(" "), extra
+        )
 
     @staticmethod
     def get_extra_data(author, channel, message, args):
@@ -307,7 +329,15 @@ class ReplyAction(MessageAction):
     async def run(self, bot, author, channel, message, args):
         extra = self.get_extra_data(author, channel, message, args)
         MappingMethods.init(bot)
-        await Function.run_functions(self.functions, extra["message"].split(" "), extra, author, channel, args["whisper"], bot)
+        await Function.run_functions(
+            self.functions,
+            extra["message"].split(" "),
+            extra,
+            author,
+            channel,
+            args["whisper"],
+            bot,
+        )
 
         resp, embed = self.get_response(bot, extra)
         if not resp and not embed:
@@ -324,7 +354,15 @@ class PrivateMessageAction(MessageAction):
     async def run(self, bot, author, channel, message, args):
         extra = self.get_extra_data(author, channel, message, args)
         MappingMethods.init(bot)
-        await Function.run_functions(self.functions, extra["message"].split(" "), extra, author, channel, args["whisper"], bot)
+        await Function.run_functions(
+            self.functions,
+            extra["message"].split(" "),
+            extra,
+            author,
+            channel,
+            args["whisper"],
+            bot,
+        )
 
         resp, embed = self.get_response(bot, extra)
         if not resp and not embed:

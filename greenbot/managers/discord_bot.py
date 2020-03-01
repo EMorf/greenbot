@@ -239,24 +239,29 @@ class DiscordBotManager:
         self.redis = redis
 
         self.guild = None
-        if not self.redis.get(f"{self.bot.bot_name}:timeouts-discord") or not json.loads(
-            self.redis.get(f"{self.bot.bot_name}:timeouts-discord")
-        ):
+        if not self.redis.get(
+            f"{self.bot.bot_name}:timeouts-discord"
+        ) or not json.loads(self.redis.get(f"{self.bot.bot_name}:timeouts-discord")):
             self.redis.set(f"{self.bot.bot_name}:timeouts-discord", json.dumps({}))
         HandlerManager.add_handler("discord_ready", self.initial_unbans)
 
     async def initial_unbans(self):
         try:
             data = json.loads(self.redis.get(f"{self.bot.bot_name}:timeouts-discord"))
-            for user in data: 
-                unban_date = datetime.strptime(utils.parse_date(data[user]["unban_date"]), "%Y-%m-%d %H:%M:%S.%f%z")
+            for user in data:
+                unban_date = datetime.strptime(
+                    utils.parse_date(data[user]["unban_date"]), "%Y-%m-%d %H:%M:%S.%f%z"
+                )
                 time_now = utils.now()
                 resp_timeout = data.get("resp_timeout", "")
                 resp_timeout += " after " if resp_timeout else ""
                 if unban_date < time_now:
                     ScheduleManager.execute_now(
                         method=self.unban,
-                        args=[data[user]["discord_id"], f"Unbanned by timer{resp_timeout}"],
+                        args=[
+                            data[user]["discord_id"],
+                            f"Unbanned by timer{resp_timeout}",
+                        ],
                     )
                     continue
                 ScheduleManager.execute_delayed(
@@ -306,12 +311,16 @@ class DiscordBotManager:
             pass
         try:
             resp_timeout = utils.seconds_to_resp(timeout_in_seconds)
-            reason += f" for {resp_timeout}!" if timeout_in_seconds > 0 else " Permanently!"
+            reason += (
+                f" for {resp_timeout}!" if timeout_in_seconds > 0 else " Permanently!"
+            )
             await self.guild.ban(
                 user=user, reason=reason, delete_message_days=delete_message_days
             )
             if timeout_in_seconds > 0:
-                timeouts = json.loads(self.redis.get(f"{self.bot.bot_name}:timeouts-discord"))
+                timeouts = json.loads(
+                    self.redis.get(f"{self.bot.bot_name}:timeouts-discord")
+                )
                 timeouts[str(user.id)] = {
                     "discord_id": str(user.id),
                     "unban_date": str(
@@ -320,7 +329,9 @@ class DiscordBotManager:
                     "resp_timeout": resp_timeout,
                     "reason": str(reason),
                 }
-                self.redis.set(f"{self.bot.bot_name}:timeouts-discord", json.dumps(timeouts))
+                self.redis.set(
+                    f"{self.bot.bot_name}:timeouts-discord", json.dumps(timeouts)
+                )
                 ScheduleManager.execute_delayed(
                     delay=timeout_in_seconds,
                     method=self.unban,
@@ -346,7 +357,9 @@ class DiscordBotManager:
         timeouts = json.loads(self.redis.get(f"{self.bot.bot_name}:timeouts-discord"))
         if str(user_id) in timeouts:
             del timeouts[str(user_id)]
-            self.redis.set(f"{self.bot.bot_name}:timeouts-discord", json.dumps(timeouts))
+            self.redis.set(
+                f"{self.bot.bot_name}:timeouts-discord", json.dumps(timeouts)
+            )
         try:
             ban = await self.guild.fetch_ban(user)
             if ban:
@@ -370,7 +383,9 @@ class DiscordBotManager:
             return False
         return True
 
-    async def private_message(self, user, message=None, embed=None, ignore_escape=False):
+    async def private_message(
+        self, user, message=None, embed=None, ignore_escape=False
+    ):
         if (message is None and embed is None) or user is None:
             return None
         try:
