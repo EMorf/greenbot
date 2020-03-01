@@ -32,7 +32,7 @@ class Filters:
         return getattr(member, key) if key and member else member, None
 
     def get_member_value(self, args, key, extra):
-        return list(self.get_member([args[0][3:][:-1]], key, extra))[0]
+        return list(self.get_member([args[0][3:][:-1]], key, extra))[0], None
 
     def get_currency(self, args, key, extra):
         return self.bot.get_currency().get(key) if key else None, None
