@@ -48,14 +48,12 @@ class Function:
     @staticmethod
     async def run_functions(_input, args, extra, author, channel, private_message, bot):
         _input = list(Substitution.apply_subs(_input, args, extra))[0]
-        log.info(_input)
         for sub_key in Function.function_regex.finditer(_input):
             func_name = sub_key.group(1)
             args = sub_key.group(2)
             array_args = []
             for arg in Substitution.args_sub_regex.finditer(args):
                 array_args.append(arg.group(1))
-            log.info(array_args)
             if func_name not in MappingMethods.func_methods():
                 log.error(f"function {func_name} not found!")
                 continue
@@ -82,7 +80,6 @@ class Substitution:
     def apply_subs(_input, args, extra):
         count = 0
         embeds = []
-        log.info(_input)
         for user_sub_key in Substitution.user_args_sub_regex.finditer(_input):
             needle = user_sub_key.group(0)
             index = int(user_sub_key.group(1)) - 1
@@ -340,14 +337,14 @@ class ReplyAction(MessageAction):
             bot,
         )
 
-        resp, embed = self.get_response(bot, extra)
-        if not resp and not embed:
+        resp, embeds = self.get_response(bot, extra)
+        if not resp and not embeds:
             return False
 
-        if args["whisper"]:
-            return await bot.private_message(author, resp, embed)
-        return await bot.say(channel, resp, embed)
-
+        messages = [await bot.private_message(author, resp) if args["whisper"] else await bot.say(channel, resp)]
+        for embed in embeds:
+            messages.append(await bot.private_message(author, embed=embed) if args["whisper"] else await bot.say(channel, embed=embed))
+        return messages
 
 class PrivateMessageAction(MessageAction):
     subtype = "Private Message"
@@ -365,8 +362,11 @@ class PrivateMessageAction(MessageAction):
             bot,
         )
 
-        resp, embed = self.get_response(bot, extra)
-        if not resp and not embed:
+        resp, embeds = self.get_response(bot, extra)
+        if not resp and not embeds:
             return False
 
-        return await bot.private_message(author, resp, embed)
+        messages = [await bot.private_message(author, resp)]
+        for embed in embeds:
+            messages.append(await bot.private_message(author, embed=embed))
+        return messages
