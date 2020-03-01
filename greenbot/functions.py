@@ -125,7 +125,7 @@ class Functions:
         if not member:
             return f"Invalid Member, {args[0]}", None
 
-        role = self.filters.get_role(args[1])
+        role = list(self.filters.get_role([args[1]], None, extra))[0]
         if not role:
             return f"Invalid Role, {args[1]}", None
 
@@ -147,7 +147,7 @@ class Functions:
         if not member:
             return f"Invalid Member {args[0]}", None
 
-        role = self.filters.get_role(args[1])
+        role = list(self.filters.get_role([args[1]], None, extra))[0]
         if not role:
             return f"Invalid Role {args[1]}", None
 
