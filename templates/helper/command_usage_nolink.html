@@ -3,6 +3,7 @@
     {% if command.json_description and command.json_description.get('usage', 'normal') == 'whisper' %}
     /w {{ bot.name }}
     {% endif %}
+    {{ command._parent_command }}
     {{ command.main_alias }}
 </div>
 {% if command.json_description %}
