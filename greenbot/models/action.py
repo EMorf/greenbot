@@ -106,13 +106,19 @@ class Substitution:
             array_args = []
             for arg in Substitution.args_sub_regex.finditer(args):
                 array_args.append(
-                    list(Substitution.apply_subs(arg.group(1) if arg.group(1) else "", args, extra))[0]
+                    list(
+                        Substitution.apply_subs(
+                            arg.group(1) if arg.group(1) else "", args, extra
+                        )
+                    )[0]
                 )
 
             final_sub = needle
             if filter_name in MappingMethods.subs_methods():
                 log.info(filter_name)
-                resp, embed = MappingMethods.subs_methods()[filter_name](args=array_args, key=key, extra=extra)
+                resp, embed = MappingMethods.subs_methods()[filter_name](
+                    args=array_args, key=key, extra=extra
+                )
                 if embed != None:
                     embeds.append(embed)
                 final_sub = resp
@@ -308,7 +314,7 @@ class MessageAction(BaseAction):
         MappingMethods.init(bot)
         if not self.response:
             return None, None
-        
+
         return Substitution.apply_subs(
             self.response, extra["message"].split(" "), extra
         )
@@ -343,10 +349,19 @@ class ReplyAction(MessageAction):
 
         messages = []
         if resp:
-            messages.append(await bot.private_message(author, resp) if args["whisper"] else await bot.say(channel, resp))
+            messages.append(
+                await bot.private_message(author, resp)
+                if args["whisper"]
+                else await bot.say(channel, resp)
+            )
         for embed in embeds:
-            messages.append(await bot.private_message(author, embed=embed) if args["whisper"] else await bot.say(channel, embed=embed))
+            messages.append(
+                await bot.private_message(author, embed=embed)
+                if args["whisper"]
+                else await bot.say(channel, embed=embed)
+            )
         return messages
+
 
 class PrivateMessageAction(MessageAction):
     subtype = "Private Message"

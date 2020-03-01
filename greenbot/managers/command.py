@@ -221,7 +221,7 @@ class CommandManager(UserDict):
     def add_db_command_aliases(self, command):
         aliases = command.command.split("|")
         for alias in aliases:
-            self.db_commands[command._parent_command+alias] = command
+            self.db_commands[command._parent_command + alias] = command
 
         return len(aliases)
 
@@ -310,7 +310,9 @@ class CommandManager(UserDict):
             self.add_db_command_aliases(command)
             self.db_session.expunge(command)
             if command.data is None:
-                log.info(f"Creating command data for {command._parent_command}{command.command}")
+                log.info(
+                    f"Creating command data for {command._parent_command}{command.command}"
+                )
                 command.data = CommandData(command.id)
             self.db_session.add(command.data)
 

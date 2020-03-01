@@ -232,9 +232,11 @@ class APICommandCheckAlias(Resource):
         command_aliases = []
 
         for alias, command in command_manager.items():
-            command_aliases.append(command._parent_command+alias)
+            command_aliases.append(command._parent_command + alias)
             if command.command and len(command.command) > 0:
-                command_aliases.extend([command._parent_command + x for x in command.command.split("|")])
+                command_aliases.extend(
+                    [command._parent_command + x for x in command.command.split("|")]
+                )
 
         command_aliases = set(command_aliases)
 

@@ -327,9 +327,7 @@ class Command(Base):
     @classmethod
     def dispatch_command(cls, cb, **options):
         cmd = cls(**options)
-        cmd.action = ActionParser.parse(
-            '{"type": "func", "cb": "' + cb + '"}'
-        )
+        cmd.action = ActionParser.parse('{"type": "func", "cb": "' + cb + '"}')
         return cmd
 
     @classmethod

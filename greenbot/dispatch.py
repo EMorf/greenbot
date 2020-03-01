@@ -301,7 +301,7 @@ class Dispatch:
                     already_used_aliases.append(alias)
                 else:
                     added_aliases.append(alias)
-                    bot.commands[command._parent_command+alias] = command
+                    bot.commands[command._parent_command + alias] = command
 
             if len(added_aliases) > 0:
                 new_aliases = f"{command.command}|{'|'.join(added_aliases)}"
@@ -335,8 +335,7 @@ class Dispatch:
             alias = " ".join(aliases)
             if alias not in bot.commands:
                 await bot.private_message(
-                    author,
-                    f"{alias} is not currently an alias",
+                    author, f"{alias} is not currently an alias",
                 )
                 return
 
@@ -364,7 +363,9 @@ class Dispatch:
             bot.commands.edit_command(command, command=new_aliases)
 
             del bot.commands[alias]
-            log_msg = f"The alias {alias} has been removed from {new_aliases.split('|')[0]}"
+            log_msg = (
+                f"The alias {alias} has been removed from {new_aliases.split('|')[0]}"
+            )
             AdminLogManager.add_entry("Alias removed", str(author.id), log_msg)
 
             await bot.private_message(author, f"Successfully removed aliase {alias}.")
