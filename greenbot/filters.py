@@ -215,7 +215,7 @@ class Filters:
 
         return data
 
-    def get_time_value(self, args, key):
+    def get_time_value(self, args, key, extra):
         try:
             tz = timezone(key)
             return datetime.datetime.now(tz).strftime("%H:%M")
@@ -223,7 +223,7 @@ class Filters:
             log.exception("Unhandled exception in get_time_value")
         return None
 
-    def get_channel(self, args, key):
+    def get_channel(self, args, key, extra):
         channel = self.discord_bot.guild.get_channel(args[0])
         return getattr(channel, key) if key else (channel if channel else None)
 
