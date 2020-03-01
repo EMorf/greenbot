@@ -49,9 +49,7 @@ class Function:
 
     @staticmethod
     async def run_functions(_input, args, extra, author, channel, private_message, bot):
-        log.info(_input)
-        _input = Substitution.apply_subs(_input, args, extra)
-        for sub_key in Substitution.substitution_regex.finditer(_input):
+        for sub_key in Function.function_regex.finditer(_input):
             func_name = sub_key.group(1)
             args = sub_key.group(2)
             array_args = []
