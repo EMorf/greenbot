@@ -44,7 +44,7 @@ class Function:
     )
 
     args_sub_regex = re.compile(
-        r'\"([^\"]*)\"|(?:(?<=,)|^)(\d*\.?\d+)(?:(?=,)|$)'
+        r'\"([^\"]*)\"|(?:(?<=,)|^)'
     )
 
     @staticmethod
@@ -57,7 +57,7 @@ class Function:
             array_args = []
             for arg in Substitution.args_sub_regex.finditer(args):
                 try:
-                    array_args.append(arg.group(1) if arg.group(1) != None else int(arg.group(2)))
+                    array_args.append(arg.group(1))
                 except ValueError:
                     array_args.append(None)
             if func_name not in MappingMethods.func_methods():
@@ -77,7 +77,7 @@ class Substitution:
     )
 
     args_sub_regex = re.compile(
-        r'\"([^\"]*)\"|(?:(?<=,)|^)(\d*\.?\d+)(?:(?=,)|$)'
+        r'\"([^\"]*)\"|(?:(?<=,)|^)'
     )
 
     user_args_sub_regex = re.compile(
@@ -102,7 +102,7 @@ class Substitution:
             key = sub_key.group(8)
             array_args = []
             for arg in Substitution.args_sub_regex.finditer(args):
-                array_args.append(list(Substitution.apply_subs(arg.group(1), args, extra))[0] if arg.group(1) else int(arg.group(2)))
+                array_args.append(list(Substitution.apply_subs(arg.group(1), args, extra))[0])
 
             final_sub = needle
             if filter_name in MappingMethods.subs_methods():
