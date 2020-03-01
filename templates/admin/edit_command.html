@@ -70,7 +70,7 @@
     ('Reply Type', True, command.action.subtype, 'action_type', 'list(Reply:Reply,Private Message:Private Message)', ''),
     ('Response', True, command.action.response, 'action_message', 'string', ''),
     ('Functions', True, command.action.functions, 'action_functions', 'string', ''),
-    ('Channels', True, command.channels_web, 'channels', 'string', ''),
+    ('Channels', True, command.channels_web, 'action_channels', 'string', ''),
 ] %}
 {% elif command.action.type == 'func' %}
 {% set data_available = [

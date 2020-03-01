@@ -292,7 +292,7 @@ class Command(Base):
 
     @property
     def channels_web(self):
-        return " ".join(self.channels)
+        return " ".join(json.loads(self.channels))
 
     @reconstructor
     def init_on_load(self):
