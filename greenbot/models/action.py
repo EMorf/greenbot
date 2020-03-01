@@ -55,6 +55,7 @@ class Function:
             array_args = []
             for arg in Substitution.args_sub_regex.finditer(args):
                 array_args.append(list(Substitution.apply_subs(arg.group(1), args, extra))[0] if arg.group(1) else int(arg.group(2)))
+            log.info(array_args)
             if func_name not in MappingMethods.func_methods():
                 continue
 
@@ -97,10 +98,7 @@ class Substitution:
             key = sub_key.group(8)
             array_args = []
             for arg in Substitution.args_sub_regex.finditer(args):
-                if arg.group(1):
-                    array_args.append(list(Substitution.apply_subs(arg.group(1), args, extra))[0])
-                else:
-                    array_args.append(int(arg.group(2)))
+                array_args.append(list(Substitution.apply_subs(arg.group(1), args, extra))[0] if arg.group(1) else int(arg.group(2)))
 
             final_sub = needle
             if filter_name in MappingMethods.subs_methods():
@@ -284,15 +282,14 @@ class MessageAction(BaseAction):
     type = "message"
 
     def __init__(self, response, bot, functions=""):
-        self._response = response
+        self.response = response
         self.functions = functions
-
-    @property
-    def response(self):
-        return self._response if self._response else ""
 
     def get_response(self, bot, extra):
         MappingMethods.init(bot)
+        if not self.response:
+            return None, None
+
         return Substitution.apply_subs(self.response, extra["message"].split(" "), extra)
 
     @staticmethod
