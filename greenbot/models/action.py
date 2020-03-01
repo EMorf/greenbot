@@ -49,12 +49,13 @@ class Function:
 
     @staticmethod
     async def run_functions(_input, args, extra, author, channel, private_message, bot):
+        _input = list(Substitution.apply_subs(_input, args, extra))[0]
         for sub_key in Function.function_regex.finditer(_input):
             func_name = sub_key.group(1)
             args = sub_key.group(2)
             array_args = []
             for arg in Substitution.args_sub_regex.finditer(args):
-                array_args.append(list(Substitution.apply_subs(arg.group(1), args, extra))[0] if arg.group(1) else int(arg.group(2)))
+                array_args.append(arg.group(1) if arg.group(1) else int(arg.group(2)))
             log.info(array_args)
             if func_name not in MappingMethods.func_methods():
                 continue
