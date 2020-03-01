@@ -82,6 +82,7 @@ class Substitution:
     def apply_subs(_input, args, extra):
         count = 0
         embeds = []
+        log.info(_input)
         for user_sub_key in Substitution.user_args_sub_regex.finditer(_input):
             needle = user_sub_key.group(0)
             index = int(user_sub_key.group(1)) - 1

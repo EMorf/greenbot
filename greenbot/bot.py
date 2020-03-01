@@ -219,15 +219,16 @@ class Bot:
             msg_lower_parts = msg_lower.split(" ")
             trigger = msg_lower_parts[0][1:]
             msg_raw_parts = content.split(" ")
-            remaining_message = (
-                " ".join(msg_raw_parts[1:]) if len(msg_raw_parts) > 1 else ""
-            )
             if trigger not in self.commands:
                 if len(msg_lower_parts) < 1:
                     return
                 trigger += " " + msg_lower_parts[1]
                 if trigger not in self.commands:
                     return
+                msg_lower_parts = msg_lower_parts[2:] if len(msg_lower_parts) > 2 else []
+            remaining_message = (
+                " ".join(msg_raw_parts) if len(msg_raw_parts) > 1 else ""
+            )
             command = self.commands[trigger]
             extra_args = {
                 "trigger": trigger,
