@@ -38,7 +38,7 @@ class Filters:
         return self.bot.get_currency().get(key) if key else None, None
 
     def get_user(self, args, key, extra):
-        user = list(self.get_member([args[0]], None, extra))[0]
+        user = list(self.get_member_value([args[0]], None, extra))[0]
         if not user:
             user = extra["author"]
         with DBManager.create_session_scope() as db_session:
