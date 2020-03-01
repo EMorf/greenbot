@@ -455,6 +455,4 @@ class BanphraseManager:
         if "name" in options:
             options["name"] = " ".join(options["name"])
 
-        log.info(options)
-
         return options, response

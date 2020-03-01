@@ -185,10 +185,10 @@ class Filters:
         return None, data
 
     def get_command_info(self, args, key, extra):
-        if key not in self.bot.commands:
-            return f"Cannot find command {key}", None
-        command = self.bot.commands[key]
-        data = discord.Embed(description=(key), colour=discord.Colour.dark_gold())
+        if args[0] not in self.bot.commands:
+            return f"Cannot find command {args[0]}", None
+        command = self.bot.commands[args[0]]
+        data = discord.Embed(description=(args[0]), colour=discord.Colour.dark_gold())
         if command.id:
             data.add_field(name=("ID"), value=command.id)
         data.add_field(name=("Level"), value=command.level)
