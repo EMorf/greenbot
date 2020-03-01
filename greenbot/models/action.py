@@ -55,7 +55,10 @@ class Function:
             args = sub_key.group(2)
             array_args = []
             for arg in Substitution.args_sub_regex.finditer(args):
-                array_args.append(arg.group(1) if arg.group(1) != None else int(arg.group(2)))
+                try:
+                    array_args.append(arg.group(1) if arg.group(1) != None else int(arg.group(2)))
+                except ValueError:
+                    array_args.append(None)
             if func_name not in MappingMethods.func_methods():
                 log.error(f"function {func_name} not found!")
                 continue
@@ -88,7 +91,7 @@ class Substitution:
             needle = user_sub_key.group(0)
             index = int(user_sub_key.group(1))-1
             additions = user_sub_key.group(2)
-            _input = _input.replace(needle, " ".join(args[index:]) if additions else args[index], 1)
+            _input = _input.replace(needle, (" ".join(args[index:]) if additions else args[index], 1) if len(args) >= index - 1 else "")
             count+=1
 
         for sub_key in Substitution.substitution_regex.finditer(_input):
