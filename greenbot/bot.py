@@ -117,7 +117,7 @@ class Bot:
             role = list(self.filters.get_role(role_id, None, {}))[0]
             if not role:
                 continue
-
+            log.info(role)
             if role in member.roles:
                 user_level = max(int(user_level), int(self.roles[role_id]))
         log.info(user_level)
