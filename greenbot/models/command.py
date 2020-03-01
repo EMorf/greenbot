@@ -290,6 +290,10 @@ class Command(Base):
     def __str__(self):
         return f"Command(!{self.command})"
 
+    @property
+    def channels_web(self):
+        return " ".join(self.channels)
+
     @reconstructor
     def init_on_load(self):
         self.last_run = 0
