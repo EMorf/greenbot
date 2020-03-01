@@ -351,7 +351,7 @@ class Dispatch:
                 return False
 
             current_aliases = command.command.split("|")
-            current_aliases.remove(alias)
+            current_aliases.remove(alias.replace(command._parent_command, ""))
 
             if len(current_aliases) == 0:
                 await bot.private_message(
