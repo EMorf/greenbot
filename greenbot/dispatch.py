@@ -173,7 +173,7 @@ class Dispatch:
             action = {
                 "type": type,
                 "message": None,
-                "functions": response.split(" "),
+                "functions": response,
             }
 
             if "channels" in options:
@@ -234,7 +234,7 @@ class Dispatch:
             options["action"] = {
                 "type": type,
                 "message": None,
-                "functions": response.split(" "),
+                "functions": response,
             }
 
             if "channels" in options:
