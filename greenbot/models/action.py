@@ -341,7 +341,9 @@ class ReplyAction(MessageAction):
         if not resp and not embeds:
             return False
 
-        messages = [await bot.private_message(author, resp) if args["whisper"] else await bot.say(channel, resp)]
+        messages = []
+        if resp:
+            messages.append(await bot.private_message(author, resp) if args["whisper"] else await bot.say(channel, resp))
         for embed in embeds:
             messages.append(await bot.private_message(author, embed=embed) if args["whisper"] else await bot.say(channel, embed=embed))
         return messages
@@ -366,7 +368,9 @@ class PrivateMessageAction(MessageAction):
         if not resp and not embeds:
             return False
 
-        messages = [await bot.private_message(author, resp)]
+        messages = []
+        if resp:
+            messages.append(await bot.private_message(author, resp))
         for embed in embeds:
             messages.append(await bot.private_message(author, embed=embed))
         return messages
