@@ -40,7 +40,7 @@ class ActionParser:
 
 class Function:
     function_regex = re.compile(
-        r"(?<!\\)\$\((\w+);\[((((\"([^\"]|\\[\$\"])*\")|(\d+)),?)*)\]\)"
+        r"(?<!\\)\$\((\w+);\[((((\"([^\"]|\\[\$\"])*\")|(\d+)),?\s?)*)\]\)"
     )
 
     args_sub_regex = re.compile(
