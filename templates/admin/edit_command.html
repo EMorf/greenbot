@@ -4,6 +4,7 @@
 {% block body %}
 {% set data_available = [
     ('ID', False, command.id, 'id', 'int', ''),
+    ('Parent Command', False, command.parent_command, 'id', 'int', ''),
     ('Aliases', False, command.command, 'command', 'string', ''),
     ('Enabled', True, command.enabled, 'enabled', 'boolean', ''),
     ('Level', True, command.level, 'level', 'int', ''),

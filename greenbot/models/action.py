@@ -16,7 +16,7 @@ class ActionParser:
     bot = None
 
     @staticmethod
-    def parse(raw_data=None, data=None, command=""):
+    def parse(raw_data=None, data=None):
         from greenbot.dispatch import Dispatch
 
         if not data:

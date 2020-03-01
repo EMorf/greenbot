@@ -221,7 +221,7 @@ class CommandManager(UserDict):
     def add_db_command_aliases(self, command):
         aliases = command.command.split("|")
         for alias in aliases:
-            self.db_commands[alias] = command
+            self.db_commands[command._parent_command+alias] = command
 
         return len(aliases)
 
@@ -310,7 +310,7 @@ class CommandManager(UserDict):
             self.add_db_command_aliases(command)
             self.db_session.expunge(command)
             if command.data is None:
-                log.info(f"Creating command data for {command.command}")
+                log.info(f"Creating command data for {command._parent_command}{command.command}")
                 command.data = CommandData(command.id)
             self.db_session.add(command.data)
 
@@ -337,6 +337,7 @@ class CommandManager(UserDict):
         parser.add_argument("--level", type=int, dest="level")
         parser.add_argument("--cost", type=int, dest="cost")
         parser.add_argument("--channel", "-c", action="append", dest="channels")
+        parser.add_argument("--parent", type=str, dest="parent_command")
 
         try:
             args, unknown = parser.parse_known_args(message)
