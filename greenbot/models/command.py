@@ -55,7 +55,7 @@ def parse_command_for_web(alias, command, list):
 
     if command.action is not None and command.action.type == "multi":
         if command.command is not None:
-            command.main_alias = command.command.split("|")[0]
+            command.main_alias = command._parent_command + command.command.split("|")[0]
         for inner_alias, inner_command in command.action.commands.items():
             parse_command_for_web(
                 alias
