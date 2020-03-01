@@ -56,10 +56,8 @@ class Function:
             args = sub_key.group(2)
             array_args = []
             for arg in Substitution.args_sub_regex.finditer(args):
-                try:
-                    array_args.append(arg.group(1))
-                except ValueError:
-                    array_args.append(None)
+                array_args.append(arg.group(1))
+            log.info(array_args)
             if func_name not in MappingMethods.func_methods():
                 log.error(f"function {func_name} not found!")
                 continue
