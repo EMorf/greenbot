@@ -298,6 +298,7 @@ class ReplyAction(MessageAction):
 
     async def run(self, bot, author, channel, message, args):
         extra = self.get_extra_data(author, channel, message, args)
+        MappingMethods.init(bot)
         await Function.run_functions(self.functions, extra["message"].split(" "), extra, author, channel, args["whisper"], bot)
 
         resp, embed = self.get_response(bot, extra)
@@ -314,6 +315,7 @@ class PrivateMessageAction(MessageAction):
 
     async def run(self, bot, author, channel, message, args):
         extra = self.get_extra_data(author, channel, message, args)
+        MappingMethods.init(bot)
         await Function.run_functions(self.functions, extra["message"].split(" "), extra, author, channel, args["whisper"], bot)
 
         resp, embed = self.get_response(bot, extra)
