@@ -106,7 +106,7 @@ class Substitution:
             array_args = []
             for arg in Substitution.args_sub_regex.finditer(args):
                 array_args.append(
-                    list(Substitution.apply_subs(arg.group(1), args, extra))[0]
+                    list(Substitution.apply_subs(arg.group(1) if arg.group(1) else "", args, extra))[0]
                 )
 
             final_sub = needle
