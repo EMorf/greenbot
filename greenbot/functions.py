@@ -160,7 +160,7 @@ class Functions:
         try:
             level = int(level)
         except ValueError:
-            return f"Invalid level (1-2000) not {level}", None
+            return f"Invalid level (1-2000) {args[1]}", None
 
         if level >= extra["user_level"]:
             return "You cannot set a level higher then your own!", None
@@ -173,7 +173,7 @@ class Functions:
                     None,
                 )
             user.level = level
-        return f"Level, {level}, set for {member.mention}>", None
+        return f"Level, {level}, set for {member.mention}!", None
 
     async def func_set_balance(self, args, extra={}):
         if len(args) == 2:
