@@ -156,6 +156,9 @@ class Functions:
         if not member:
             return f"Invalid Member {args[0]}", None
 
+        if member == extra["author"]:
+            return "You cannot edit your own level :)", None
+
         level = args[1]
         try:
             level = int(level)
