@@ -43,7 +43,7 @@ class Filters:
             user = extra["author"]
         with DBManager.create_session_scope() as db_session:
             db_user = User._create_or_get_by_discord_id(db_session, user.id)
-            return getattr(db_user, key) if db_user else None, None
+            return getattr(db_user, key) if key and db_user else db_user, None
 
     def get_user_info(self, args, key, extra):
         user = self.get_member(args[0][3:][:-1], None, extra)
@@ -138,7 +138,7 @@ class Filters:
         role_name = extra["message"]
         role = list(self.get_role([role_name], None, extra))[0]
         if not role:
-            return f"Role {role_name} not found"
+            return f"Role {role_name} not found", None
         data = discord.Embed(colour=role.colour)
         data.add_field(name=("Role Name"), value=role.name)
         data.add_field(
@@ -186,7 +186,7 @@ class Filters:
 
     def get_command_info(self, args, key, extra):
         if key not in self.bot.commands:
-            return f"Cannot find command {key}"
+            return f"Cannot find command {key}", None
         command = self.bot.commands[key]
         data = discord.Embed(description=(key), colour=discord.Colour.dark_gold())
         if command.id:
@@ -218,10 +218,10 @@ class Filters:
     def get_time_value(self, args, key, extra):
         try:
             tz = timezone(key)
-            return datetime.datetime.now(tz).strftime("%H:%M")
+            return datetime.datetime.now(tz).strftime("%H:%M"), None
         except:
             log.exception("Unhandled exception in get_time_value")
-        return None
+        return None, None
 
     def get_channel(self, args, key, extra):
         channel = self.discord_bot.guild.get_channel(args[0])
@@ -230,20 +230,20 @@ class Filters:
     @staticmethod
     def get_command_value(args, key, extra):
         if key:
-            return getattr(extra["command"].data, key)
+            return getattr(extra["command"].data, key), None
         else:
             return extra["command"].data, None
 
     @staticmethod
     def get_author_value(args, key, extra):
         if key:
-            return getattr(extra["author"], key)
+            return getattr(extra["author"], key), None
         else:
             return extra["author"], None
 
     @staticmethod
     def get_channel_value(args, key, extra):
         if key:
-            return getattr(extra["channel"], key)
+            return getattr(extra["channel"], key), None
         else:
             return extra["channel"], None
