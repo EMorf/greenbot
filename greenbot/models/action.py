@@ -57,6 +57,7 @@ class Function:
             for arg in Substitution.args_sub_regex.finditer(args):
                 array_args.append(arg.group(1) if arg.group(1) != None else int(arg.group(2)))
             if func_name not in MappingMethods.func_methods():
+                log.error(f"function {func_name} not found!")
                 continue
 
             resp, embed = await MappingMethods.func_methods()[func_name](array_args, extra)
