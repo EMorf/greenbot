@@ -301,7 +301,7 @@ class Dispatch:
                     already_used_aliases.append(alias)
                 else:
                     added_aliases.append(alias)
-                    bot.commands[alias] = command
+                    bot.commands[command._parent_command+alias] = command
 
             if len(added_aliases) > 0:
                 new_aliases = f"{command.command}|{'|'.join(added_aliases)}"
