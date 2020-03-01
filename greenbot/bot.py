@@ -113,13 +113,14 @@ class Bot:
 
     def psudo_level_member(self, member):
         user_level = 100
-        for role_id in self.roles.keys():
+        for role_id, level in self.roles:
             role = list(self.filters.get_role(role_id, None, {}))[0]
+            log.info(role)
+            log.info(role_id)
             if not role:
                 continue
-            log.info(role)
             if role in member.roles:
-                user_level = max(int(user_level), int(self.roles[role_id]))
+                user_level = max(int(user_level), int(level))
         log.info(user_level)
         return user_level
 
