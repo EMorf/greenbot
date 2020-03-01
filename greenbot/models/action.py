@@ -23,11 +23,11 @@ class ActionParser:
             data = json.loads(raw_data)
         if data["type"] == "reply":
             action = ReplyAction(
-                data["message"], ActionParser.bot, functions=data.get("functions", [])
+                data["message"], ActionParser.bot, functions=data.get("functions", "")
             )
         elif data["type"] == "privatemessage":
             action = PrivateMessageAction(
-                data["message"], ActionParser.bot, functions=data.get("functions", [])
+                data["message"], ActionParser.bot, functions=data.get("functions", "")
             )
         elif data["type"] == "func":
             action = FuncAction(getattr(Dispatch, data["cb"]))
@@ -311,7 +311,7 @@ class MessageAction(BaseAction):
         MappingMethods.init(bot)
         if not self.response:
             return None, None
-
+        
         return Substitution.apply_subs(
             self.response, extra["message"].split(" "), extra
         )
