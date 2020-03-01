@@ -164,9 +164,9 @@ class AdvancedAdminLog(BaseModule):
     async def message_delete(self, payload):
         if not self.settings["log_delete_message"]:
             return
-        out_channel = self.bot.filters.get_channel(
+        out_channel = list(self.bot.filters.get_channel(
             [int(self.settings["output_channel"])], None
-        )
+        ))[0]
         message_id = payload.message_id
         with DBManager.create_session_scope() as db_session:
             db_message = Message._get(db_session, message_id)
@@ -174,7 +174,7 @@ class AdvancedAdminLog(BaseModule):
                 return
             content = json.loads(db_message.content)
             author_id = db_message.user_id
-        sent_in_channel = self.bot.filters.get_channel([int(payload.channel_id)], None)
+        sent_in_channel = list(self.bot.filters.get_channel([int(payload.channel_id)], None))[0]
         channels = (
             self.settings["ingore_channels"].split(" ")
             if self.settings["ingore_channels"] != ""
@@ -215,12 +215,12 @@ class AdvancedAdminLog(BaseModule):
     async def message_edit(self, payload):
         if not self.settings["log_edit_message"]:
             return
-        out_channel = self.bot.filters.get_channel(
+        out_channel = list(self.bot.filters.get_channel(
             [int(self.settings["output_channel"])], None
-        )
-        sent_in_channel = self.bot.filters.get_channel(
+        ))[0]
+        sent_in_channel = list(self.bot.filters.get_channel(
             [int(payload.data["channel_id"])], None
-        )
+        ))[0]
         channels = (
             self.settings["ingore_channels"].split(" ")
             if self.settings["ingore_channels"] != ""
@@ -273,9 +273,9 @@ class AdvancedAdminLog(BaseModule):
         if guild != self.bot.discord_bot.guild:
             return
 
-        out_channel = self.bot.filters.get_channel(
+        out_channel = list(self.bot.filters.get_channel(
             [int(self.settings["output_channel"])], None
-        )
+        ))[0]
         embed = discord.Embed(
             colour=await self.get_event_colour(guild, "user_change"),
             timestamp=utils.now(),
@@ -345,9 +345,9 @@ class AdvancedAdminLog(BaseModule):
         guild = before.guild
         if guild != self.bot.discord_bot.guild:
             return
-        out_channel = self.bot.filters.get_channel(
+        out_channel = list(self.bot.filters.get_channel(
             [int(self.settings["output_channel"])], None
-        )
+        ))[0]
         perp = None
         reason = None
         action = discord.AuditLogAction.role_update
@@ -406,9 +406,9 @@ class AdvancedAdminLog(BaseModule):
         guild = role.guild
         if guild != self.bot.discord_bot.guild:
             return
-        out_channel = self.bot.filters.get_channel(
+        out_channel = list(self.bot.filters.get_channel(
             [int(self.settings["output_channel"])], None
-        )
+        ))[0]
         perp = None
         reason = None
         action = discord.AuditLogAction.role_create
@@ -434,9 +434,9 @@ class AdvancedAdminLog(BaseModule):
         guild = role.guild
         if guild != self.bot.discord_bot.guild:
             return
-        out_channel = self.bot.filters.get_channel(
+        out_channel = list(self.bot.filters.get_channel(
             [int(self.settings["output_channel"])], None
-        )
+        ))[0]
         perp = None
         reason = None
         action = discord.AuditLogAction.role_create
@@ -462,9 +462,9 @@ class AdvancedAdminLog(BaseModule):
         guild = member.guild
         if guild != self.bot.discord_bot.guild:
             return
-        out_channel = self.bot.filters.get_channel(
+        out_channel = list(self.bot.filters.get_channel(
             [int(self.settings["output_channel"])], None
-        )
+        ))[0]
         embed = discord.Embed(
             timestamp=utils.now(),
             colour=await self.get_event_colour(guild, "voice_change"),
@@ -525,9 +525,9 @@ class AdvancedAdminLog(BaseModule):
         guild = member.guild
         if guild != self.bot.discord_bot.guild:
             return
-        out_channel = self.bot.filters.get_channel(
+        out_channel = list(self.bot.filters.get_channel(
             [int(self.settings["output_channel"])], None
-        )
+        ))[0]
         users = len(guild.members)
         created_at = member.created_at.replace(tzinfo=datetime.timezone.utc)
         since_created = (utils.now() - created_at).days
@@ -557,9 +557,9 @@ class AdvancedAdminLog(BaseModule):
         guild = member.guild
         if guild != self.bot.discord_bot.guild:
             return
-        out_channel = self.bot.filters.get_channel(
+        out_channel = list(self.bot.filters.get_channel(
             [int(self.settings["output_channel"])], None
-        )
+        ))[0]
 
         embed = discord.Embed(
             description=f"@{member}",
@@ -605,9 +605,9 @@ class AdvancedAdminLog(BaseModule):
         guild = before.guild
         if guild != self.bot.discord_bot.guild:
             return
-        out_channel = self.bot.filters.get_channel(
+        out_channel = list(self.bot.filters.get_channel(
             [int(self.settings["output_channel"])], None
-        )
+        ))[0]
         channel_type = str(after.type).title()
         embed = discord.Embed(
             description=after.mention,
@@ -710,9 +710,9 @@ class AdvancedAdminLog(BaseModule):
         guild = channel.guild
         if guild != self.bot.discord_bot.guild:
             return
-        out_channel = self.bot.filters.get_channel(
+        out_channel = list(self.bot.filters.get_channel(
             [int(self.settings["output_channel"])], None
-        )
+        ))[0]
         channel_type = str(channel.type).title()
         embed = discord.Embed(
             description=f"{channel.mention} {channel.name}",
@@ -744,9 +744,9 @@ class AdvancedAdminLog(BaseModule):
         guild = channel.guild
         if guild != self.bot.discord_bot.guild:
             return
-        out_channel = self.bot.filters.get_channel(
+        out_channel = list(self.bot.filters.get_channel(
             [int(self.settings["output_channel"])], None
-        )
+        ))[0]
         channel_type = str(channel.type).title()
         embed = discord.Embed(
             description=channel.name,
@@ -777,9 +777,9 @@ class AdvancedAdminLog(BaseModule):
             return
         if after != self.bot.discord_bot.guild:
             return
-        out_channel = self.bot.filters.get_channel(
+        out_channel = list(self.bot.filters.get_channel(
             [int(self.settings["output_channel"])], None
-        )
+        ))[0]
         embed = discord.Embed(
             timestamp=utils.now(),
             colour=await self.get_event_colour(after, "guild_change"),
@@ -837,9 +837,9 @@ class AdvancedAdminLog(BaseModule):
             return
         if guild != self.bot.discord_bot.guild:
             return
-        out_channel = self.bot.filters.get_channel(
+        out_channel = list(self.bot.filters.get_channel(
             [int(self.settings["output_channel"])], None
-        )
+        ))[0]
         perp = None
 
         time = datetime.datetime.utcnow()
@@ -940,9 +940,9 @@ class AdvancedAdminLog(BaseModule):
         guild = invite.guild
         if guild != self.bot.discord_bot.guild:
             return
-        out_channel = self.bot.filters.get_channel(
+        out_channel = list(self.bot.filters.get_channel(
             [int(self.settings["output_channel"])], None
-        )
+        ))[0]
         invite_attrs = {
             "code": "Code:",
             "inviter": "Inviter:",
@@ -969,9 +969,9 @@ class AdvancedAdminLog(BaseModule):
         guild = invite.guild
         if guild != self.bot.discord_bot.guild:
             return
-        out_channel = self.bot.filters.get_channel(
+        out_channel = list(self.bot.filters.get_channel(
             [int(self.settings["output_channel"])], None
-        )
+        ))[0]
         invite_attrs = {
             "code": "Code: ",
             "inviter": "Inviter: ",
@@ -1122,7 +1122,7 @@ class AdvancedAdminLog(BaseModule):
             embed.description = f"Message not found with message id {message_id}"
             await self.bot.say(channel=channel, embed=embed)
             return
-        sent_in_channel = self.bot.filters.get_channel([int(channel_id)], None)
+        sent_in_channel = list(self.bot.filters.get_channel([int(channel_id)], None))[0]
 
         try:
             message = await sent_in_channel.fetch_message(int(message_id))
