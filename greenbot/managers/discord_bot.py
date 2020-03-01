@@ -268,10 +268,10 @@ class DiscordBotManager:
             log.exception(e)
             self.redis.set(f"{self.bot.bot_name}:timeouts-discord", json.dumps({}))
 
-    def get_role_id(self, role_name):
+    def get_role_by_name(self, role_name):
         for role in self.guild.roles:
             if role.name == role_name:
-                return str(role.id)
+                return role
         return None
 
     def get_role(self, role_id):

@@ -14,48 +14,37 @@ class Filters:
         self.bot = bot
         self.discord_bot = discord_bot
 
-    def get_role_id(self, role_name):
-        return self.discord_bot.get_role_id(role_name)
+    def get_role(self, args, key, extra):
+        role = self.discord_bot.get_role(args[0]) or self.discord_bot.get_role_by_name(args[0])
+        return getattr(role, key) if key else (role if role else None)
 
-    def get_role(self, role_id):
-        return self.discord_bot.get_role(role_id)
+    def get_member(self, args, key, extra):
+        member = self.discord_bot.get_member(args[0])
+        return getattr(member, key) if key else (member if member else None)
 
-    def get_member(self, member_id):
-        return self.discord_bot.get_member(member_id)
+    def get_member_value(self, args, key, extra):
+        return self.get_member([args[0][3:][:-1]], key, extra)
 
-    def get_member_value(self, key, extra={}):
-        if len(extra["argument"]) != 22:
-            return getattr(extra["author"], key)
-        member = self.get_member(extra["argument"][3:][:-1])
-        return_val = getattr(member, key) if member else None
-        return return_val
-
-    def get_currency(self, key, extra={}):
+    def get_currency(self, args, key, extra):
         return self.bot.get_currency().get(key) if key else None
 
-    def get_user(self, key, extra={}):
-        user = (
-            self.get_member(extra["argument"][3:][:-1]) if extra["argument"] else None
-        )
+    def get_user(self, args, key, extra):
+        user = self.get_member([args[0]], None, extra)
         if not user:
             user = extra["author"]
         with DBManager.create_session_scope() as db_session:
             db_user = User._create_or_get_by_discord_id(db_session, user.id)
             return getattr(db_user, key) if db_user else None
 
-    def rest(self, key, extra={}):
-        return " ".join(extra["message"].split(" ")[int(key) :])
-
-    def get_role_value(self, key, extra={}):
-        role_name = extra["argument"]
-        role = self.get_role(self.get_role_id(role_name))
+    def get_role_value(self, args, key, extra):
+        role_name = args[0]
+        role = self.get_role([role_name], None, extra)
         if not role:
             return f"Role {role_name} not found"
-        return_val = getattr(role, key) if role else None
-        return return_val
+        return getattr(role, key) if role else None
 
-    def get_user_info(self, key, extra={}):
-        user = self.get_member(key[3:][:-1]) if key else None
+    def get_user_info(self, args, key, extra):
+        user = self.get_member(args[0][3:][:-1], None, extra)
         message = extra["message_raw"]
         if not user:
             user = extra["author"]
@@ -143,12 +132,11 @@ class Filters:
             data.set_author(name=name)
         return data
 
-    def get_role_info(self, key, extra={}):
+    def get_role_info(self, args, key, extra):
         role_name = extra["message"]
-        role_id = self.get_role_id(role_name)
-        if not role_id:
+        role = self.get_role([role_name], None, extra)
+        if not role:
             return f"Role {role_name} not found"
-        role = self.get_role(role_id)
         data = discord.Embed(colour=role.colour)
         data.add_field(name=("Role Name"), value=role.name)
         data.add_field(
@@ -178,7 +166,7 @@ class Filters:
         data.set_thumbnail(url=extra["message_raw"].guild.icon_url)
         return data
 
-    def get_commands(self, key, extra={}):
+    def get_commands(self, args, key, extra):
         data = discord.Embed(
             description=("All Commands"), colour=discord.Colour.dark_gold()
         )
@@ -194,7 +182,7 @@ class Filters:
         data.set_thumbnail(url=extra["message_raw"].guild.icon_url)
         return data
 
-    def get_command_info(self, key, extra={}):
+    def get_command_info(self, args, key, extra):
         if key not in self.bot.commands:
             return f"Cannot find command {key}"
         command = self.bot.commands[key]
@@ -225,69 +213,31 @@ class Filters:
 
         return data
 
-    @staticmethod
-    def get_args_value(key, extra={}):
-        r = None
-        try:
-            msg_parts = extra["message"].split(" ")
-        except (KeyError, AttributeError):
-            msg_parts = [""]
-
-        try:
-            if "-" in key:
-                range_str = key.split("-")
-                if len(range_str) == 2:
-                    r = (int(range_str[0]), int(range_str[1]))
-
-            if r is None:
-                r = (int(key), len(msg_parts))
-        except (TypeError, ValueError):
-            r = (0, len(msg_parts))
-
-        try:
-            return " ".join(msg_parts[r[0] : r[1]])
-        except AttributeError:
-            return ""
-        except:
-            log.exception("Caught exception in get_args_value")
-            return ""
-
-    def get_time_value(self, key, extra={}):
+    def get_time_value(self, args, key):
         try:
             tz = timezone(key)
             return datetime.datetime.now(tz).strftime("%H:%M")
         except:
             log.exception("Unhandled exception in get_time_value")
-
         return None
 
-    def get_strictargs_value(self, key, extra={}):
-        ret = self.get_args_value(key, extra)
-        if not ret:
-            return None
-        return ret
-
     @staticmethod
-    def get_command_value(key, extra={}):
-        try:
+    def get_command_value(args, key, extra):
+        if key:
             return getattr(extra["command"].data, key)
-        except:
+        else:
             return extra["command"].data
 
-        return None
-
     @staticmethod
-    def get_author_value(key, extra={}):
-        try:
+    def get_author_value(args, key, extra):
+        if key:
             return getattr(extra["author"], key)
-        except:
+        else:
             return extra["author"]
 
     @staticmethod
-    def get_channel_value(key, extra={}):
-        try:
+    def get_channel_value(args, key, extra):
+        if key:
             return getattr(extra["channel"], key)
-        except:
+        else:
             return extra["channel"]
-
-        return None

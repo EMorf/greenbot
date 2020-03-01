@@ -31,13 +31,7 @@ class MessageManager:
             user_level = user.level
             self.new_message(db_session, message)
         if member:
-            for role_id in self.bot.roles.keys():
-                role = self.bot.filters.get_role(role_id)
-                if not role:
-                    continue
-
-                if role in member.roles:
-                    user_level = max(int(user_level), int(self.bot.roles[role_id]))
+            user_level = max(user_level, self.bot.psudo_level_member(member))
         await HandlerManager.trigger(
             "parse_command_from_message",
             message=message,

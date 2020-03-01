@@ -99,6 +99,17 @@ class Bot:
         self.filters = Filters(self, self.discord_bot)
         self.functions = Functions(self, self.filters)
 
+    def psudo_level_member(self, member):
+        user_level = 100
+        for role_id in self.roles.keys():
+            role = self.filters.get_role(role_id, None, {})
+            if not role:
+                continue
+
+            if role in member.roles:
+                user_level = max(int(user_level), int(self.roles[role_id]))
+        return user_level
+
     @property
     def bot_id(self):
         return self.discord_bot.client.user.id
