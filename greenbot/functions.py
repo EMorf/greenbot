@@ -152,7 +152,9 @@ class Functions:
         if len(args) != 2:
             return "Invalid Comand Args", None
 
-        member_id = args[0][3:][:-1]
+        member = self.filters.get_member(args[0][3:][:-1])
+        if not member:
+            return f"Invalid Member {args[0]}", None
         level = args[1]
         try:
             level = int(level)
@@ -163,14 +165,14 @@ class Functions:
             return "You cannot set a level higher then your own!", None
 
         with DBManager.create_session_scope() as db_session:
-            user = User._create_or_get_by_discord_id(db_session, str(member_id))
+            user = User._create_or_get_by_discord_id(db_session, str(member.id))
             if user.level >= extra["user_level"]:
                 return (
                     "You cannot set a level of a user with a higher then your own!",
                     None,
                 )
             user.level = level
-        return f"Level, {level}, set for <@!{member_id}>", None
+        return f"Level, {level}, set for {member.mention}>", None
 
     async def func_set_balance(self, args, extra={}):
         if len(args) == 2:
