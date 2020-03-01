@@ -50,13 +50,15 @@ class Function:
     @staticmethod
     async def run_functions(_input, args, extra, author, channel, private_message, bot):
         _input = list(Substitution.apply_subs(_input, args, extra))[0]
+        count = 1
         for sub_key in Function.function_regex.finditer(_input):
+            log.info(count)
+            count += 1
             func_name = sub_key.group(1)
             args = sub_key.group(2)
             array_args = []
             for arg in Substitution.args_sub_regex.finditer(args):
                 array_args.append(arg.group(1) if arg.group(1) != None else int(arg.group(2)))
-            log.info(array_args)
             if func_name not in MappingMethods.func_methods():
                 continue
 
@@ -84,7 +86,6 @@ class Substitution:
     def apply_subs(_input, args, extra):
         count = 0
         embeds = []
-        log.info(_input)
         for user_sub_key in Substitution.user_args_sub_regex.finditer(_input):
             needle = user_sub_key.group(0)
             index = int(user_sub_key.group(1))-1
