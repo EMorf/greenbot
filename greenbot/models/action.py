@@ -112,8 +112,7 @@ class Substitution:
             _input = _input.replace(needle, final_sub, 1)
             count+=1
         if count > 0:
-            _input_, embeds_ = Substitution.apply_subs(_input, args, extra)
-            _input += _input_
+            _input, embeds_ = Substitution.apply_subs(_input, args, extra)
             embeds += embeds_
         return _input, embeds
 
