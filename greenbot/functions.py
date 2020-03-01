@@ -105,7 +105,7 @@ class Functions:
         return f"Member <@!{member_id}> has been unbanned!", None
 
     async def func_add_role_member(self, args, extra={}):
-        if len(args) == 3:
+        if len(args) != 3:
             return "Invalid Comand Args", None
 
         author = extra["author"]
@@ -127,7 +127,7 @@ class Functions:
         return f"Role {role.name} has been added to {member.mention}!", None
 
     async def func_remove_role_member(self, args, extra={}):
-        if len(args) == 3:
+        if len(args) != 3:
             return "Invalid Comand Args", None
 
         author = extra["author"]
@@ -149,9 +149,7 @@ class Functions:
         return f"Role {role.name} has been removed from {member.mention}!", None
 
     async def func_level(self, args, extra={}):
-        log.info(args)
-        log.info(len(args))
-        if len(args) == 2:
+        if len(args) != 2:
             return "Invalid Comand Args", None
 
         member_id = args[0][3:][:-1]
