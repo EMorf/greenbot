@@ -55,7 +55,7 @@ class Function:
             args = sub_key.group(2)
             array_args = []
             for arg in Substitution.args_sub_regex.finditer(args):
-                array_args.append(arg.group(1) if arg.group(1) else int(arg.group(2)))
+                array_args.append(arg.group(1) if arg.group(1) != None else int(arg.group(2)))
             log.info(array_args)
             if func_name not in MappingMethods.func_methods():
                 continue
