@@ -122,7 +122,7 @@ class Substitution:
                 if embed != None:
                     embeds.append(embed)
                 final_sub = resp
-            _input = _input.replace(needle, str(final_sub) if final_sub else "", 1)
+            _input = _input.replace(needle, str(final_sub) if final_sub is not None else "", 1)
             count += 1
         if count > 0:
             _input, embeds_ = Substitution.apply_subs(_input, args, extra)
