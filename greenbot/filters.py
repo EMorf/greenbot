@@ -28,8 +28,8 @@ class Filters:
         return getattr(role, key) if role else None, None
 
     def get_member(self, args, key, extra):
-        member = self.discord_bot.get_member(args[0])
-        return getattr(member, key) if key else (member if member else None), None
+        member = self.discord_bot.get_member(args[0]) if args[0] else extra["author"]
+        return getattr(member, key) if key and member else member, None
 
     def get_member_value(self, args, key, extra):
         return self.get_member([args[0][3:][:-1]], key, extra)
