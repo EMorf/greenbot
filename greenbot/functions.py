@@ -149,6 +149,8 @@ class Functions:
         return f"Role {role.name} has been removed from {member.mention}!", None
 
     async def func_level(self, args, extra={}):
+        log.info(args)
+        log.info(len(args))
         if len(args) == 2:
             return "Invalid Comand Args", None
 
