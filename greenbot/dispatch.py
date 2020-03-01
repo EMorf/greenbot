@@ -387,7 +387,11 @@ class Dispatch:
                 pass
 
             if id is None:
-                potential_cmd = "".join(message.split(" ")[:1]).lower().replace("!", "")
+                split = message.split(" ")
+                potential_cmd = "".join(split[:1]).lower().replace("!", "")
+                if potential_cmd in bot.commands:
+                    command = bot.commands[potential_cmd]
+                potential_cmd += " " + split[1] if len(split) > 1 else ""
                 if potential_cmd in bot.commands:
                     command = bot.commands[potential_cmd]
             else:
