@@ -124,7 +124,7 @@ class TwitchTracker(BaseModule):
                 stream_title=channel["title"],
                 image_url=channel["thumbnail_url"],
                 icon_url=users[channel["user_name"].lower()]["profile_image_url"],
-                game=games[channel["game_id"]]["name"],
+                game=games[channel["game_id"]]["name"] if channel["game_id"] else "Just Chatting",
                 viewers=channel["viewer_count"],
             )
             channels_updated.append(channel["user_name"].lower())
