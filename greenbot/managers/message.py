@@ -22,16 +22,14 @@ class MessageManager:
         not_whisper = isinstance(message.author, discord.Member)
         if not_whisper and (message.guild != self.bot.discord_bot.guild):
             return
+
+        if not member:
+            return
+
         with DBManager.create_session_scope() as db_session:
-            user = User._create_or_get_by_discord_id(
-                db_session,
-                message.author.id,
-                user_name=str(member) if member else str(message.author),
-            )
-            user_level = user.level
             self.new_message(db_session, message)
-        if member:
-            user_level = max(user_level, self.bot.psudo_level_member(member))
+            user_level = self.bot.psudo_level_member(db_session, member)
+
         await HandlerManager.trigger(
             "parse_command_from_message",
             message=message,
