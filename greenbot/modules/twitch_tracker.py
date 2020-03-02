@@ -150,9 +150,7 @@ class TwitchTracker(BaseModule):
             url=f"https://twitch.tv/{streamer_name.lower()}",
             icon_url=icon_url,
         )
-        channel, _ = await self.bot.functions.func_get_channel(
-            args=[int(self.settings["output_channel"])]
-        )
+        channel = await self.bot.filters.get_channel([int(self.settings["output_channel"])], None, {})
         await self.bot.say(
             channel,
             message=self.settings["broadcast_message"].format(
