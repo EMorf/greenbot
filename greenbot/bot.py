@@ -34,8 +34,8 @@ def custom_exception_handler(loop, context):
         if context["exception"] == AssertionError:
             log.error("error ignored")
             return
-    log.error(context["message"])
-    return
+    log.exception(context["message"])
+    raise Exception
 
 
 class Bot:
