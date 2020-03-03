@@ -83,5 +83,5 @@ class ScheduleManager:
                     if schedule.should_run():
                         await schedule.run()
                 await asyncio.sleep(0.2)
-            except Exception as e:
-                log.error(e)
+            except SystemExit:
+                pass

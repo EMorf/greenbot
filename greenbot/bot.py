@@ -172,7 +172,7 @@ class Bot:
 
     def quit_bot(self):
         self.module_manager.disable_all()
-        self.private_loop.call_soon_threadsafe(self.private_loop.stop)
+        self.execute_now(self.private_loop.stop)
         self.socket_manager.quit()
         sys.exit()
 
