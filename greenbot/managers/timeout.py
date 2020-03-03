@@ -91,7 +91,11 @@ class TimeoutManager:
         current_timeout.unban(db_session, str(unbanner.id) if unbanner else None, unban_reason)
         db_session.commit()
         for channel in self.bot.discord_bot.guild.text_channels:
-            await channel.set_permissions(target=member, send_messages=None, reason=f"Timedout #{current_timeout.id}")
+            overwrite = channel.overwrites_for(member)
+            overwrite.send_messages = None
+            if overwrite.is_empty():
+                overwrite = None
+            await channel.set_permissions(target=member, overwrite=overwrite, reason=f"Timedout #{current_timeout.id}")
 
         if self.settings["log_untimeout"]: #TODO
             pass
