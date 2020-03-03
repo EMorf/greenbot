@@ -99,7 +99,7 @@ def init(args):
 
     default_variables = {
         "last_commit": last_commit,
-        "version": "v1.0",
+        "version": "v1.1",
         "bot": {"name": config["main"]["bot_name"]},
         "site": {"domain": config["web"]["domain"]},
         "modules": app.bot_modules,
