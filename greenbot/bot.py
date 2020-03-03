@@ -161,7 +161,7 @@ class Bot:
                     owner.level = 2000
         while True:
             time.sleep(5)
-            log.info(asyncio.Task.all_tasks)
+            log.info(asyncio.Task.all_tasks())
 
     def execute_now(self, function, *args, **kwargs):
         self.execute_delayed(0, function, *args, **kwargs)
