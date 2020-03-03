@@ -81,11 +81,11 @@ class ScheduleManager:
                     if schedule.should_run:
                         await schedule.run()
                     else:
-                        log.info(schedule.run_type)
-                        log.info(schedule.run_date)
-                        log.info(utils.now())
-                        log.info(schedule.run_date < utils.now())
-                        log.info("")
+                        if schedule.run_type == "date":
+                            log.info(schedule.run_date)
+                            log.info(utils.now())
+                            log.info(schedule.run_date < utils.now())
+                            log.info("")
                 await asyncio.sleep(0.2)
             except Exception as e:
                 log.error(e)
