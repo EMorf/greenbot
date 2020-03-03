@@ -64,6 +64,7 @@ class ScheduleManager:
     def execute_delayed(delay, method, args=[], kwargs={}):
         job = ScheduledJob("date", method, run_date=(utils.now() + datetime.timedelta(seconds=delay)), args=args, kwargs=kwargs)
         ScheduleManager.schedules.append(job)
+        log.info("job added")
         return job
 
     @staticmethod
@@ -86,6 +87,7 @@ class ScheduleManager:
                             log.info(utils.now())
                             log.info(schedule.run_date < utils.now())
                             log.info("")
+                log.info(ScheduleManager.schedules[:])
                 await asyncio.sleep(0.2)
             except Exception as e:
                 log.error(e)
