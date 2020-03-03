@@ -20,7 +20,6 @@ class ScheduledJob:
         self.paused = False
         self.last_run = None
 
-    @property
     def should_run(self):
         if self.paused:
             return False
@@ -80,7 +79,7 @@ class ScheduleManager:
             try:
                 schedules = ScheduleManager.schedules.copy()
                 for schedule in schedules:
-                    if schedule.should_run:
+                    if schedule.should_run():
                         await schedule.run()
                     else:
                         if schedule.run_type == "date":
