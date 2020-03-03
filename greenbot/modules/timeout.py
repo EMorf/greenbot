@@ -141,8 +141,12 @@ class TimeoutModule(BaseModule):
                     name="Banned by", value=timeout.issued_by, inline=False
                 )
                 embed.add_field(
-                    name="Reason", value=timeout.reason, inline=False
+                    name="Ban Reason", value=timeout.ban_reason, inline=False
                 )
+                if timeout.time_left != 0:
+                    embed.add_field(
+                        name="Unban Reason", value=timeout.unban_reason, inline=False
+                    )
                 await self.bot.say(channel=channel, embed=embed)
 
     async def is_timedout(self, bot, author, channel, message, args):
@@ -176,7 +180,7 @@ class TimeoutModule(BaseModule):
                 name="Banned by", value=timeout.issued_by, inline=False
             )
             embed.add_field(
-                name="Reason", value=timeout.reason, inline=False
+                name="Ban Reason", value=timeout.ban_reason, inline=False
             )
             await self.bot.say(channel=channel, embed=embed)
         
