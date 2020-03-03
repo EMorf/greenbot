@@ -173,7 +173,10 @@ class Bot:
         self.module_manager.disable_all()
         self.private_loop.call_soon_threadsafe(self.private_loop.stop)
         self.socket_manager.quit()
-        sys.exit(0)
+        try:
+            sys.exit(0)
+        except:
+            pass
 
     def connect(self):
         self.discord_bot.connect()
