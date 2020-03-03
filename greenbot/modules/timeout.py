@@ -131,19 +131,21 @@ class TimeoutModule(BaseModule):
                     name="Banned on", value=str(timeout.created_at.strftime("%b %d %Y %H:%M:%S %Z")), inline=False
                 )
                 embed.add_field(
-                    name="Banned till" if timeout.time_left != 0 else "Unbanned on", value=str(timeout.until.strftime("%b %d %Y %H:%M:%S %Z")), inline=False
+                    name="Banned till" if timeout.time_left != 0 else "Unbanned on", value=str(timeout.until.strftime("%b %d %Y %H:%M:%S %Z")) if timeout.until else "Permanently", inline=False
                 )
                 if timeout.time_left != 0:
                     embed.add_field(
                         name="Timeleft", value=str(utils.seconds_to_resp(timeout.time_left)), inline=False
                     )
-                embed.add_field(
-                    name="Banned by", value=str(timeout.issued_by), inline=False
-                )
-                embed.add_field(
-                    name="Ban Reason", value=str(timeout.ban_reason), inline=False
-                )
-                if timeout.time_left != 0:
+                if timeout.issued_by:
+                    embed.add_field(
+                        name="Banned by", value=str(timeout.issued_by), inline=False
+                    )
+                if timeout.ban_reason:
+                    embed.add_field(
+                        name="Ban Reason", value=str(timeout.ban_reason), inline=False
+                    )
+                if timeout.time_left != 0 and timeout.unban_reason:
                     embed.add_field(
                         name="Unban Reason", value=str(timeout.unban_reason), inline=False
                     )
@@ -171,17 +173,24 @@ class TimeoutModule(BaseModule):
                 name="Banned on", value=str(timeout.created_at.strftime("%b %d %Y %H:%M:%S %Z")), inline=False
             )
             embed.add_field(
-                name="Banned till", value=str(timeout.until.strftime("%b %d %Y %H:%M:%S %Z")), inline=False
+                name="Banned till" if timeout.time_left != 0 else "Unbanned on", value=str(timeout.until.strftime("%b %d %Y %H:%M:%S %Z")) if timeout.until else "Permanently", inline=False
             )
-            embed.add_field(
-                name="Timeleft", value=str(utils.seconds_to_resp(timeout.time_left)), inline=False
-            )
-            embed.add_field(
-                name="Banned by", value=str(timeout.issued_by), inline=False
-            )
-            embed.add_field(
-                name="Ban Reason", value=str(timeout.ban_reason), inline=False
-            )
+            if timeout.time_left != 0:
+                embed.add_field(
+                    name="Timeleft", value=str(utils.seconds_to_resp(timeout.time_left)), inline=False
+                )
+            if timeout.issued_by:
+                embed.add_field(
+                    name="Banned by", value=str(timeout.issued_by), inline=False
+                )
+            if timeout.ban_reason:
+                embed.add_field(
+                    name="Ban Reason", value=str(timeout.ban_reason), inline=False
+                )
+            if timeout.time_left != 0 and timeout.unban_reason:
+                embed.add_field(
+                    name="Unban Reason", value=str(timeout.unban_reason), inline=False
+                )
             await self.bot.say(channel=channel, embed=embed)
         
 
