@@ -15,6 +15,7 @@ from greenbot import utils
 
 log = logging.getLogger("greenbot")
 
+
 class Timeout(Base):
     __tablename__ = "timeouts"
 
@@ -39,7 +40,11 @@ class Timeout(Base):
 
     @property
     def time_left(self):
-        return int((self.until - utils.now()).total_seconds() if self.until > utils.now() and self.active else 0)
+        return int(
+            (self.until - utils.now()).total_seconds()
+            if self.until > utils.now() and self.active
+            else 0
+        )
 
     def check_lengths(self, _date):
         if not self.until:
@@ -49,7 +54,7 @@ class Timeout(Base):
 
     def unban(self, db_session, unbanned_by_id, unban_reason):
         self.active = False
-        self.unbanned_by_id = unbanned_by_id,
+        self.unbanned_by_id = (unbanned_by_id,)
         self.unban_reason = unban_reason
         db_session.merge(self)
         return self
@@ -60,13 +65,25 @@ class Timeout(Base):
 
     @staticmethod
     def _create(db_session, user_id, issued_by_id, until, ban_reason):
-        timeout = Timeout(active=True, user_id=user_id, issued_by_id=issued_by_id, until=until, created_at=utils.now(), ban_reason=ban_reason)
+        timeout = Timeout(
+            active=True,
+            user_id=user_id,
+            issued_by_id=issued_by_id,
+            until=until,
+            created_at=utils.now(),
+            ban_reason=ban_reason,
+        )
         db_session.add(timeout)
         return timeout
-    
+
     @staticmethod
     def _is_timedout(db_session, user_id):
-        return db_session.query(Timeout).filter_by(user_id=user_id).filter_by(active=True).one_or_none()
+        return (
+            db_session.query(Timeout)
+            .filter_by(user_id=user_id)
+            .filter_by(active=True)
+            .one_or_none()
+        )
 
     @staticmethod
     def _by_user_id(db_session, user_id):

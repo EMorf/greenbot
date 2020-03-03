@@ -10,7 +10,9 @@ log = logging.getLogger(__name__)
 
 
 class ScheduledJob:
-    def __init__(self, run_type, method, interval=1, run_date=utils.now(), args=[], kwargs={}):
+    def __init__(
+        self, run_type, method, interval=1, run_date=utils.now(), args=[], kwargs={}
+    ):
         self.run_type = run_type
         self.method = method
         self.run_date = run_date
@@ -26,7 +28,11 @@ class ScheduledJob:
         if self.run_type == "date":
             return self.run_date < utils.now()
         else:
-            return (utils.now() - self.last_run).total_seconds() > self.interval if self.last_run else True
+            return (
+                (utils.now() - self.last_run).total_seconds() > self.interval
+                if self.last_run
+                else True
+            )
 
     def pause(self):
         self.paused = True
@@ -55,20 +61,24 @@ class ScheduleManager:
 
     @staticmethod
     def execute_now(method, args=[], kwargs={}):
-        job = ScheduledJob("date", method, run_date=utils.now(), args=args, kwargs=kwargs)
+        job = ScheduledJob(
+            "date", method, run_date=utils.now(), args=args, kwargs=kwargs
+        )
         ScheduleManager.schedules.append(job)
         return job
 
     @staticmethod
     def execute_delayed(delay, method, args=[], kwargs={}):
-        run_date = (utils.now() + datetime.timedelta(seconds=delay))
+        run_date = utils.now() + datetime.timedelta(seconds=delay)
         job = ScheduledJob("date", method, run_date=run_date, args=args, kwargs=kwargs)
         ScheduleManager.schedules.append(job)
         return job
 
     @staticmethod
     def execute_every(interval, method, args=[], kwargs={}):
-        job = ScheduledJob("interval", method, interval=interval, args=args, kwargs=kwargs)
+        job = ScheduledJob(
+            "interval", method, interval=interval, args=args, kwargs=kwargs
+        )
         ScheduleManager.schedules.append(job)
         return job
 

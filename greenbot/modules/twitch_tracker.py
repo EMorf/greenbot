@@ -126,7 +126,9 @@ class TwitchTracker(BaseModule):
                 stream_title=channel["title"],
                 image_url=channel["thumbnail_url"],
                 icon_url=users[channel["user_name"].lower()]["profile_image_url"],
-                game=games[channel["game_id"]]["name"] if channel["game_id"] else "Just Chatting",
+                game=games[channel["game_id"]]["name"]
+                if channel["game_id"]
+                else "Just Chatting",
                 viewers=channel["viewer_count"],
             )
             channels_updated.append(channel["user_name"].lower())
@@ -152,7 +154,11 @@ class TwitchTracker(BaseModule):
             url=f"https://twitch.tv/{streamer_name.lower()}",
             icon_url=icon_url,
         )
-        channel = list(self.bot.filters.get_channel([int(self.settings["output_channel"])], None, {}))[0]
+        channel = list(
+            self.bot.filters.get_channel(
+                [int(self.settings["output_channel"])], None, {}
+            )
+        )[0]
         await self.bot.say(
             channel,
             message=self.settings["broadcast_message"].format(
