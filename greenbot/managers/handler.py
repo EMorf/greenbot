@@ -250,6 +250,8 @@ class HandlerManager:
                     if event
                     else await handler(*args, **kwargs)
                 )
+            except SystemExit:
+                pass
             except:
                 log.exception(f"Unhandled exception from {handler} in {event_name}")
 
