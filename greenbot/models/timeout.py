@@ -80,7 +80,7 @@ class Timeout(Base):
     def _is_timedout(db_session, user_id):
         return (
             db_session.query(Timeout)
-            .filter_by(user_id=user_id)
+            .filter_by(user_id=str(user_id))
             .filter_by(active=True)
             .one_or_none()
         )

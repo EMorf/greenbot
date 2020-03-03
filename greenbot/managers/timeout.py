@@ -68,7 +68,7 @@ class TimeoutManager:
         if not self.settings["enabled"]:
             return False, "Module is not enabled"
         current_timeout = Timeout._is_timedout(db_session, str(member.id))
-        if current_timeout:
+        if current_timeout is not None:
             if current_timeout.check_lengths(until):
                 current_timeout.active = False
                 new_timeout = Timeout._create(
