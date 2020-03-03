@@ -137,9 +137,10 @@ class TimeoutModule(BaseModule):
                     embed.add_field(
                         name="Timeleft", value=str(utils.seconds_to_resp(timeout.time_left)), inline=False
                     )
-                if timeout.issued_by:
+                if timeout.issued_by_id:
+                    issued_by = list(self.bot.filters.get_member([int(timeout.issued_by_id)], None, {}))[0]
                     embed.add_field(
-                        name="Banned by", value=str(timeout.issued_by), inline=False
+                        name="Banned by", value=issued_by.mention if issued_by else f"{timeout.issued_by_id}", inline=False
                     )
                 if timeout.ban_reason:
                     embed.add_field(
@@ -148,6 +149,11 @@ class TimeoutModule(BaseModule):
                 if timeout.time_left != 0 and timeout.unban_reason:
                     embed.add_field(
                         name="Unban Reason", value=str(timeout.unban_reason), inline=False
+                    )
+                if timeout.time_left != 0 and timeout.unbanned_by_id:
+                    unbanned_by = list(self.bot.filters.get_member([int(timeout.unbanned_by_id)], None, {}))[0]
+                    embed.add_field(
+                        name="Unban By", value=unbanned_by.mention if unbanned_by else f"{timeout.issued_by_id}", inline=False
                     )
                 await self.bot.say(channel=channel, embed=embed)
 
