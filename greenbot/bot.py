@@ -54,7 +54,8 @@ class Bot:
 
         self.discord_token = self.config["main"]["discord_token"]
 
-        ScheduleManager.init(self)
+        ScheduleManager.init(self.private_loop)
+
         DBManager.init(self.config["main"]["db"])
 
         ActionParser.bot = self
@@ -159,11 +160,6 @@ class Bot:
                     )
                 else:
                     owner.level = 2000
-        while True:
-            for x in asyncio.Task.all_tasks():
-                log.info(x)
-            time.sleep(5)
-            log.info("")
 
     def execute_now(self, function, *args, **kwargs):
         self.execute_delayed(0, function, *args, **kwargs)
@@ -176,11 +172,6 @@ class Bot:
 
     def quit_bot(self):
         self.module_manager.disable_all()
-        try:
-            ScheduleManager.base_scheduler.print_jobs()
-            ScheduleManager.base_scheduler.shutdown(wait=False)
-        except:
-            log.exception("Error while shutting down the apscheduler")
         self.private_loop.call_soon_threadsafe(self.private_loop.stop)
         self.socket_manager.quit()
         sys.exit()

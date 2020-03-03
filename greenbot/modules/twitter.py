@@ -7,7 +7,6 @@ import threading
 from datetime import datetime
 
 from greenbot import utils
-from greenbot.managers.schedule import ScheduleManager
 from greenbot.managers.redis import RedisManager
 from greenbot.managers.handler import HandlerManager
 from greenbot.models.command import Command

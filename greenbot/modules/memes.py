@@ -3,6 +3,7 @@ import logging
 import random
 import discord
 import asyncio
+import time
 from datetime import datetime
 
 from greenbot import utils
@@ -189,7 +190,7 @@ class Memes(BaseModule):
         r, g, b = role.color.to_rgb()
         for c in rainbowcolors:
             dcol = discord.Colour(c)
-            await asyncio.sleep(0.2)
+            time.sleep(0.2)
             await role.edit(colour=dcol)
         await role.edit(colour=discord.Colour.from_rgb(r, g, b))
         self.mod_pride_running = False
@@ -199,14 +200,14 @@ class Memes(BaseModule):
             start_time = utils.now()
             m = await self.bot.say(channel=channel, message="﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏")
             self.vroom_races.append(m)
-            await asyncio.sleep(0.5)
+            time.sleep(0.5)
             await m.edit(
                 content=f"{self.settings['emote_for_vroom']}﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏﹏"
             )
             for _ in range(19):
                 newtick = m.content[:-1]
                 newtick = "﹏" + newtick
-                await asyncio.sleep((random.randint(5, 30) / 10))
+                time.sleep(random.randint(5, 30) / 10)
                 await m.edit(content=newtick)
             elapsed_time = utils.now() - start_time
             await m.edit(

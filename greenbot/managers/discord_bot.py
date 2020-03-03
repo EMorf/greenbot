@@ -4,6 +4,7 @@ import discord
 import traceback
 import asyncio
 import json
+import time
 from datetime import datetime, timedelta
 
 from greenbot.models.user import User
@@ -28,6 +29,8 @@ class CustomClient(discord.Client):
             return
         log.info(f"discord.py {discord.__version__}")
         log.info(f"Discord Bot has started with id {self.user.id}")
+        while not ScheduleManager.ready:
+            time.sleep(0.1)
         await HandlerManager.trigger("discord_ready")
 
     async def on_connect(self):

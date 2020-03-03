@@ -1,121 +1,76 @@
 import datetime
 import logging
+import time
 
-from apscheduler.schedulers.background import BackgroundScheduler
-
+from greenbot.managers.handler import HandlerManager
 from greenbot import utils
 
 log = logging.getLogger(__name__)
 
 
 class ScheduledJob:
-    def __init__(self, job):
-        self.job = job
+    def __init__(self, run_type, method, interval=1, run_date=utils.now(), args=[], kwargs={}):
+        self.run_type = run_type
+        self.method = method
+        self.run_date = run_date
+        self.interval = interval
+        self.args = args
+        self.kwargs = kwargs
+        self.paused = False
+        self.last_run = None
 
-    def pause(self, *args, **kwargs):
-        if self.job:
-            self.job.pause(*args, **kwargs)
+    @property
+    def should_run(self):
+        if self.paused:
+            return False
+        if self.run_type == "date":
+            return self.run_date < utils.now()
+        else:
+            return (utils.now() - self.last_run).total_seconds() > self.interval
 
-    def resume(self, *args, **kwargs):
-        if self.job:
-            self.job.resume(*args, **kwargs)
+    def pause(self):
+        self.paused = True
 
-    def remove(self, *args, **kwargs):
-        if self.job:
-            self.job.remove(*args, **kwargs)
+    def resume(self):
+        self.paused = False
 
+    def remove(self):
+        ScheduleManager.schedules.remove(self)
+
+    async def run(self):
+        await self.method(*self.args, **self.kwargs)
+        if self.run_type == "date":
+            self.remove()
+        else:
+            self.last_run = utils.now()
+
+    
 
 class ScheduleManager:
-    base_scheduler = None
-    bot = None
+    schedules = []
+    ready = False
 
     @staticmethod
-    def init(bot):
-        if not ScheduleManager.base_scheduler:
-            ScheduleManager.base_scheduler = BackgroundScheduler(daemon=True)
-            ScheduleManager.base_scheduler.start()
-        if not ScheduleManager.bot:
-            ScheduleManager.bot = bot
+    def init(private_loop):
+        private_loop.create_task(ScheduleManager.process_schedules()
 
     @staticmethod
-    def execute_now(method, args=[], kwargs={}, scheduler=None):
-        if scheduler is None:
-            scheduler = ScheduleManager.base_scheduler
-
-        if scheduler is None:
-            raise ValueError("No scheduler available")
-        if not ScheduleManager.bot:
-            job = scheduler.add_job(
-                method, "date", run_date=utils.now(), args=args, kwargs=kwargs
-            )
-            return ScheduledJob(job)
-        job = scheduler.add_job(
-            ScheduleManager.run_async_task,
-            "date",
-            run_date=utils.now(),
-            args=[method, *args],
-            kwargs=kwargs,
-        )
-        return ScheduledJob(job)
+    def execute_now(method, args=[], kwargs={}):
+        return ScheduledJob("date", method, run_date=utils.now(), args=args, kwargs=kwargs)
 
     @staticmethod
-    def execute_delayed(delay, method, args=[], kwargs={}, scheduler=None):
-        if scheduler is None:
-            scheduler = ScheduleManager.base_scheduler
-
-        if scheduler is None:
-            raise ValueError("No scheduler available")
-
-        if not ScheduleManager.bot:
-            job = scheduler.add_job(
-                method,
-                "date",
-                run_date=utils.now() + datetime.timedelta(seconds=delay),
-                args=args,
-                kwargs=kwargs,
-            )
-            return ScheduledJob(job)
-
-        job = scheduler.add_job(
-            ScheduleManager.run_async_task,
-            "date",
-            run_date=utils.now() + datetime.timedelta(seconds=delay),
-            args=[method, *args],
-            kwargs=kwargs,
-        )
-        return ScheduledJob(job)
+    def execute_delayed(delay, method, args=[], kwargs={}):
+        return ScheduledJob("date", method, run_date=(utils.now() + datetime.datetime.timedelta(seconds=delay)), args=args, kwargs=kwargs)
 
     @staticmethod
-    def execute_every(
-        interval, method, args=[], kwargs={}, scheduler=None, jitter=None
-    ):
-        if scheduler is None:
-            scheduler = ScheduleManager.base_scheduler
-
-        if scheduler is None:
-            raise ValueError("No scheduler available")
-
-        if not ScheduleManager.bot:
-            job = scheduler.add_job(
-                method,
-                "interval",
-                seconds=interval,
-                args=args,
-                kwargs=kwargs,
-                jitter=jitter,
-            )
-            return ScheduledJob(job)
-
-        job = scheduler.add_job(
-            ScheduleManager.run_async_task,
-            "interval",
-            seconds=interval,
-            args=[method, *args],
-            kwargs=kwargs,
-            jitter=jitter,
-        )
-        return ScheduledJob(job)
+    def execute_every(interval, method, args=[], kwargs={}):
+        return ScheduledJob("interval", method, interval=interval, args=args, kwargs=kwargs)
 
     @staticmethod
-    def run_async_task(method, *args, **kwargs):
-        ScheduleManager.bot.private_loop.create_task(method(*args, **kwargs))
+    async def process_schedules():
+        ScheduleManager.ready = True
+        while True:
+            for schedule in ScheduleManager.schedules[:]:
+                if schedule.should_run:
+                    await schedule.run()
+            time.sleep(0.2)
