@@ -56,7 +56,6 @@ class Timeout(Base):
         self.active = False
         self.unbanned_by_id = (unbanned_by_id,)
         self.unban_reason = unban_reason
-        db_session.merge(self)
         return self
 
     @staticmethod
