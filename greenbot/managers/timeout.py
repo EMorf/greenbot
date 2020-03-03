@@ -84,6 +84,7 @@ class TimeoutManager:
 
         if self.settings["log_timeout"]: #TODO
             pass
+        log.info(f"{member} timed out")
         return True, None
 
     async def untimeout_user(self, db_session, member, unbanner, unban_reason):
