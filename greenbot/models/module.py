@@ -75,6 +75,12 @@ class ModuleManager:
 
         module.load()
 
+        try:
+            module.disable(self.bot)
+            self.modules.remove(module)
+        except:
+            pass
+
         module.enable(self.bot)
 
         if module in self.modules:
