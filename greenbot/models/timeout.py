@@ -18,7 +18,7 @@ log = logging.getLogger("greenbot")
 class Timeout(Base):
     __tablename__ = "timeouts"
 
-    id = Column(INT, primary_key=True, autoincrement=False)
+    id = Column(INT, primary_key=True, autoincrement=True)
     active = Column(BOOLEAN, default=True, nullable=False)
     user_id = Column(
         TEXT, ForeignKey("user.discord_id", ondelete="CASCADE"), nullable=False
