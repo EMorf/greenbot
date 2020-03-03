@@ -85,7 +85,7 @@ class TimeoutManager:
         if self.settings["log_timeout"]: #TODO
             pass
         log.info(f"{member} timed out")
-        ScheduleManager.execute_delayed(new_timeout.time_left + 1, self.auto_untimeout, args=[new_timeout.id, self.salt])
+        ScheduleManager.execute_delayed(new_timeout.time_left + 5, self.auto_untimeout, args=[new_timeout.id, self.salt])
         return True, None
 
     async def untimeout_user(self, db_session, member, unbanner, unban_reason):
