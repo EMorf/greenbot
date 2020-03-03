@@ -128,24 +128,24 @@ class TimeoutModule(BaseModule):
                     colour=member.colour,
                 )
                 embed.add_field(
-                    name="Banned on", value=timeout.created_at.strftime("%b %d %Y %H:%M:%S %Z"), inline=False
+                    name="Banned on", value=str(timeout.created_at.strftime("%b %d %Y %H:%M:%S %Z")), inline=False
                 )
                 embed.add_field(
-                    name="Banned till" if timeout.time_left != 0 else "Unbanned on", value=timeout.until.strftime("%b %d %Y %H:%M:%S %Z"), inline=False
+                    name="Banned till" if timeout.time_left != 0 else "Unbanned on", value=str(timeout.until.strftime("%b %d %Y %H:%M:%S %Z")), inline=False
                 )
                 if timeout.time_left != 0:
                     embed.add_field(
-                        name="Timeleft", value=utils.seconds_to_resp(timeout.time_left), inline=False
+                        name="Timeleft", value=str(utils.seconds_to_resp(timeout.time_left)), inline=False
                     )
                 embed.add_field(
-                    name="Banned by", value=timeout.issued_by, inline=False
+                    name="Banned by", value=str(timeout.issued_by), inline=False
                 )
                 embed.add_field(
-                    name="Ban Reason", value=timeout.ban_reason, inline=False
+                    name="Ban Reason", value=str(timeout.ban_reason), inline=False
                 )
                 if timeout.time_left != 0:
                     embed.add_field(
-                        name="Unban Reason", value=timeout.unban_reason, inline=False
+                        name="Unban Reason", value=str(timeout.unban_reason), inline=False
                     )
                 await self.bot.say(channel=channel, embed=embed)
 
@@ -168,19 +168,19 @@ class TimeoutModule(BaseModule):
                 colour=member.colour,
             )
             embed.add_field(
-                name="Banned on", value=timeout.created_at.strftime("%b %d %Y %H:%M:%S %Z"), inline=False
+                name="Banned on", value=str(timeout.created_at.strftime("%b %d %Y %H:%M:%S %Z")), inline=False
             )
             embed.add_field(
-                name="Banned till", value=timeout.until.strftime("%b %d %Y %H:%M:%S %Z"), inline=False
+                name="Banned till", value=str(timeout.until.strftime("%b %d %Y %H:%M:%S %Z")), inline=False
             )
             embed.add_field(
-                name="Timeleft", value=utils.seconds_to_resp(timeout.time_left), inline=False
+                name="Timeleft", value=str(utils.seconds_to_resp(timeout.time_left)), inline=False
             )
             embed.add_field(
-                name="Banned by", value=timeout.issued_by, inline=False
+                name="Banned by", value=str(timeout.issued_by), inline=False
             )
             embed.add_field(
-                name="Ban Reason", value=timeout.ban_reason, inline=False
+                name="Ban Reason", value=str(timeout.ban_reason), inline=False
             )
             await self.bot.say(channel=channel, embed=embed)
         
