@@ -10,7 +10,7 @@ log = logging.getLogger(__name__)
 
 
 class ScheduledJob:
-    def __init__(self, run_type, method, interval=1, run_date=None, args=[], kwargs={}):
+    def __init__(self, run_type, method, interval=1, run_date=utils.now(), args=[], kwargs={}):
         self.run_type = run_type
         self.method = method
         self.run_date = run_date
@@ -56,13 +56,13 @@ class ScheduleManager:
 
     @staticmethod
     def execute_now(method, args=[], kwargs={}):
-        job = ScheduledJob(run_type="date", method=method, run_date=utils.now(), args=args, kwargs=kwargs)
+        job = ScheduledJob("date", method, run_date=utils.now(), args=args, kwargs=kwargs)
         ScheduleManager.schedules.append(job)
         return job
 
     @staticmethod
     def execute_delayed(delay, method, args=[], kwargs={}):
-        job = ScheduledJob(run_type="date", method=method, run_date=(utils.now() + datetime.timedelta(seconds=delay)), args=args, kwargs=kwargs)
+        job = ScheduledJob("date", method, run_date=(utils.now() + datetime.timedelta(seconds=delay)), args=args, kwargs=kwargs)
         ScheduleManager.schedules.append(job)
         log.info("job added")
         return job
