@@ -52,7 +52,7 @@ class ScheduleManager:
 
     @staticmethod
     def init(private_loop):
-        private_loop.create_task(ScheduleManager.process_schedules()
+        private_loop.create_task(ScheduleManager.process_schedules())
 
     @staticmethod
     def execute_now(method, args=[], kwargs={}):
