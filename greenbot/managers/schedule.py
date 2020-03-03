@@ -78,7 +78,8 @@ class ScheduleManager:
         ScheduleManager.ready = True
         while True:
             try:
-                for schedule in ScheduleManager.schedules[:]:
+                schedules = ScheduleManager.schedules.copy()
+                for schedule in schedules:
                     if schedule.should_run:
                         await schedule.run()
                     else:
@@ -87,7 +88,7 @@ class ScheduleManager:
                             log.info(utils.now())
                             log.info(schedule.run_date < utils.now())
                             log.info("")
-                log.info(ScheduleManager.schedules[:])
+                log.info(schedules)
                 await asyncio.sleep(0.2)
             except Exception as e:
                 log.error(e)
