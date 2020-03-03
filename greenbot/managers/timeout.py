@@ -54,7 +54,7 @@ class TimeoutManager:
 
             member = list(self.bot.filters.get_member([int(timeout.user_id)], None, {}))[0]
             if member:
-                await self.untimeout_user(db_session, member, None, "Timeout removed by timer")
+                log.info(list(await self.untimeout_user(db_session, member, None, "Timeout removed by timer")))
                 log.info("removed timeout with member")
                 return
             log.info("removed timeout without member")
