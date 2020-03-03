@@ -656,6 +656,8 @@ class AdvancedAdminLog(BaseModule):
                 if _log.reason:
                     reason = _log.reason
                 break
+        if perp.id == self.bot.discord_bot.client.user.id:
+            return
         if type(before) == discord.TextChannel:
             text_updates = {
                 "name": "Name:",
