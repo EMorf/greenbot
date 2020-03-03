@@ -1,6 +1,7 @@
 import datetime
 import logging
 import asyncio
+import datetime
 
 from greenbot.managers.handler import HandlerManager
 from greenbot import utils
@@ -60,7 +61,7 @@ class ScheduleManager:
 
     @staticmethod
     def execute_delayed(delay, method, args=[], kwargs={}):
-        return ScheduledJob("date", method, run_date=(utils.now() + datetime.datetime.timedelta(seconds=delay)), args=args, kwargs=kwargs)
+        return ScheduledJob("date", method, run_date=(utils.now() + datetime.timedelta(seconds=delay)), args=args, kwargs=kwargs)
 
     @staticmethod
     def execute_every(interval, method, args=[], kwargs={}):
