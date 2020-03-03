@@ -71,9 +71,12 @@ class ScheduleManager:
     async def process_schedules():
         ScheduleManager.ready = True
         while True:
-            for schedule in ScheduleManager.schedules[:]:
-                if schedule.should_run:
-                    await schedule.run()
-                else:
-                    log.info(schedule.run_date)
-            await asyncio.sleep(0.2)
+            try:
+                for schedule in ScheduleManager.schedules[:]:
+                    if schedule.should_run:
+                        await schedule.run()
+                    else:
+                        log.info(schedule.run_date)
+                await asyncio.sleep(0.2)
+            except Exception as e:
+                log.error(e)
