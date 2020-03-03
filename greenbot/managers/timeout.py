@@ -41,23 +41,17 @@ class TimeoutManager:
         self.salt = None
 
     async def auto_untimeout(self, timeout_id, salt):
-        log.info(timeout_id)
-        log.info(salt)
         if self.salt != salt:
             return
 
         with DBManager.create_session_scope() as db_session:
             timeout = Timeout._by_id(db_session, timeout_id)
             if not timeout.active:
-                log.info("timeout already ended!")
                 return
 
             member = list(self.bot.filters.get_member([int(timeout.user_id)], None, {}))[0]
             if member:
-                log.info(list(await self.untimeout_user(db_session, member, None, "Timeout removed by timer")))
-                log.info("removed timeout with member")
                 return
-            log.info("removed timeout without member")
             timeout.unban(db_session, None, "Timeout removed by timer")
             if self.settings["log_untimeout"]: #TODO
                 pass

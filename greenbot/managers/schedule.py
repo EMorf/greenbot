@@ -64,7 +64,6 @@ class ScheduleManager:
         run_date = (utils.now() + datetime.timedelta(seconds=delay))
         job = ScheduledJob("date", method, run_date=run_date, args=args, kwargs=kwargs)
         ScheduleManager.schedules.append(job)
-        log.info(f"job added {run_date}")
         return job
 
     @staticmethod
