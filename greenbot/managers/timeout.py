@@ -41,6 +41,8 @@ class TimeoutManager:
         self.salt = None
 
     async def auto_untimeout(self, timeout_id, salt):
+        log.info(timeout_id)
+        log.info(salt)
         if self.salt != salt:
             return
 

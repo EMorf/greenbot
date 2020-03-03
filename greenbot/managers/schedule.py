@@ -38,7 +38,6 @@ class ScheduledJob:
         ScheduleManager.schedules.remove(self)
 
     async def run(self):
-        log.info("job ran")
         await self.method(*self.args, **self.kwargs)
         if self.run_type == "date":
             self.remove()
@@ -82,18 +81,7 @@ class ScheduleManager:
                 schedules = ScheduleManager.schedules.copy()
                 for schedule in schedules:
                     if schedule.should_run():
-                        log.info("TASK RAN")
-                        log.info(schedule.run_date)
-                        log.info(utils.now())
-                        log.info(schedule.run_date < utils.now())
-                        log.info("")
                         await schedule.run()
-                    else:
-                        if schedule.run_type == "date":
-                            log.info(schedule.run_date)
-                            log.info(utils.now())
-                            log.info(schedule.run_date < utils.now())
-                            log.info("")
                 await asyncio.sleep(0.2)
             except Exception as e:
                 log.error(e)
