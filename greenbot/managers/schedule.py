@@ -45,7 +45,6 @@ class ScheduledJob:
         else:
             self.last_run = utils.now()
 
-    
 
 class ScheduleManager:
     schedules = []
@@ -82,6 +81,7 @@ class ScheduleManager:
                     if schedule.should_run:
                         await schedule.run()
                     else:
+                        log.info(schedule.run_type)
                         log.info(schedule.run_date)
                         log.info(utils.now())
                         log.info(schedule.run_date < utils.now())
