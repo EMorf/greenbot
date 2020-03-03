@@ -68,7 +68,8 @@ class TimeoutManager:
         if not self.settings["enabled"]:
             return False, "Module is not enabled"
         current_timeout = Timeout._is_timedout(db_session, str(member.id))
-        if current_timeout:
+        new_timeout = None
+        if current_timeout is not None:
             if current_timeout.check_lengths(until):
                 current_timeout.active = False
                 new_timeout = Timeout._create(
@@ -81,17 +82,16 @@ class TimeoutManager:
                     f"Timeout overwritten by Timeout #{new_timeout.id}",
                 )
                 db_session.commit()
-                if self.settings["log_timeout_update"]:  # TODO
-                    pass
             else:
                 return (
                     False,
                     f"{member} is currently timedout by Timeout #{current_timeout.id}",
                 )
-        new_timeout = Timeout._create(
-            db_session, str(member.id), str(banner.id), until, ban_reason
-        )
-        db_session.commit()
+        if not new_timeout:
+            new_timeout = Timeout._create(
+                db_session, str(member.id), str(banner.id), until, ban_reason
+            )
+            db_session.commit()
         for channel in self.bot.discord_bot.guild.text_channels:
             overwrite = channel.overwrites_for(member)
             overwrite.send_messages = False
@@ -103,7 +103,6 @@ class TimeoutManager:
 
         if self.settings["log_timeout"]:  # TODO
             pass
-        log.info(f"{member} timed out")
         ScheduleManager.execute_delayed(
             new_timeout.time_left + 5,
             self.auto_untimeout,

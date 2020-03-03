@@ -56,7 +56,6 @@ class Timeout(Base):
         self.active = False
         self.unbanned_by_id = (unbanned_by_id,)
         self.unban_reason = unban_reason
-        db_session.merge(self)
         return self
 
     @staticmethod
@@ -80,7 +79,7 @@ class Timeout(Base):
     def _is_timedout(db_session, user_id):
         return (
             db_session.query(Timeout)
-            .filter_by(user_id=user_id)
+            .filter_by(user_id=str(user_id))
             .filter_by(active=True)
             .one_or_none()
         )
