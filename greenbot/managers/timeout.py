@@ -29,7 +29,7 @@ class TimeoutManager:
         with DBManager.create_session_scope() as db_session:
             current_timeouts = Timeout._active_timeouts(db_session)
             for timeout in current_timeouts:
-                ScheduleManager.execute_delayed(timeout.time_left, self.auto_untimeout, args=[timeout.id, self.salt])
+                ScheduleManager.execute_delayed(timeout.time_left + 5, self.auto_untimeout, args=[timeout.id, self.salt])
 
     def disable(self):
         self.settings = {
@@ -61,6 +61,7 @@ class TimeoutManager:
             timeout.unban(db_session, None, "Timeout removed by timer")
             if self.settings["log_untimeout"]: #TODO
                 pass
+        return
 
     async def timeout_user(self, db_session, member, banner, until, ban_reason):
         if not self.settings["enabled"]:
@@ -78,7 +79,7 @@ class TimeoutManager:
                 return False, f"{member} is currently timedout by Timeout #{current_timeout.id}"
         new_timeout = Timeout._create(db_session, str(member.id), str(banner.id), until, ban_reason)
         db_session.commit()
-        ScheduleManager.execute_delayed(new_timeout.time_left, self.auto_untimeout, args=[new_timeout.id, self.salt])
+        ScheduleManager.execute_delayed(new_timeout.time_left + 5, self.auto_untimeout, args=[new_timeout.id, self.salt])
         for channel in self.bot.discord_bot.guild.text_channels:
             await channel.set_permissions(target=member, send_messages=False, reason=f"Timedout #{new_timeout.id}")
 
