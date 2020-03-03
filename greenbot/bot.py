@@ -163,6 +163,7 @@ class Bot:
             for x in asyncio.Task.all_tasks():
                 log.info(x)
             time.sleep(5)
+            log.info("")
 
     def execute_now(self, function, *args, **kwargs):
         self.execute_delayed(0, function, *args, **kwargs)
