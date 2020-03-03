@@ -160,7 +160,7 @@ class Bot:
                 else:
                     owner.level = 2000
         while True:
-            for x in asyncio.Task.all_tasks()
+            for x in asyncio.Task.all_tasks():
                 log.info(x)
             time.sleep(5)
 
