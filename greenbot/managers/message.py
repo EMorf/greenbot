@@ -28,6 +28,8 @@ class MessageManager:
             return
 
         with DBManager.create_session_scope() as db_session:
+            user = User._create_or_get_by_discord_id(db_session, str(member.id), str(member))
+            db_session.commit()
             self.new_message(db_session, message)
             db_session.commit()
             current_timeout = Timeout._is_timedout(db_session, str(member.id))
