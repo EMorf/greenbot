@@ -19,7 +19,7 @@ class TimeoutManager:
             "enabled": False,
             "log_timeout": False,
             "log_untimeout": False,
-            "log_timeout_update": False
+            "log_timeout_update": False,
         }
         self.salt = ""
 
@@ -29,14 +29,18 @@ class TimeoutManager:
         with DBManager.create_session_scope() as db_session:
             current_timeouts = Timeout._active_timeouts(db_session)
             for timeout in current_timeouts:
-                ScheduleManager.execute_delayed(timeout.time_left + 1, self.auto_untimeout, args=[timeout.id, self.salt])
+                ScheduleManager.execute_delayed(
+                    timeout.time_left + 1,
+                    self.auto_untimeout,
+                    args=[timeout.id, self.salt],
+                )
 
     def disable(self):
         self.settings = {
             "enabled": False,
             "log_timeout": False,
             "log_untimeout": False,
-            "log_timeout_update": False
+            "log_timeout_update": False,
         }
         self.salt = None
 
@@ -49,11 +53,13 @@ class TimeoutManager:
             if not timeout.active:
                 return
 
-            member = list(self.bot.filters.get_member([int(timeout.user_id)], None, {}))[0]
+            member = list(
+                self.bot.filters.get_member([int(timeout.user_id)], None, {})
+            )[0]
             if member:
                 return
             timeout.unban(db_session, None, "Timeout removed by timer")
-            if self.settings["log_untimeout"]: #TODO
+            if self.settings["log_untimeout"]:  # TODO
                 pass
         return
 
@@ -64,23 +70,40 @@ class TimeoutManager:
         if current_timeout:
             if current_timeout.check_lengths(until):
                 current_timeout.active = False
-                new_timeout = Timeout._create(db_session, str(member.id), str(banner.id), until, ban_reason)
+                new_timeout = Timeout._create(
+                    db_session, str(member.id), str(banner.id), until, ban_reason
+                )
                 db_session.commit()
-                current_timeout.unban(db_session, None, f"Timeout overwritten by Timeout #{new_timeout.id}")
+                current_timeout.unban(
+                    db_session,
+                    None,
+                    f"Timeout overwritten by Timeout #{new_timeout.id}",
+                )
                 db_session.commit()
-                if self.settings["log_timeout_update"]: #TODO
+                if self.settings["log_timeout_update"]:  # TODO
                     pass
             else:
-                return False, f"{member} is currently timedout by Timeout #{current_timeout.id}"
-        new_timeout = Timeout._create(db_session, str(member.id), str(banner.id), until, ban_reason)
+                return (
+                    False,
+                    f"{member} is currently timedout by Timeout #{current_timeout.id}",
+                )
+        new_timeout = Timeout._create(
+            db_session, str(member.id), str(banner.id), until, ban_reason
+        )
         db_session.commit()
         for channel in self.bot.discord_bot.guild.text_channels:
-            await channel.set_permissions(target=member, send_messages=False, reason=f"Timedout #{new_timeout.id}")
+            await channel.set_permissions(
+                target=member, send_messages=False, reason=f"Timedout #{new_timeout.id}"
+            )
 
-        if self.settings["log_timeout"]: #TODO
+        if self.settings["log_timeout"]:  # TODO
             pass
         log.info(f"{member} timed out")
-        ScheduleManager.execute_delayed(new_timeout.time_left + 5, self.auto_untimeout, args=[new_timeout.id, self.salt])
+        ScheduleManager.execute_delayed(
+            new_timeout.time_left + 5,
+            self.auto_untimeout,
+            args=[new_timeout.id, self.salt],
+        )
         return True, None
 
     async def untimeout_user(self, db_session, member, unbanner, unban_reason):
@@ -89,16 +112,22 @@ class TimeoutManager:
         current_timeout = Timeout._is_timedout(db_session, str(member.id))
         if not current_timeout:
             return False, f"{member} is not currently timedout!"
-        
-        current_timeout.unban(db_session, str(unbanner.id) if unbanner else None, unban_reason)
+
+        current_timeout.unban(
+            db_session, str(unbanner.id) if unbanner else None, unban_reason
+        )
         db_session.commit()
         for channel in self.bot.discord_bot.guild.text_channels:
             overwrite = channel.overwrites_for(member)
             overwrite.send_messages = None
             if overwrite.is_empty():
                 overwrite = None
-            await channel.set_permissions(target=member, overwrite=overwrite, reason=f"Timedout #{current_timeout.id}")
+            await channel.set_permissions(
+                target=member,
+                overwrite=overwrite,
+                reason=f"Timedout #{current_timeout.id}",
+            )
 
-        if self.settings["log_untimeout"]: #TODO
+        if self.settings["log_untimeout"]:  # TODO
             pass
         return True, None

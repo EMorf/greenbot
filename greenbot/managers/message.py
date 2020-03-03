@@ -36,7 +36,11 @@ class MessageManager:
             if current_timeout and not_whisper:
                 await message.delete()
                 for channel in self.bot.discord_bot.guild.text_channels:
-                    await channel.set_permissions(target=member, send_messages=False, reason=f"Timedout #{current_timeout.id}")
+                    await channel.set_permissions(
+                        target=member,
+                        send_messages=False,
+                        reason=f"Timedout #{current_timeout.id}",
+                    )
                 return
 
             user_level = self.bot.psudo_level_member(db_session, member)
