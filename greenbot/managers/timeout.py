@@ -92,8 +92,12 @@ class TimeoutManager:
         )
         db_session.commit()
         for channel in self.bot.discord_bot.guild.text_channels:
+            overwrite = channel.overwrites_for(member)
+            overwrite.send_messages = False
             await channel.set_permissions(
-                target=member, send_messages=False, reason=f"Timedout #{new_timeout.id}"
+                target=member,
+                overwrite=overwrite,
+                reason=f"Timedout #{current_timeout.id}",
             )
 
         if self.settings["log_timeout"]:  # TODO
