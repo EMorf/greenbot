@@ -10,7 +10,7 @@ def up(cursor, bot):
         ban_reason TEXT,
         unban_reason TEXT,
         until TIMESTAMPTZ,
-        created_at TIMESTAMPTZ NOT NULL,
+        created_at TIMESTAMPTZ NOT NULL
     )
     """
     )
