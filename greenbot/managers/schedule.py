@@ -83,6 +83,8 @@ class ScheduleManager:
                         await schedule.run()
                     else:
                         log.info(schedule.run_date)
+                        log.info(utils.now())
+                        log.info("")
                 await asyncio.sleep(0.2)
             except Exception as e:
                 log.error(e)
