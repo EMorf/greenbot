@@ -4,6 +4,7 @@ import sys
 import discord
 from pytz import timezone
 import urllib
+import time
 
 from greenbot.models.action import ActionParser
 from greenbot.models.user import User
@@ -158,6 +159,9 @@ class Bot:
                     )
                 else:
                     owner.level = 2000
+        while True:
+            time.sleep(5)
+            log.info(asyncio.Task.all_tasks)
 
     def execute_now(self, function, *args, **kwargs):
         self.execute_delayed(0, function, *args, **kwargs)

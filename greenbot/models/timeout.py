@@ -39,7 +39,7 @@ class Timeout(Base):
 
     @property
     def time_left(self):
-        return (self.until - utils.now()).total_seconds() if self.until > utils.now() and not self.active else 0
+        return int((self.until - utils.now()).total_seconds() if self.until > utils.now() and not self.active else 0)
 
     def check_lengths(self, _date):
         if not self.until:

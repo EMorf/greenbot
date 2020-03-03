@@ -412,27 +412,6 @@ class DiscordBotManager:
             return False
         return True
 
-    async def run_periodically(self, wait_time, func, *args):
-        while True:
-            await asyncio.sleep(wait_time)
-            if not self.client.is_closed():
-                try:
-                    await func(*args)
-                except Exception as e:
-                    log.error(e)
-
-    def schedule_task_periodically(self, wait_time, func, *args):
-        return self.private_loop.create_task(
-            self.run_periodically(wait_time, func, *args)
-        )
-
-    async def cancel_scheduled_task(self, task):
-        task.cancel()
-        try:
-            await task
-        except asyncio.CancelledError:
-            pass
-
     def connect(self):
         self.private_loop.create_task(self._connect())
 
@@ -441,14 +420,3 @@ class DiscordBotManager:
             await self.client.start(self.settings["discord_token"])
         except Exception as e:
             log.error(e)
-
-    def stop(self):
-        self.private_loop.create_task(self._stop())
-
-    async def _stop(self):
-        log.info("Discord closing")
-        await self.client.logout()
-        try:
-            self.client.clear()
-        except:
-            pass
