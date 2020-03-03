@@ -74,7 +74,7 @@ class TimeoutModule(BaseModule):
         with DBManager.create_session_scope() as db_session:
             user_level = self.bot.psudo_level_member(db_session, member)
 
-            if user_level <= args["user_level"]:
+            if user_level >= args["user_level"]:
                 await self.bot.say(channel=channel, message=f"You cannot timeout a member with a with a level the same or higher than you!")
                 return False
 
