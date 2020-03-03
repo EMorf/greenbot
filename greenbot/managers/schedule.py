@@ -62,9 +62,10 @@ class ScheduleManager:
 
     @staticmethod
     def execute_delayed(delay, method, args=[], kwargs={}):
-        job = ScheduledJob("date", method, run_date=(utils.now() + datetime.timedelta(seconds=delay)), args=args, kwargs=kwargs)
+        run_date = (utils.now() + datetime.timedelta(seconds=delay))
+        job = ScheduledJob("date", method, run_date=run_date, args=args, kwargs=kwargs)
         ScheduleManager.schedules.append(job)
-        log.info("job added")
+        log.info(f"job added {run_date}")
         return job
 
     @staticmethod
