@@ -36,7 +36,7 @@ class MessageManager:
             log.info(current_timeout)
             if current_timeout and not_whisper:
                 await message.delete()
-                for channel in self.bot.discord_bot.text_channels:
+                for channel in self.bot.discord_bot.guild.text_channels:
                     await channel.set_permissions(target=member, send_messages=False, reason=f"Timedout #{current_timeout.id}")
                 return
 
