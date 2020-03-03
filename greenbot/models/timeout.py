@@ -23,43 +23,19 @@ class Timeout(Base):
     user_id = Column(
         TEXT, ForeignKey("user.discord_id", ondelete="CASCADE"), nullable=False
     )
+    user = relationship("User", foreign_keys=[user_id])
     issued_by_id = Column(
         TEXT, ForeignKey("user.discord_id", ondelete="SET NULL"), nullable=True
     )
+    issued_by = relationship("User", foreign_keys=[issued_by_id])
     unbanned_by_id = Column(
         TEXT, ForeignKey("user.discord_id", ondelete="SET NULL"), nullable=True
     )
+    unbanned_by = relationship("User", foreign_keys=[unbanned_by_id])
     ban_reason = Column(TEXT, nullable=True)
     unban_reason = Column(TEXT, nullable=True)
     until = Column(UtcDateTime(), nullable=True, server_default="NULL")
     created_at = Column(UtcDateTime(), nullable=False, default=utils.now())
-
-    user = relationship(
-        "User",
-        primaryjoin="User.discord_id==Timeout.user_id",
-        foreign_keys="User.discord_id",
-        uselist=False,
-        cascade="",
-        lazy="noload",
-    )
-
-    issued_by = relationship(
-        "User",
-        primaryjoin="User.discord_id==Timeout.issued_by_id",
-        foreign_keys="User.discord_id",
-        uselist=False,
-        cascade="",
-        lazy="noload",
-    )
-
-    unbanned_by = relationship(
-        "User",
-        primaryjoin="User.discord_id==Timeout.unbanned_by_id",
-        foreign_keys="User.discord_id",
-        uselist=False,
-        cascade="",
-        lazy="noload",
-    )
 
     @property
     def time_left(self):
