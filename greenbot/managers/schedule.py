@@ -65,7 +65,7 @@ class ScheduleManager:
         run_date = (utils.now() + datetime.timedelta(seconds=delay))
         job = ScheduledJob("date", method, run_date=run_date, args=args, kwargs=kwargs)
         ScheduleManager.schedules.append(job)
-        log.info(f"job added {delay}s")
+        log.info(f"job added {run_date}")
         return job
 
     @staticmethod
@@ -94,7 +94,6 @@ class ScheduleManager:
                             log.info(utils.now())
                             log.info(schedule.run_date < utils.now())
                             log.info("")
-                # log.info(schedules)
                 await asyncio.sleep(0.2)
             except Exception as e:
                 log.error(e)
