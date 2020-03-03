@@ -33,7 +33,6 @@ class MessageManager:
             self.new_message(db_session, message)
             db_session.commit()
             current_timeout = Timeout._is_timedout(db_session, str(member.id))
-            log.info(current_timeout)
             if current_timeout and not_whisper:
                 await message.delete()
                 for channel in self.bot.discord_bot.guild.text_channels:
