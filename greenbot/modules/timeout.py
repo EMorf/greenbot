@@ -135,7 +135,7 @@ class Timeout(BaseModule):
                 name="Timeleft", value=utils.seconds_to_resp((timeout["date_expired"] - timeout["date_issued"]).total_seconds()), inline=False
             )
             embed.add_field(
-                name="Banned by", value=list(self.bot.filters.get_member_value([timeout["issued_by"]], "mention", {}))[0], inline=False
+                name="Banned by", value=timeout["issued_by"], inline=False
             )
             await self.bot.say(channel=channel, embed=embed)
             count += 1

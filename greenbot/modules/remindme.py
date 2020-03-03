@@ -289,10 +289,7 @@ class RemindMe(BaseModule):
             new_user_reminders = []
             for reminder in user_reminders:
                 salt = reminder["salt"]
-                date_of_reminder = datetime.strptime(
-                    utils.parse_date(reminder["date_of_reminder"]),
-                    "%Y-%m-%d %H:%M:%S.%f%z",
-                )
+                date_of_reminder = utils.parse_date(reminder["date_of_reminder"])
                 if date_of_reminder < utils.now():
                     continue
                 new_user_reminders.append(reminder)

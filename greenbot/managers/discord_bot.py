@@ -249,9 +249,7 @@ class DiscordBotManager:
         try:
             data = json.loads(self.redis.get(f"{self.bot.bot_name}:timeouts-discord"))
             for user in data:
-                unban_date = datetime.strptime(
-                    utils.parse_date(data[user]["unban_date"]), "%Y-%m-%d %H:%M:%S.%f%z"
-                )
+                unban_date = utils.parse_date(data[user]["unban_date"])
                 time_now = utils.now()
                 resp_timeout = data.get("resp_timeout", "")
                 resp_timeout += " after " if resp_timeout else ""
