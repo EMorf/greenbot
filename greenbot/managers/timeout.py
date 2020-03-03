@@ -74,6 +74,7 @@ class TimeoutManager:
                 return False, f"{member} is currently timedout by Timeout #{current_timeout.id}"
         new_timeout = Timeout._create(db_session, str(member.id), str(banner.id), until, ban_reason)
         db_session.commit()
+        ScheduleManager.execute_delayed(new_timeout.time_left, self.auto_untimeout, args=[new_timeout.id, self.salt])
         for channel in self.bot.discord_bot.guild.text_channels:
             await channel.set_permissions(target=member, send_messages=False, reason=f"Timedout #{new_timeout.id}")
 
