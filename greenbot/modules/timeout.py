@@ -59,28 +59,48 @@ class TimeoutModule(BaseModule):
         self.redis = RedisManager.get()
         self.reminder_tasks = {}
 
-    async def timeout_user(self, bot, author, channel, message, args): # !timeout <here> @username
+    async def timeout_user(
+        self, bot, author, channel, message, args
+    ):  # !timeout <here> @username
         command_args = message.split(" ") if message else []
 
         if len(command_args) == 0:
-            await self.bot.say(channel=channel, message=f"!timeout (here) <User mention> <duration> (reason...)")
+            await self.bot.say(
+                channel=channel,
+                message=f"!timeout (here) <User mention> <duration> (reason...)",
+            )
             return False
 
         member = list(self.bot.filters.get_member_value([command_args[0]], None, {}))[0]
         if not member:
-            await self.bot.say(channel=channel, message=f"Cant find member, {command_args[0]}")
+            await self.bot.say(
+                channel=channel, message=f"Cant find member, {command_args[0]}"
+            )
             return False
-        
+
         with DBManager.create_session_scope() as db_session:
             user_level = self.bot.psudo_level_member(db_session, member)
 
             if user_level >= args["user_level"]:
-                await self.bot.say(channel=channel, message=f"You cannot timeout a member with a with a level the same or higher than you!")
+                await self.bot.say(
+                    channel=channel,
+                    message=f"You cannot timeout a member with a with a level the same or higher than you!",
+                )
                 return False
 
-            timedelta = utils.parse_timedelta(command_args[1]) if len(command_args) > 1 else None
-            ban_reason = " ".join(command_args[1:]) if not timedelta else " ".join(command_args[2:])
-            success, resp = await self.bot.timeout_manager.timeout_user(db_session, member, author, utils.now() + timedelta, ban_reason)
+            timedelta = (
+                utils.parse_timedelta(command_args[1])
+                if len(command_args) > 1
+                else None
+            )
+            ban_reason = (
+                " ".join(command_args[1:])
+                if not timedelta
+                else " ".join(command_args[2:])
+            )
+            success, resp = await self.bot.timeout_manager.timeout_user(
+                db_session, member, author, utils.now() + timedelta, ban_reason
+            )
             if success:
                 return True
 
@@ -90,18 +110,24 @@ class TimeoutModule(BaseModule):
     async def untimeout_user(self, bot, author, channel, message, args):
         command_args = message.split(" ") if message else []
         if len(command_args) == 0:
-            await self.bot.say(channel=channel, message=f"!untimeout (here) <User mention> (reason...)")
+            await self.bot.say(
+                channel=channel, message=f"!untimeout (here) <User mention> (reason...)"
+            )
             return False
 
         member = list(self.bot.filters.get_member_value([command_args[0]], None, {}))[0]
         if not member:
-            await self.bot.say(channel=channel, message=f"Cant find member, {command_args[0]}")
+            await self.bot.say(
+                channel=channel, message=f"Cant find member, {command_args[0]}"
+            )
             return False
 
         unban_reason = " ".join(command_args[1:])
 
         with DBManager.create_session_scope() as db_session:
-            success, resp = await self.bot.timeout_manager.untimeout_user(db_session, member, author, unban_reason)
+            success, resp = await self.bot.timeout_manager.untimeout_user(
+                db_session, member, author, unban_reason
+            )
             if success:
                 return True
 
@@ -112,35 +138,55 @@ class TimeoutModule(BaseModule):
         command_args = message.split(" ") if message else []
         member = list(self.bot.filters.get_member_value([command_args[0]], None, {}))[0]
         if not member:
-            await self.bot.say(channel=channel, message=f"Cant find member, {command_args[0]}")
+            await self.bot.say(
+                channel=channel, message=f"Cant find member, {command_args[0]}"
+            )
             return False
         with DBManager.create_session_scope() as db_session:
             timeouts = Timeout._by_user_id(db_session, str(member.id))
 
             if not timeouts:
-                await self.bot.say(channel=channel, message=f"The user {member} has no timeouts")
+                await self.bot.say(
+                    channel=channel, message=f"The user {member} has no timeouts"
+                )
                 return True
 
-            for timeout in timeouts:                    
+            for timeout in timeouts:
                 embed = discord.Embed(
                     description=f"Timeout #{timeout.id}",
                     timestamp=timeout.created_at,
                     colour=member.colour,
                 )
                 embed.add_field(
-                    name="Banned on", value=str(timeout.created_at.strftime("%b %d %Y %H:%M:%S %Z")), inline=False
+                    name="Banned on",
+                    value=str(timeout.created_at.strftime("%b %d %Y %H:%M:%S %Z")),
+                    inline=False,
                 )
                 embed.add_field(
-                    name="Banned till" if timeout.active else "Unbanned on", value=str(timeout.until.strftime("%b %d %Y %H:%M:%S %Z")) if timeout.until else "Permanently", inline=False
+                    name="Banned till" if timeout.active else "Unbanned on",
+                    value=str(timeout.until.strftime("%b %d %Y %H:%M:%S %Z"))
+                    if timeout.until
+                    else "Permanently",
+                    inline=False,
                 )
                 if timeout.active:
                     embed.add_field(
-                        name="Timeleft", value=str(utils.seconds_to_resp(timeout.time_left)), inline=False
+                        name="Timeleft",
+                        value=str(utils.seconds_to_resp(timeout.time_left)),
+                        inline=False,
                     )
                 if timeout.issued_by_id:
-                    issued_by = list(self.bot.filters.get_member([int(timeout.issued_by_id)], None, {}))[0]
+                    issued_by = list(
+                        self.bot.filters.get_member(
+                            [int(timeout.issued_by_id)], None, {}
+                        )
+                    )[0]
                     embed.add_field(
-                        name="Banned by", value=issued_by.mention if issued_by else f"{timeout.issued_by_id}", inline=False
+                        name="Banned by",
+                        value=issued_by.mention
+                        if issued_by
+                        else f"{timeout.issued_by_id}",
+                        inline=False,
                     )
                 if timeout.ban_reason:
                     embed.add_field(
@@ -148,12 +194,22 @@ class TimeoutModule(BaseModule):
                     )
                 if timeout.active and timeout.unban_reason:
                     embed.add_field(
-                        name="Unban Reason", value=str(timeout.unban_reason), inline=False
+                        name="Unban Reason",
+                        value=str(timeout.unban_reason),
+                        inline=False,
                     )
                 if timeout.active and timeout.unbanned_by_id:
-                    unbanned_by = list(self.bot.filters.get_member([int(timeout.unbanned_by_id)], None, {}))[0]
+                    unbanned_by = list(
+                        self.bot.filters.get_member(
+                            [int(timeout.unbanned_by_id)], None, {}
+                        )
+                    )[0]
                     embed.add_field(
-                        name="Unban By", value=unbanned_by.mention if unbanned_by else f"{timeout.issued_by_id}", inline=False
+                        name="Unban By",
+                        value=unbanned_by.mention
+                        if unbanned_by
+                        else f"{timeout.issued_by_id}",
+                        inline=False,
                     )
                 await self.bot.say(channel=channel, embed=embed)
 
@@ -161,13 +217,18 @@ class TimeoutModule(BaseModule):
         command_args = message.split(" ") if message else []
         member = list(self.bot.filters.get_member_value([command_args[0]], None, {}))[0]
         if not member:
-            await self.bot.say(channel=channel, message=f"Cant find member, {command_args[0]}")
+            await self.bot.say(
+                channel=channel, message=f"Cant find member, {command_args[0]}"
+            )
             return False
         with DBManager.create_session_scope() as db_session:
             timeout = Timeout._is_timedout(db_session, str(member.id))
 
             if not timeout:
-                await self.bot.say(channel=channel, message=f"The user {member} has not currently timedout")
+                await self.bot.say(
+                    channel=channel,
+                    message=f"The user {member} has not currently timedout",
+                )
                 return True
 
             embed = discord.Embed(
@@ -176,14 +237,22 @@ class TimeoutModule(BaseModule):
                 colour=member.colour,
             )
             embed.add_field(
-                name="Banned on", value=str(timeout.created_at.strftime("%b %d %Y %H:%M:%S %Z")), inline=False
+                name="Banned on",
+                value=str(timeout.created_at.strftime("%b %d %Y %H:%M:%S %Z")),
+                inline=False,
             )
             embed.add_field(
-                name="Banned till" if timeout.time_left != 0 else "Unbanned on", value=str(timeout.until.strftime("%b %d %Y %H:%M:%S %Z")) if timeout.until else "Permanently", inline=False
+                name="Banned till" if timeout.time_left != 0 else "Unbanned on",
+                value=str(timeout.until.strftime("%b %d %Y %H:%M:%S %Z"))
+                if timeout.until
+                else "Permanently",
+                inline=False,
             )
             if timeout.time_left != 0:
                 embed.add_field(
-                    name="Timeleft", value=str(utils.seconds_to_resp(timeout.time_left)), inline=False
+                    name="Timeleft",
+                    value=str(utils.seconds_to_resp(timeout.time_left)),
+                    inline=False,
                 )
             if timeout.issued_by:
                 embed.add_field(
@@ -198,7 +267,6 @@ class TimeoutModule(BaseModule):
                     name="Unban Reason", value=str(timeout.unban_reason), inline=False
                 )
             await self.bot.say(channel=channel, embed=embed)
-        
 
     def load_commands(self, **options):
         self.commands["timeout"] = Command.raw_command(
@@ -238,7 +306,14 @@ class TimeoutModule(BaseModule):
         if not bot:
             return
 
-        self.bot.timeout_manager.enable({"enabled": True, "log_timeout": self.settings["log_timeout"], "log_untimeout": self.settings["log_untimeout"], "log_timeout_update": self.settings["log_timeout_update"]})
+        self.bot.timeout_manager.enable(
+            {
+                "enabled": True,
+                "log_timeout": self.settings["log_timeout"],
+                "log_untimeout": self.settings["log_untimeout"],
+                "log_timeout_update": self.settings["log_timeout_update"],
+            }
+        )
 
     def disable(self, bot):
         if not bot:
