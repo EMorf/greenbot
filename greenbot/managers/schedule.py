@@ -27,7 +27,7 @@ class ScheduledJob:
         if self.run_type == "date":
             return self.run_date < utils.now()
         else:
-            return (utils.now() - self.last_run).total_seconds() > self.interval
+            return (utils.now() - self.last_run).total_seconds() > self.interval if self.last_run else True
 
     def pause(self):
         self.paused = True
