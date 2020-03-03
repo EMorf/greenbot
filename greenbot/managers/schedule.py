@@ -74,4 +74,6 @@ class ScheduleManager:
             for schedule in ScheduleManager.schedules[:]:
                 if schedule.should_run:
                     await schedule.run()
+                else:
+                    log.info(schedule.run_date)
             await asyncio.sleep(0.2)
