@@ -4,6 +4,7 @@ import sys
 import discord
 from pytz import timezone
 import urllib
+import time
 
 from greenbot.models.action import ActionParser
 from greenbot.models.user import User
@@ -18,6 +19,7 @@ from greenbot.managers.handler import HandlerManager
 from greenbot.managers.discord_bot import DiscordBotManager
 from greenbot.managers.command import CommandManager
 from greenbot.managers.twitter import TwitterManager
+from greenbot.managers.timeout import TimeoutManager
 from greenbot.migration.db import DatabaseMigratable
 from greenbot.migration.migrate import Migration
 from greenbot.functions import Functions
@@ -31,11 +33,11 @@ log = logging.getLogger(__name__)
 def custom_exception_handler(loop, context):
     # first, handle with default handler
     if "exception" in context:
-        if context["exception"] == AssertionError:
-            log.error("error ignored")
+        if context["exception"] in [AssertionError, SystemExit]:
             return
+
+    loop.default_exception_handler(context)
     log.error(context["message"])
-    return
 
 
 class Bot:
@@ -51,7 +53,8 @@ class Bot:
 
         self.discord_token = self.config["main"]["discord_token"]
 
-        ScheduleManager.init(self)
+        ScheduleManager.init(self.private_loop)
+
         DBManager.init(self.config["main"]["db"])
 
         ActionParser.bot = self
@@ -111,16 +114,16 @@ class Bot:
         self.filters = Filters(self, self.discord_bot)
         self.functions = Functions(self, self.filters)
 
-    def psudo_level_member(self, member):
+    def psudo_level_member(self, db_session, member):
         user_level = 100
+        user = User._create_or_get_by_discord_id(db_session, str(member.id))
         for role_id in self.roles:
             role = list(self.filters.get_role([role_id], None, {}))[0]
             if not role:
                 continue
             if role in member.roles:
                 user_level = max(int(user_level), int(self.roles[role_id]))
-        log.info(user_level)
-        return user_level
+        return max(user_level, user.level)
 
     @property
     def bot_id(self):
@@ -130,6 +133,7 @@ class Bot:
         self.roles = {}
         self.socket_manager = SocketManager(self.bot_name, self.execute_now)
         self.message_manager = MessageManager(self)
+        self.timeout_manager = TimeoutManager(self)
         self.module_manager = ModuleManager(self.socket_manager, bot=self).load()
 
         self.commands = CommandManager(
@@ -167,14 +171,9 @@ class Bot:
 
     def quit_bot(self):
         self.module_manager.disable_all()
-        try:
-            ScheduleManager.base_scheduler.print_jobs()
-            ScheduleManager.base_scheduler.shutdown(wait=False)
-        except:
-            log.exception("Error while shutting down the apscheduler")
         self.private_loop.call_soon_threadsafe(self.private_loop.stop)
         self.socket_manager.quit()
-        sys.exit()
+        sys.exit(0)
 
     def connect(self):
         self.discord_bot.connect()

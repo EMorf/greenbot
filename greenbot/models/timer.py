@@ -40,7 +40,6 @@ class Timer(Base):
         self.name = options.get("name", self.name)
         log.debug(options)
         if "action" in options:
-            log.info("new action!")
             self.action_json = json.dumps(options["action"])
             self.action = ActionParser.parse(self.action_json)
         self.interval_online = options.get("interval_online", self.interval_online)

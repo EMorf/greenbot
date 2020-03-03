@@ -133,7 +133,6 @@ class ActivityTracker(BaseModule):
     def enable(self, bot):
         if not bot:
             return
-        ScheduleManager.execute_now(self.process_messages)
         self.process_messages_job = ScheduleManager.execute_every(
             3600, self.process_messages
         )  # Checks every hour

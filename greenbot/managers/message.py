@@ -5,6 +5,7 @@ from greenbot.managers.handler import HandlerManager
 from greenbot.managers.db import DBManager
 from greenbot.models.message import Message
 from greenbot.models.user import User
+from greenbot.models.timeout import Timeout
 
 log = logging.getLogger(__name__)
 
@@ -22,16 +23,26 @@ class MessageManager:
         not_whisper = isinstance(message.author, discord.Member)
         if not_whisper and (message.guild != self.bot.discord_bot.guild):
             return
+
+        if not member:
+            return
+
         with DBManager.create_session_scope() as db_session:
-            user = User._create_or_get_by_discord_id(
-                db_session,
-                message.author.id,
-                user_name=str(member) if member else str(message.author),
-            )
-            user_level = user.level
+            User._create_or_get_by_discord_id(db_session, str(member.id), str(member))
+            db_session.commit()
             self.new_message(db_session, message)
-        if member:
-            user_level = max(user_level, self.bot.psudo_level_member(member))
+            db_session.commit()
+            current_timeout = Timeout._is_timedout(db_session, str(member.id))
+            if current_timeout and not_whisper:
+                await message.delete()
+                for channel in self.bot.discord_bot.guild.text_channels:
+                    await channel.set_permissions(target=member, send_messages=False, reason=f"Timedout #{current_timeout.id}")
+                return
+
+            user_level = self.bot.psudo_level_member(db_session, member)
+        if message.author.id == self.bot.discord_bot.client.user.id:
+            return
+
         await HandlerManager.trigger(
             "parse_command_from_message",
             message=message,
@@ -56,4 +67,5 @@ class MessageManager:
             message = Message._get(db_session, payload.message_id)
             if not message:
                 return
+
             message.edit_message(db_session, payload.data.get("content", ""))

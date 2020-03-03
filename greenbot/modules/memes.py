@@ -3,6 +3,7 @@ import logging
 import random
 import discord
 import asyncio
+import time
 from datetime import datetime
 
 from greenbot import utils
@@ -206,7 +207,7 @@ class Memes(BaseModule):
             for _ in range(19):
                 newtick = m.content[:-1]
                 newtick = "﹏" + newtick
-                await asyncio.sleep((random.randint(5, 30) / 10))
+                await asyncio.sleep(random.randint(5, 30) / 10)
                 await m.edit(content=newtick)
             elapsed_time = utils.now() - start_time
             await m.edit(

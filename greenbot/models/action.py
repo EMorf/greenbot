@@ -7,8 +7,6 @@ import regex as re
 import requests
 import discord
 
-from greenbot.managers.schedule import ScheduleManager
-
 log = logging.getLogger(__name__)
 
 

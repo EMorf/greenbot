@@ -171,7 +171,7 @@ Remember the name of the schema you created! You'll need to enter it into the co
 There is an [example config file](../configs/example.ini) available for you to copy:
 
 ```bash
-sudo -u greenbot cp /opt/greenbot/configs/example.ini /opt/greenbot/config/name.ini
+sudo -u greenbot cp /opt/greenbot/configs/example.ini /opt/greenbot/configs/name.ini
 ```
 
 The example config contains comments about what values you need to enter in what places. Edit the config with a text editor to adjust the values.

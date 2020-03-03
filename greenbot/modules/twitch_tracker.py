@@ -55,7 +55,6 @@ class TwitchTracker(BaseModule):
     def __init__(self, bot):
         super().__init__(bot)
         self.bot = bot
-        self.process_checker_job = None
         self.redis = RedisManager.get()
         if self.bot:
             self.twitch_streamers_tracked = self.redis.get(
@@ -67,7 +66,10 @@ class TwitchTracker(BaseModule):
                 )
                 self.twitch_streamers_tracked = json.dumps({})
             self.twitch_streamers_tracked = json.loads(self.twitch_streamers_tracked)
-            self.process_messages_job = None
+            self.process_messages_job = ScheduleManager.execute_every(
+                300, self.process_checker
+            )
+            self.process_messages_job.pause()
 
     def load_commands(self, **options):
         if self.bot:
@@ -124,7 +126,7 @@ class TwitchTracker(BaseModule):
                 stream_title=channel["title"],
                 image_url=channel["thumbnail_url"],
                 icon_url=users[channel["user_name"].lower()]["profile_image_url"],
-                game=games[channel["game_id"]]["name"],
+                game=games[channel["game_id"]]["name"] if channel["game_id"] else "Just Chatting",
                 viewers=channel["viewer_count"],
             )
             channels_updated.append(channel["user_name"].lower())
@@ -150,9 +152,7 @@ class TwitchTracker(BaseModule):
             url=f"https://twitch.tv/{streamer_name.lower()}",
             icon_url=icon_url,
         )
-        channel, _ = await self.bot.functions.func_get_channel(
-            args=[int(self.settings["output_channel"])]
-        )
+        channel = list(self.bot.filters.get_channel([int(self.settings["output_channel"])], None, {}))[0]
         await self.bot.say(
             channel,
             message=self.settings["broadcast_message"].format(
@@ -198,12 +198,9 @@ class TwitchTracker(BaseModule):
         if not bot:
             return
         ScheduleManager.execute_now(self.process_checker)
-        self.process_messages_job = ScheduleManager.execute_every(
-            300, self.process_checker
-        )
+        self.process_messages_job.resume()
 
     def disable(self, bot):
-        if not bot or not self.process_messages_job:
+        if not bot:
             return
-        self.process_messages_job.remove()
-        self.process_messages_job = None
+        self.process_messages_job.pause()
