@@ -2,7 +2,7 @@ def up(cursor, bot):
     cursor.execute(
         """
     CREATE TABLE timeouts(
-        id integer NOT NULL DEFAULT nextval('table_name_id_seq') PRIMARY KEY,
+        id SERIAL PRIMARY KEY,
         active BOOL DEFAULT TRUE NOT NULL,
         user_id TEXT REFERENCES "user"(discord_id) ON DELETE CASCADE NOT NULL,
         issued_by_id TEXT REFERENCES "user"(discord_id) ON DELETE SET NULL,
