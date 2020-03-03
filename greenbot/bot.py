@@ -18,6 +18,7 @@ from greenbot.managers.handler import HandlerManager
 from greenbot.managers.discord_bot import DiscordBotManager
 from greenbot.managers.command import CommandManager
 from greenbot.managers.twitter import TwitterManager
+from greenbot.managers.timeout import TimeoutManager
 from greenbot.migration.db import DatabaseMigratable
 from greenbot.migration.migrate import Migration
 from greenbot.functions import Functions
@@ -131,6 +132,7 @@ class Bot:
         self.roles = {}
         self.socket_manager = SocketManager(self.bot_name, self.execute_now)
         self.message_manager = MessageManager(self)
+        self.timeout_manager = TimeoutManager(self)
         self.module_manager = ModuleManager(self.socket_manager, bot=self).load()
 
         self.commands = CommandManager(
