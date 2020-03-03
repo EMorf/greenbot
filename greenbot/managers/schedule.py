@@ -95,7 +95,7 @@ class ScheduleManager:
                         if schedule.run_type == "date":
                             log.info(schedule.run_date)
                             log.info(utils.now())
-                            log.info()
+                            log.info("")
                 await asyncio.sleep(0.2)
             except SystemExit:
                 pass
