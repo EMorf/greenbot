@@ -57,6 +57,7 @@ class TimeoutManager:
                 self.bot.filters.get_member([int(timeout.user_id)], None, {})
             )[0]
             if member:
+                await self.untimeout_user(db_session, member, None, "Timeout removed by timer")
                 return
             timeout.unban(db_session, None, "Timeout removed by timer")
             if self.settings["log_untimeout"]:  # TODO
