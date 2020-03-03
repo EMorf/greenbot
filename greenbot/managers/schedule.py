@@ -1,6 +1,6 @@
 import datetime
 import logging
-import time
+import asyncio
 
 from greenbot.managers.handler import HandlerManager
 from greenbot import utils
@@ -73,4 +73,4 @@ class ScheduleManager:
             for schedule in ScheduleManager.schedules[:]:
                 if schedule.should_run:
                     await schedule.run()
-            time.sleep(0.2)
+            await asyncio.sleep(0.2)

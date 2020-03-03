@@ -30,7 +30,7 @@ class CustomClient(discord.Client):
         log.info(f"discord.py {discord.__version__}")
         log.info(f"Discord Bot has started with id {self.user.id}")
         while not ScheduleManager.ready:
-            time.sleep(0.1)
+            await asyncio.sleep(0.1)
         await HandlerManager.trigger("discord_ready")
 
     async def on_connect(self):

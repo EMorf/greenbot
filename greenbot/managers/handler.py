@@ -15,7 +15,6 @@ class HandlerManager:
 
         # When the managers are loaded!
         HandlerManager.create_handler("manager_loaded")
-        HandlerManager.create_handler("schedule_ready")
 
         # on_quit
         HandlerManager.create_handler("on_quit")
