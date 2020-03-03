@@ -80,7 +80,7 @@ class TimeoutModule(BaseModule):
 
             timedelta = utils.parse_timedelta(command_args[1]) if len(command_args) > 1 else None
             ban_reason = " ".join(command_args[1:]) if not timedelta else " ".join(command_args[2:])
-            success, resp = self.bot.timeout_manager.timeout_user(db_session, member, author, utils.now() + timedelta, ban_reason)
+            success, resp = await self.bot.timeout_manager.timeout_user(db_session, member, author, utils.now() + timedelta, ban_reason)
             if success:
                 return True
 
@@ -101,7 +101,7 @@ class TimeoutModule(BaseModule):
         unban_reason = " ".join(command_args[1:])
 
         with DBManager.create_session_scope() as db_session:
-            success, resp = self.bot.timeout_manager.untimeout_user(db_session, member, author, unban_reason)
+            success, resp = await self.bot.timeout_manager.untimeout_user(db_session, member, author, unban_reason)
             if success:
                 return True
 
