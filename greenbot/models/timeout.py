@@ -66,7 +66,7 @@ class Timeout(Base):
     
     @staticmethod
     def _is_timedout(db_session, user_id):
-        return db_session.query(Timeout).filter_by(user_id=user_id).filter_by(active=True).filter(or_(Timeout.until == None, Timeout.until < utils.now())).one_or_none()
+        return db_session.query(Timeout).filter_by(user_id=user_id).filter_by(active=True).one_or_none()
 
     @staticmethod
     def _by_user_id(db_session, user_id):

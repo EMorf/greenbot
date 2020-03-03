@@ -131,9 +131,9 @@ class TimeoutModule(BaseModule):
                     name="Banned on", value=str(timeout.created_at.strftime("%b %d %Y %H:%M:%S %Z")), inline=False
                 )
                 embed.add_field(
-                    name="Banned till" if timeout.time_left != 0 else "Unbanned on", value=str(timeout.until.strftime("%b %d %Y %H:%M:%S %Z")) if timeout.until else "Permanently", inline=False
+                    name="Banned till" if timeout.active else "Unbanned on", value=str(timeout.until.strftime("%b %d %Y %H:%M:%S %Z")) if timeout.until else "Permanently", inline=False
                 )
-                if timeout.time_left != 0:
+                if timeout.active:
                     embed.add_field(
                         name="Timeleft", value=str(utils.seconds_to_resp(timeout.time_left)), inline=False
                     )
@@ -146,11 +146,11 @@ class TimeoutModule(BaseModule):
                     embed.add_field(
                         name="Ban Reason", value=str(timeout.ban_reason), inline=False
                     )
-                if timeout.time_left != 0 and timeout.unban_reason:
+                if timeout.active and timeout.unban_reason:
                     embed.add_field(
                         name="Unban Reason", value=str(timeout.unban_reason), inline=False
                     )
-                if timeout.time_left != 0 and timeout.unbanned_by_id:
+                if timeout.active and timeout.unbanned_by_id:
                     unbanned_by = list(self.bot.filters.get_member([int(timeout.unbanned_by_id)], None, {}))[0]
                     embed.add_field(
                         name="Unban By", value=unbanned_by.mention if unbanned_by else f"{timeout.issued_by_id}", inline=False
