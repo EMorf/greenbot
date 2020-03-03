@@ -63,6 +63,7 @@ class TimeoutManager:
         current_timeout = Timeout._is_timedout(db_session, str(member.id))
         if current_timeout:
             if current_timeout.check_lengths(until):
+                current_timeout.active = False
                 new_timeout = Timeout._create(db_session, str(member.id), str(banner.id), until, ban_reason)
                 db_session.commit()
                 current_timeout.unban(db_session, None, f"Timeout overwritten by Timeout #{new_timeout.id}")
