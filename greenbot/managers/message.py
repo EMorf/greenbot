@@ -37,7 +37,8 @@ class MessageManager:
                     await channel.set_permissions(target=member, send_messages=False, reason=f"Timedout #{current_timeout.id}")
                 return
             user_level = self.bot.psudo_level_member(db_session, member)
-
+        if message.author.id == self.bot.discord_bot.client.user.id:
+            return
         await HandlerManager.trigger(
             "parse_command_from_message",
             message=message,
