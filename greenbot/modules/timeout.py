@@ -238,7 +238,7 @@ class TimeoutModule(BaseModule):
         if not bot:
             return
 
-        self.bot.timeout_manager.enable({"enabled": True, "log_timeout": self.settings["log_timeout"], "log_untimeout": self.settings["log_untimeout"]})
+        self.bot.timeout_manager.enable({"enabled": True, "log_timeout": self.settings["log_timeout"], "log_untimeout": self.settings["log_untimeout"], "log_timeout_update": self.settings["log_timeout_update"]})
 
     def disable(self, bot):
         if not bot:
