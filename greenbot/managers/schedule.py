@@ -10,7 +10,7 @@ log = logging.getLogger(__name__)
 
 
 class ScheduledJob:
-    def __init__(self, run_type, method, interval=1, run_date=utils.now(), args=[], kwargs={}):
+    def __init__(self, run_type, method, interval=1, run_date=None, args=[], kwargs={}):
         self.run_type = run_type
         self.method = method
         self.run_date = run_date
