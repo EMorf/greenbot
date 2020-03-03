@@ -214,8 +214,6 @@ class TimeoutModule(BaseModule):
             can_execute_with_whisper=False,
             description="Checks if the user is currently timedout",
         )
-        if self.bot:
-            self.bot.timeout_manager.enable()
 
     def enable(self, bot):
         if not bot:
