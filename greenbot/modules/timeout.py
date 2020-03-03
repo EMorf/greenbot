@@ -104,7 +104,7 @@ class TimeoutModule(BaseModule):
             if success:
                 return True
 
-            self.bot.say(channel=channel, message=resp)
+            await self.bot.say(channel=channel, message=resp)
             return False
 
     async def untimeout_user(self, bot, author, channel, message, args):
