@@ -5,6 +5,7 @@ from greenbot.managers.handler import HandlerManager
 from greenbot.managers.db import DBManager
 from greenbot.models.message import Message
 from greenbot.models.user import User
+from greenbot.models.timeout import Timeout
 
 log = logging.getLogger(__name__)
 
@@ -28,6 +29,13 @@ class MessageManager:
 
         with DBManager.create_session_scope() as db_session:
             self.new_message(db_session, message)
+            db_session.commit()
+            current_timeout = Timeout._is_timedout(db_session, str(member.id))
+            if current_timeout and not_whisper:
+                await message.delete()
+                for channel in self.bot.discord_bot.text_channels:
+                    await channel.set_permissions(target=member, send_messages=False, reason=f"Timedout #{current_timeout.id}")
+                return
             user_level = self.bot.psudo_level_member(db_session, member)
 
         await HandlerManager.trigger(

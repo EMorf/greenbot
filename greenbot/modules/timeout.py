@@ -9,13 +9,14 @@ from greenbot.managers.schedule import ScheduleManager
 from greenbot.managers.redis import RedisManager
 from greenbot.managers.db import DBManager
 from greenbot.models.command import Command
+from greenbot.models.timeout import Timeout
 from greenbot.modules import BaseModule
 from greenbot.modules import ModuleSetting
 
 log = logging.getLogger(__name__)
 
 
-class Timeout(BaseModule):
+class TimeoutModule(BaseModule):
     ID = __name__.split(".")[-1]
     NAME = "Timeout"
     DESCRIPTION = "Allows moderators to timeout users"
@@ -28,6 +29,27 @@ class Timeout(BaseModule):
             type="number",
             placeholder="",
             default=500,
+        ),
+        ModuleSetting(
+            key="log_timeout",
+            label="Log timeout Event",
+            type="boolean",
+            placeholder="",
+            default=True,
+        ),
+        ModuleSetting(
+            key="log_untimeout",
+            label="Log untimeout Event",
+            type="boolean",
+            placeholder="",
+            default=True,
+        ),
+        ModuleSetting(
+            key="log_timeout_update",
+            label="Log timeout_update Event",
+            type="boolean",
+            placeholder="",
+            default=True,
         ),
     ]
 
@@ -44,17 +66,6 @@ class Timeout(BaseModule):
             await self.bot.say(channel=channel, message=f"!timeout (here) <User mention> <duration> (reason...)")
             return False
 
-        only_this_channel = False
-
-        if command_args[0] == "here":
-            only_this_channel = True
-            command_args = command_args[1:]
-
-        if len(command_args) == 0:
-            await self.bot.say(channel=channel, message=f"!untimeout (here) <User mention> (reason...)")
-            return False
-
-
         member = list(self.bot.filters.get_member_value([command_args[0]], None, {}))[0]
         if not member:
             await self.bot.say(channel=channel, message=f"Cant find member, {command_args[0]}")
@@ -63,14 +74,18 @@ class Timeout(BaseModule):
         with DBManager.create_session_scope() as db_session:
             user_level = self.bot.psudo_level_member(db_session, member)
 
-        if user_level <= args["user_level"]:
-            await self.bot.say(channel=channel, message=f"You cannot timeout a member with a with a level the same or higher than you!")
-            return False
+            if user_level <= args["user_level"]:
+                await self.bot.say(channel=channel, message=f"You cannot timeout a member with a with a level the same or higher than you!")
+                return False
 
-        timedelta = utils.parse_timedelta(command_args[1]) if len(command_args) > 1 else None
-        reason = " ".join(command_args[1:]) if not timedelta else " ".join(command_args[2:])
-        channels = self.bot.discord_bot.guild.text_channels if not only_this_channel else [only_this_channel]
-        self.bot.timeout_manager.timeout_user(member, timedelta, channels, reason)
+            timedelta = utils.parse_timedelta(command_args[1]) if len(command_args) > 1 else None
+            ban_reason = " ".join(command_args[1:]) if not timedelta else " ".join(command_args[2:])
+            success, resp = self.bot.timeout_manager.timeout_user(db_session, member, author, utils.now() + timedelta, ban_reason)
+            if success:
+                return True
+
+            self.bot.say(channel=channel, messgae=resp)
+            return False
 
     async def untimeout_user(self, bot, author, channel, message, args):
         command_args = message.split(" ") if message else []
@@ -78,24 +93,20 @@ class Timeout(BaseModule):
             await self.bot.say(channel=channel, message=f"!untimeout (here) <User mention> (reason...)")
             return False
 
-        only_this_channel = False
-
-        if command_args[0] == "here":
-            only_this_channel = True
-            command_args = command_args[1:]
-
-        if len(command_args) == 0:
-            await self.bot.say(channel=channel, message=f"!untimeout (here) <User mention> (reason...)")
-            return False
-
         member = list(self.bot.filters.get_member_value([command_args[0]], None, {}))[0]
         if not member:
             await self.bot.say(channel=channel, message=f"Cant find member, {command_args[0]}")
             return False
 
-        channels = self.bot.discord_bot.guild.text_channels if not only_this_channel else [only_this_channel]
-        reason = " ".join(command_args[1:])
-        self.bot.timeout_manager.untimeout_user(member, channels, reason)
+        unban_reason = " ".join(command_args[1:])
+
+        with DBManager.create_session_scope() as db_session:
+            success, resp = self.bot.timeout_manager.untimeout_user(db_session, member, author, unban_reason)
+            if success:
+                return True
+
+            self.bot.say(channel=channel, messgae=resp)
+            return False
 
     async def query_timeouts(self, bot, author, channel, message, args):
         command_args = message.split(" ") if message else []
@@ -103,42 +114,71 @@ class Timeout(BaseModule):
         if not member:
             await self.bot.say(channel=channel, message=f"Cant find member, {command_args[0]}")
             return False
+        with DBManager.create_session_scope() as db_session:
+            timeouts = Timeout._by_user_id(db_session, str(member.id))
 
-        timeouts = self.bot.timeout_manager.query_timeouts(member)
-        if not timeouts:
-            await self.bot.say(channel=channel, message=f"{member.mention} has no timeouts")
-            return True
-        count = 1
-        await self.bot.say(channel=channel, message=f"{member.mention}'s current timeouts'")
-        for timeout in timeouts:
+            if not timeouts:
+                await self.bot.say(channel=channel, message=f"The user {member} has no timeouts")
+                return True
+
+            for timeout in timeouts:                    
+                embed = discord.Embed(
+                    description=f"Timeout #{timeout.id}",
+                    timestamp=timeout.created_at,
+                    colour=member.colour,
+                )
+                embed.add_field(
+                    name="Banned on", value=timeout.created_at.strftime("%b %d %Y %H:%M:%S %Z"), inline=False
+                )
+                embed.add_field(
+                    name="Banned till" if timeout.time_left != 0 else "Unbanned on", value=timeout.until.strftime("%b %d %Y %H:%M:%S %Z"), inline=False
+                )
+                if timeout.time_left != 0:
+                    embed.add_field(
+                        name="Timeleft", value=utils.seconds_to_resp(timeout.time_left), inline=False
+                    )
+                embed.add_field(
+                    name="Banned by", value=timeout.issued_by, inline=False
+                )
+                embed.add_field(
+                    name="Reason", value=timeout.reason, inline=False
+                )
+                await self.bot.say(channel=channel, embed=embed)
+
+    async def is_timedout(self, bot, author, channel, message, args):
+        command_args = message.split(" ") if message else []
+        member = list(self.bot.filters.get_member_value([command_args[0]], None, {}))[0]
+        if not member:
+            await self.bot.say(channel=channel, message=f"Cant find member, {command_args[0]}")
+            return False
+        with DBManager.create_session_scope() as db_session:
+            timeout = Timeout._is_timedout(db_session, str(member.id))
+
+            if not timeout:
+                await self.bot.say(channel=channel, message=f"The user {member} has not currently timedout")
+                return True
+
             embed = discord.Embed(
-                description=f"Timeout {count}",
-                timestamp=timeout["date_issued"],
+                description=f"Timeout #{timeout.id}",
+                timestamp=timeout.created_at,
                 colour=member.colour,
             )
-            channels = []
-            for x in timeout["channels"]:
-                channel = list(self.bot.filters.get_channel([int(x)]))[0]
-                if channel:
-                    channels.append(channel.metion) 
-
             embed.add_field(
-                name="Channels Banned In", value="\n".join(channels), inline=False
+                name="Banned on", value=timeout.created_at.strftime("%b %d %Y %H:%M:%S %Z"), inline=False
             )
             embed.add_field(
-                name="Banned on", value=timeout["date_issued"].strftime("%b %d %Y %H:%M:%S %Z"), inline=False
+                name="Banned till", value=timeout.until.strftime("%b %d %Y %H:%M:%S %Z"), inline=False
             )
             embed.add_field(
-                name="Banned till", value=timeout["date_expired"].strftime("%b %d %Y %H:%M:%S %Z"), inline=False
+                name="Timeleft", value=utils.seconds_to_resp(timeout.time_left), inline=False
             )
             embed.add_field(
-                name="Timeleft", value=utils.seconds_to_resp((timeout["date_expired"] - timeout["date_issued"]).total_seconds()), inline=False
+                name="Banned by", value=timeout.issued_by, inline=False
             )
             embed.add_field(
-                name="Banned by", value=timeout["issued_by"], inline=False
+                name="Reason", value=timeout.reason, inline=False
             )
             await self.bot.say(channel=channel, embed=embed)
-            count += 1
         
 
     def load_commands(self, **options):
@@ -146,7 +186,7 @@ class Timeout(BaseModule):
             self.timeout_user,
             delay_all=0,
             delay_user=0,
-            cost=int(self.settings["cost"]),
+            level=int(self.settings["level_for_command"]),
             can_execute_with_whisper=False,
             description="Adds a timeout to a user",
         )
@@ -154,6 +194,7 @@ class Timeout(BaseModule):
             self.untimeout_user,
             delay_all=0,
             delay_user=0,
+            level=int(self.settings["level_for_command"]),
             can_execute_with_whisper=False,
             description="Removes a timeout on a user",
         )
@@ -161,77 +202,20 @@ class Timeout(BaseModule):
             self.query_timeouts,
             delay_all=0,
             delay_user=0,
+            level=int(self.settings["level_for_command"]),
             can_execute_with_whisper=False,
             description="Queries timeouts of a user",
         )
+        self.commands["istimedout"] = Command.raw_command(
+            self.is_timedout,
+            delay_all=0,
+            delay_user=0,
+            level=int(self.settings["level_for_command"]),
+            can_execute_with_whisper=False,
+            description="Checks if the user is currently timedout",
+        )
         if self.bot:
             self.bot.timeout_manager.enable()
-
-    async def execute_reminder(self, salt, user_id, reminder):
-        self.reminder_tasks.pop(salt)
-        try:
-            channel = self.bot.discord_bot.guild.get_channel(
-                int(reminder["channel_id"])
-            )
-            bot_message = await channel.fetch_message(int(reminder["message_id"]))
-        except:
-            return
-        message = reminder["message"]
-        for reaction in bot_message.reactions:
-            if reaction.emoji == self.settings["emoji"]:
-                users = await reaction.users().flatten()
-                users.remove(self.bot.discord_bot.client.user)
-                sender = await self.bot.discord_bot.get_user(user_id)
-                if sender and sender not in users:
-                    users.append(sender)
-                for user in users:
-                    date_of_reminder = utils.parse_date(reminder["date_of_reminder"])
-                    date_reminder_set = utils.parse_date(reminder["date_reminder_set"])
-                    seconds = int(
-                        round((date_of_reminder - date_reminder_set).total_seconds())
-                    )
-                    response_str = utils.seconds_to_resp(seconds)
-                    await self.bot.private_message(
-                        user,
-                        f"Hello! You asked me to remind you {response_str} ago:\n{message}",
-                    )
-                break
-        try:
-            await bot_message.delete()
-        except Exception as e:
-            log.error(f"Failed to delete message from bot: {e}")
-        try:
-            reminders_list = json.loads(
-                self.redis.get(f"{self.bot.bot_name}:remind-me-reminders")
-            )
-            """
-            { 
-                user_id: [
-                    {
-                        "message_id": message_id,
-                        "channel_id": channel_id,
-                        "salt": salt,
-                        "message": message,
-                        "date_of_reminder": date_of_reminder,
-                        "date_reminder_set": date_reminder_set
-                    },
-                ],
-            }
-            """
-        except:
-            self.redis.set(f"{self.bot.bot_name}:remind-me-reminders", json.dumps({}))
-            reminders_list = {}
-        user_reminders = (
-            reminders_list[str(user_id)] if str(user_id) in reminders_list else []
-        )
-        for _reminder in user_reminders:
-            if _reminder == reminder:
-                user_reminders.remove(_reminder)
-                break
-        reminders_list[str(user_id)] = user_reminders
-        self.redis.set(
-            f"{self.bot.bot_name}:remind-me-reminders", json.dumps(reminders_list)
-        )
 
     def enable(self, bot):
         if not bot:
