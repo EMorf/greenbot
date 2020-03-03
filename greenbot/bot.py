@@ -32,12 +32,11 @@ log = logging.getLogger(__name__)
 
 def custom_exception_handler(loop, context):
     # first, handle with default handler
-    loop.default_exception_handler(context)
-
     if "exception" in context:
         if context["exception"] in [AssertionError, SystemExit]:
-            log.error("error ignored")
             return
+
+    loop.default_exception_handler(context)
     log.error(context["message"])
 
 
@@ -172,7 +171,7 @@ class Bot:
 
     def quit_bot(self):
         self.module_manager.disable_all()
-        self.execute_now(self.private_loop.stop)
+        self.private_loop.call_soon_threadsafe(self.private_loop.stop)
         self.socket_manager.quit()
         sys.exit()
 
