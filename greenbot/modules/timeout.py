@@ -84,7 +84,7 @@ class TimeoutModule(BaseModule):
             if success:
                 return True
 
-            self.bot.say(channel=channel, messgae=resp)
+            self.bot.say(channel=channel, message=resp)
             return False
 
     async def untimeout_user(self, bot, author, channel, message, args):
@@ -105,7 +105,7 @@ class TimeoutModule(BaseModule):
             if success:
                 return True
 
-            self.bot.say(channel=channel, messgae=resp)
+            self.bot.say(channel=channel, message=resp)
             return False
 
     async def query_timeouts(self, bot, author, channel, message, args):
