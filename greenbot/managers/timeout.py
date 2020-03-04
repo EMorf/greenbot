@@ -98,7 +98,7 @@ class TimeoutManager:
             db_session.commit()
 
         role = list(self.bot.filters.get_role([self.settings["punished_role_id"]], None, {}))[0]
-        self.bot.add_role(member, role, f"Timedout by Timeout #{new_timeout.id}")
+        await self.bot.add_role(member, role, f"Timedout by Timeout #{new_timeout.id}")
         if self.settings["log_timeout"]:
             embed = discord.Embed(
                 title="Member has been timedout",
@@ -151,7 +151,7 @@ class TimeoutManager:
         )
         db_session.commit()
         role = list(self.bot.filters.get_role([self.settings["punished_role_id"]], None, {}))[0]
-        self.bot.remove_role(member, role, f"Untimedout by Timeout #{current_timeout.id}")
+        await self.bot.remove_role(member, role, f"Untimedout by Timeout #{current_timeout.id}")
 
         if self.settings["log_untimeout"]:
             embed = discord.Embed(
