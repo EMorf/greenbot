@@ -96,9 +96,9 @@ class TimeoutManager:
                 db_session, str(member.id), str(banner.id), until, ban_reason
             )
             db_session.commit()
+        
+        await self.apply_timeout(member, new_timeout)
 
-        role = list(self.bot.filters.get_role([self.settings["punished_role_id"]], None, {}))[0]
-        await self.bot.add_role(member, role, f"Timedout by Timeout #{new_timeout.id}")
         if self.settings["log_timeout"]:
             embed = discord.Embed(
                 title="Member has been timedout",
@@ -211,3 +211,10 @@ class TimeoutManager:
                 )
             await HandlerManager.trigger("aml_custom_log", embed=embed)
         return True, None
+
+    async def apply_timeout(self, member, timeout):
+        if not self.settings["enabled"]:
+            return False, "Module is not enabled"
+
+        role = list(self.bot.filters.get_role([self.settings["punished_role_id"]], None, {}))[0]
+        await self.bot.add_role(member, role, f"Timedout by Timeout #{timeout.id}")
