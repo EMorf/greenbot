@@ -24,6 +24,13 @@ class TimeoutModule(BaseModule):
 
     SETTINGS = [
         ModuleSetting(
+            key="punished_role_id",
+            label="Role ID given when a user is timedout",
+            type="text",
+            placeholder="",
+            default="",
+        ),
+        ModuleSetting(
             key="level_for_command",
             label="Level required to timeout user",
             type="number",
@@ -156,6 +163,10 @@ class TimeoutModule(BaseModule):
                     description=f"Timeout #{timeout.id}",
                     timestamp=timeout.created_at,
                     colour=member.colour,
+                )
+                embed.set_author(
+                    name=f"{member} ({member.id})",
+                    icon_url=str(member.avatar_url),
                 )
                 embed.add_field(
                     name="Banned on",
@@ -312,6 +323,7 @@ class TimeoutModule(BaseModule):
                 "log_timeout": self.settings["log_timeout"],
                 "log_untimeout": self.settings["log_untimeout"],
                 "log_timeout_update": self.settings["log_timeout_update"],
+                "punished_role_id": self.settings["punished_role_id"],
             }
         )
 
