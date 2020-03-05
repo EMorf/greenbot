@@ -44,6 +44,7 @@ class GenericTwitterManager:
             if username and username not in self.listener.relevant_users:
                 self.follow_user(username)
         self.reload()
+        self.quit()
 
     def reload(self):
         if self.listener:
@@ -96,7 +97,7 @@ class GenericTwitterManager:
                 public_tweets = self.twitter_client.user_timeline(username)
                 for tweet in public_tweets:
                     if not tweet.text.startswith("RT ") and tweet.in_reply_to_screen_name is None:
-                        await HandlerManager.trigger("twitter_on_status")
+                        return tweet
             except Exception:
                 log.exception("Exception caught while getting last tweet")
                 return "FeelsBadMan"
@@ -141,7 +142,7 @@ class TwitterManager(GenericTwitterManager):
                     ):
                         log.debug("On status from tweepy: %s", status.text)
                         tweet = status
-                        ScheduleManager.execute_now(self.dispatch_tweet, tweet)
+                        ScheduleManager.execute_now(self.dispatch_tweet, args=[tweet])
                         
                 async def dispatch_tweet(self, tweet):
                     await HandlerManager.trigger("twitter_on_status", tweet=tweet)
