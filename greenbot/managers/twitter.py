@@ -196,7 +196,6 @@ class TwitterManager(GenericTwitterManager):
         If it's not running, try to restart it.
         """
         if self.twitter_stream and self.twitter_stream.running:
-            log.info("Twitter is runnning")
             return
 
         try:

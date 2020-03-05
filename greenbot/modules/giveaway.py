@@ -180,8 +180,9 @@ class GiveawayModule(BaseModule):
 
     async def giveaway_winner(self, bot, author, channel, message, args):
         args_split = message.split(" ")
+        log.info(args_split)
         try:
-            count = args_split[0]
+            count = int(args_split[0])
         except:
             count = 1
 
