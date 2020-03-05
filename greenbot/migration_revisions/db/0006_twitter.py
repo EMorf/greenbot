@@ -1,7 +1,7 @@
 def up(cursor, bot):
     cursor.execute(
         """
-    CREATE TABLE timeouts(
+    CREATE TABLE twitter_following(
         id SERIAL PRIMARY KEY,
         username TEXT
     )
