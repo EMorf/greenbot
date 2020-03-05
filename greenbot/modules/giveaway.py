@@ -3,6 +3,7 @@ import logging
 import json
 import random
 import asyncio
+import regex as re
 import discord
 from datetime import datetime
 
@@ -154,6 +155,18 @@ class GiveawayModule(BaseModule):
             if current_giveaway:
                 await self.bot.say(channel=channel, message="There is already a giveaway running. Please use !wipegiveaway before you start a new one. (Don't forget to chose a winner before you end!)")
                 return False
+
+            desc_array = re.findall(r'"([^"]*)"', message)
+            if not len(desc_array) == 2:
+                await self.bot.say(channel=channel, message='Please set 2 arguments between quotation marks. `!startgiveaway "<item>" "<deadline>"`\nExample: `!startgiveaway "a new GTX2900" "10 days"`')
+                return False
+
+            if Giveaway._create(db_session, str(author.id), desc_array[0], desc_array[1]):
+                await self.bot.say(channel=channel, message="New giveaway was started! Use !giveawaywinner to chose a winner when the time has passed.")
+                return True
+
+            await self.bot.say(channel=channel, message="An unknown error has occurred, please contact a moderator")
+            return False
 
     async def giveaway_wipe(self, bot, author, channel, message, args):
         with DBManager.create_session_scope() as db_session:
