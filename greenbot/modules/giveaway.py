@@ -197,7 +197,7 @@ class GiveawayModule(BaseModule):
                     pool.append(entry)
 
             winning_users = []
-            winning_entry = []
+            winning_entries = []
             while len(winning_users) < count:
                 if len(pool) == 0:
                     break
@@ -205,7 +205,7 @@ class GiveawayModule(BaseModule):
                 winning_user = list(self.bot.filters.get_member([int(winning_entry.user_id)], None, {}))[0]
                 if winning_user and winning_user not in winning_users:
                     winning_users.append(winning_user)
-                    winning_entry.append(winning_entry)
+                    winning_entries.append(winning_entry)
                     pool.remove(winning_entry)
 
             current_giveaway._disable(db_session)
@@ -218,7 +218,7 @@ class GiveawayModule(BaseModule):
             await asyncio.sleep(5)
             await self.bot.say(channel=channel, message="*Shuffling intensifies...*", ignore_escape=True)
             await asyncio.sleep(5)
-            await self.bot.say(channel=channel, message="**And the winner is...**", ignore_escape=True)
+            await self.bot.say(channel=channel, message="**And the winner{'s' if count > 1 else ''} is...**", ignore_escape=True)
             await asyncio.sleep(5)
             for winning_user in winning_users:
                 await self.bot.say(channel=channel, message=f"Congatulations {winning_user.mention} you won **{current_giveaway.giveaway_item}**!!!", ignore_escape=True)
