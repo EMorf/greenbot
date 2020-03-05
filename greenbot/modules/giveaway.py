@@ -136,8 +136,8 @@ class GiveawayModule(BaseModule):
         }
 
         tickets = 1
-        for role_id in role_dict:
-            role_id = self.settings[role_id]
+        for role_name in role_dict:
+            role_id = self.settings[role_name]
             if not role_id:
                 continue
 
@@ -145,7 +145,7 @@ class GiveawayModule(BaseModule):
             if not role:
                 continue
 
-            tickets = max(tickets, role_dict[role_id]) if role and role in member.roles else tickets
+            tickets = max(tickets, role_dict[role_name]) if role and role in member.roles else tickets
 
         return tickets
 
