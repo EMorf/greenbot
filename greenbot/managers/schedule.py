@@ -89,6 +89,8 @@ class ScheduleManager:
             try:
                 schedules = ScheduleManager.schedules.copy()
                 for schedule in schedules:
+                    if schedule.run_type == "interval":
+                        log.info(schedule.last_run)
                     if schedule.should_run():
                         await schedule.run()
                 await asyncio.sleep(0.2)
