@@ -179,6 +179,12 @@ class GiveawayModule(BaseModule):
         return True
 
     async def giveaway_winner(self, bot, author, channel, message, args):
+        args_split = message.split(" ")
+        try:
+            count = args_split[0]
+        except:
+            count = 1
+
         with DBManager.create_session_scope() as db_session:
             current_giveaway = Giveaway._get_current_giveaway(db_session)
             if not current_giveaway:
@@ -189,11 +195,23 @@ class GiveawayModule(BaseModule):
                 for _ in range(entry.tickets):
                     pool.append(entry)
 
-            winning_user = None
-            winning_entry = None
-            while not winning_user:
+            winning_users = []
+            winning_entry = []
+            while winning_users < count:
+                if len(pool) == 0:
+                    break
                 winning_entry = random.choice(pool)
                 winning_user = list(self.bot.filters.get_member([int(winning_entry.user_id)], None, {}))[0]
+                if winning_user and winning_user not in winning_users:
+                    winning_users.append(winning_user)
+                    winning_entry.append(winning_entry)
+                    pool.remove(winning_entry)
+
+            current_giveaway._disable(db_session)
+
+            if len(winning_users) == 0:
+                await self.bot.say(channel=channel, message="The giveaway ended but nobody entered!", ignore_escape=True)
+                return True
 
             await self.bot.say(channel=channel, message="Shuffling giveaway list...", ignore_escape=True)
             await asyncio.sleep(5)
@@ -201,8 +219,9 @@ class GiveawayModule(BaseModule):
             await asyncio.sleep(5)
             await self.bot.say(channel=channel, message="**And the winner is...**", ignore_escape=True)
             await asyncio.sleep(5)
-            await self.bot.say(channel=channel, message=f"Congatulations {winning_user.mention} you won **{current_giveaway.giveaway_item}**!!!", ignore_escape=True)
-            current_giveaway._disable(db_session)
+            for winning_user in winning_users:
+                await self.bot.say(channel=channel, message=f"Congatulations {winning_user.mention} you won **{current_giveaway.giveaway_item}**!!!", ignore_escape=True)
+
         return True
 
     
@@ -270,7 +289,7 @@ class GiveawayModule(BaseModule):
             level=self.settings["level"],
             channels=json.dumps(self.settings["valid_channels"].split(" ")),
             can_execute_with_whisper=False,
-            description="Chooses a winner for the current giveaway",
+            description="Chooses a winner(s) for the current giveaway",
         )
         self.commands["lockgiveaway"] = Command.raw_command(
             self.giveaway_lock,
