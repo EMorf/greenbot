@@ -198,7 +198,7 @@ class GiveawayModule(BaseModule):
 
             winning_users = []
             winning_entry = []
-            while winning_users < count:
+            while len(winning_users) < count:
                 if len(pool) == 0:
                     break
                 winning_entry = random.choice(pool)
