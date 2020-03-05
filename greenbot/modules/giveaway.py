@@ -1,6 +1,7 @@
 import logging
 
 import json
+import random
 import discord
 from datetime import datetime
 
@@ -18,18 +19,11 @@ log = logging.getLogger(__name__)
 
 class GiveawayModule(BaseModule):
     ID = __name__.split(".")[-1]
-    NAME = "RemindMe"
-    DESCRIPTION = "Allows users to create reminders"
+    NAME = "Giveaway"
+    DESCRIPTION = "Create Giveaways"
     CATEGORY = "Feature"
 
     SETTINGS = [
-        ModuleSetting(
-            key="max_reminders_per_user",
-            label="Maximum reminders per user",
-            type="number",
-            placeholder="",
-            default=3,
-        ),
         ModuleSetting(
             key="level",
             label="Level required to start and stop giveaways",
@@ -113,6 +107,10 @@ class GiveawayModule(BaseModule):
                 await self.bot.say(channel=channel, message=f"{author.mention}, there is no giveaway running right now.")
                 return False
 
+            if current_giveaway.locked:
+                await self.bot.say(channel=channel, message=f"{author.mention}, the current giveaway is locked.")
+                return False
+
             registered = GiveawayEntry.is_entered(db_session, str(author.id), current_giveaway.id)
             if registered:
                 await self.bot.say(channel=channel, message=f"{author.mention}, you already joined the giveaway.")
@@ -156,19 +154,72 @@ class GiveawayModule(BaseModule):
                 await self.bot.say(channel=channel, message="There is already a giveaway running. Please use !wipegiveaway before you start a new one. (Don't forget to chose a winner before you end!)")
                 return False
 
-            
-
     async def giveaway_wipe(self, bot, author, channel, message, args):
-        pass
+        with DBManager.create_session_scope() as db_session:
+            current_giveaway = Giveaway._get_current_giveaway(db_session)
+            if not current_giveaway:
+                await self.bot.say(channel=channel, message="There is no giveaway running.")
+                return False
+            current_giveaway._disable(db_session)
+        await self.bot.say(channel=channel, message="The current giveaway has been wiped")
+        return True
 
     async def giveaway_winner(self, bot, author, channel, message, args):
-        pass 
+        with DBManager.create_session_scope() as db_session:
+            current_giveaway = Giveaway._get_current_giveaway(db_session)
+            if not current_giveaway:
+                await self.bot.say(channel=channel, message="There is no giveaway running.")
+                return False
+            pool = []
+            for entry in current_giveaway.entries:
+                for _ in range(entry.tickets):
+                    pool.append(entry)
+
+            winning_user = None
+            winning_entry = None
+            while not winning_user:
+                winning_entry = random.choice(pool)
+                winning_user = list(self.bot.filters.get_member([int(winning_entry.user_id)], None, {}))[0]
+
+            await self.bot.say(channel=channel, message="Shuffling giveaway list...")
+            await asyncio.sleep(5)
+            await self.bot.say(channel=channel, message="*Shuffling intensifies...*")
+            await asyncio.sleep(5)
+            await self.bot.say(channel=channel, message="**And the winner is...**")
+            await asyncio.sleep(5)
+            await self.bot.say(channel=channel, message=f"Congatulations {winning_user.mention} you won **{current_giveaway.giveaway_item}**!!!")
+        return True
+
     
     async def giveaway_lock(self, bot, author, channel, message, args):
-        pass 
+        with DBManager.create_session_scope() as db_session:
+            current_giveaway = Giveaway._get_current_giveaway(db_session)
+            if not current_giveaway:
+                await self.bot.say(channel=channel, message="There is no giveaway running.")
+                return False
+
+            if current_giveaway.locked:
+                await self.bot.say(channel=channel, message="The current giveaway has already been locked")
+                return False
+
+            current_giveaway.locked = True
+        await self.bot.say(channel=channel, message="The current giveaway has been locked")
+        return True
 
     async def giveaway_unlock(self, bot, author, channel, message, args):
-        pass 
+        with DBManager.create_session_scope() as db_session:
+            current_giveaway = Giveaway._get_current_giveaway(db_session)
+            if not current_giveaway:
+                await self.bot.say(channel=channel, message="There is no giveaway running.")
+                return False
+
+            if not current_giveaway.locked:
+                await self.bot.say(channel=channel, message="The current giveaway is not locked")
+                return False
+
+            current_giveaway.locked = False
+        await self.bot.say(channel=channel, message="The current giveaway has been unlocked")
+        return True 
 
     def load_commands(self, **options):
         self.commands["giveaway"] = Command.raw_command(
