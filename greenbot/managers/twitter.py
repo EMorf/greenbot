@@ -121,7 +121,8 @@ class TwitterManager(GenericTwitterManager):
             return
 
         try:
-            bot.execute_every(60 * 5, self.check_twitter_connection)
+            ScheduleManager.now(self.check_twitter_connection)
+            ScheduleManager.execute_every(60 * 5, self.check_twitter_connection)
         except:
             log.exception("Twitter authentication failed.")
 
@@ -181,12 +182,14 @@ class TwitterManager(GenericTwitterManager):
         If it's not running, try to restart it.
         """
         if self.twitter_stream and self.twitter_stream.running:
+            log.info("Twitter is runnning")
             return
 
         try:
             t = threading.Thread(target=self._run_twitter_stream, name="Twitter")
             t.daemon = True
             t.start()
+            log.info("Started Twitter")
         except:
             log.exception("Caught exception while checking twitter connection")
 
