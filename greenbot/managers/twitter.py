@@ -48,7 +48,7 @@ class GenericTwitterManager:
                 self.unfollow_user(username)
 
         self.reload()
-        self.quit()
+        self.quit(reconnect=True)
 
     def reload(self):
         if self.listener:
@@ -110,7 +110,7 @@ class GenericTwitterManager:
 
         return "FeelsBadMan"
 
-    def quit(self):
+    def quit(self, reconnect=False):
         pass
 
 
@@ -196,8 +196,10 @@ class TwitterManager(GenericTwitterManager):
             t.start()
             log.info("Started Twitter")
         except:
-            log.exception("Caught exception while checking twitter connection")
+            log.error("Caught exception while checking twitter connection")
 
-    def quit(self):
+    def quit(self, reconnect=False):
         if self.twitter_stream:
             self.twitter_stream.disconnect()
+            if reconnect:
+                ScheduleManager.execute_now(self.check_twitter_connection)
