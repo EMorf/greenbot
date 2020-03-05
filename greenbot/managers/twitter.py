@@ -4,8 +4,6 @@ import threading
 import json
 
 import tweepy
-from twisted.internet.protocol import ReconnectingClientFactory
-from autobahn.twisted.websocket import WebSocketClientProtocol, WebSocketClientFactory
 
 from greenbot import utils
 from greenbot.managers.db import DBManager
