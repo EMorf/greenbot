@@ -31,8 +31,7 @@ class MessageManager:
         with DBManager.create_session_scope() as db_session:
             User._create_or_get_by_discord_id(db_session, str(member.id), str(member))
             db_session.commit()
-            message = self.new_message(db_session, message)
-            if message is None:
+            if self.new_message(db_session, message) is None:
                 log.error("Discord api running slow?")
                 return
 
