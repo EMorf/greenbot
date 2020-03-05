@@ -202,6 +202,11 @@ class HandlerManager:
         # custom_log(embed)
         HandlerManager.create_handler("aml_custom_log")
 
+        # MovieNight
+
+        # movie_night_started()
+        HandlerManager.create_handler("movie_night_started")
+
     @staticmethod
     def create_handler(event):
         """ Create an empty list for the given event """

@@ -6,6 +6,7 @@ from pytz import timezone
 import urllib
 import time
 
+from greenbot.apiwrappers.movienight_api import MovieNightAPI
 from greenbot.models.action import ActionParser
 from greenbot.models.user import User
 from greenbot.models.message import Message
@@ -78,6 +79,9 @@ class Bot:
             log.error(error)
 
         HandlerManager.init_handlers()
+
+        self.movienight_api = MovieNightAPI(self, self.config["wsc"], self.config["wowza_cdn"])
+
         HandlerManager.add_handler(
             "parse_command_from_message", self.parse_command_from_message
         )

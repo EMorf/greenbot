@@ -255,8 +255,9 @@ class AdvancedAdminLog(BaseModule):
             colour=await self.get_event_colour(author.guild, "message_edit"),
             timestamp=utils.now(),
         )
-        embed.add_field(name="Now:", value=f"{content[-1]}", inline=False)
-        embed.add_field(name="Previous:", value=f"{content[-2]}", inline=False)
+
+        embed.add_field(name="Now:", value=f"{content[-1]}" if content[-1] else "None", inline=False)
+        embed.add_field(name="Previous:", value=f"{content[-2]}" if content[-2] else "None", inline=False)
         embed.add_field(
             name="Channel:",
             value=f"{sent_in_channel.mention} ({sent_in_channel})\n[Jump to message]({message.jump_url})",

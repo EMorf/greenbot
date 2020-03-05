@@ -1,0 +1,234 @@
+import logging
+
+import json
+import discord
+from datetime import datetime
+
+from greenbot import utils
+from greenbot.managers.schedule import ScheduleManager
+from greenbot.managers.db import DBManager
+from greenbot.managers.redis import RedisManager
+from greenbot.models.command import Command
+from greenbot.models.giveaway import Giveaway, GiveawayEntry
+from greenbot.modules import BaseModule
+from greenbot.modules import ModuleSetting
+
+log = logging.getLogger(__name__)
+
+
+class RemindMe(BaseModule):
+    ID = __name__.split(".")[-1]
+    NAME = "RemindMe"
+    DESCRIPTION = "Allows users to create reminders"
+    CATEGORY = "Feature"
+
+    SETTINGS = [
+        ModuleSetting(
+            key="max_reminders_per_user",
+            label="Maximum reminders per user",
+            type="number",
+            placeholder="",
+            default=3,
+        ),
+        ModuleSetting(
+            key="level",
+            label="Level required to start and stop giveaways",
+            type="number",
+            placeholder="500",
+            default=500,
+        ),
+        ModuleSetting(
+            key="regular_role_id",
+            label="Role ID for regular role",
+            type="text",
+            placeholder="",
+            default="",
+        ),
+        ModuleSetting(
+            key="regular_role_tickets",
+            label="Regular role tickets",
+            type="number",
+            placeholder="",
+            default=5,
+        ),
+        ModuleSetting(
+            key="tier1_sub_role_id",
+            label="Role ID for tier 1 sub role",
+            type="text",
+            placeholder="",
+            default="",
+        ),
+        ModuleSetting(
+            key="tier1_sub_role_tickets",
+            label="Tier 1 sub role tickets",
+            type="number",
+            placeholder="",
+            default=1,
+        ),
+        ModuleSetting(
+            key="tier2_sub_role_id",
+            label="Role ID for tier 2 sub role",
+            type="text",
+            placeholder="",
+            default="",
+        ),
+        ModuleSetting(
+            key="tier2_sub_role_tickets",
+            label="Tier 2 sub role tickets",
+            type="number",
+            placeholder="",
+            default=2,
+        ),
+        ModuleSetting(
+            key="tier3_sub_role_id",
+            label="Role ID for tier 3 sub role",
+            type="text",
+            placeholder="",
+            default="",
+        ),
+        ModuleSetting(
+            key="tier3_sub_role_tickets",
+            label="Tier 3 sub role tickets",
+            type="number",
+            placeholder="",
+            default=4,
+        ),
+        ModuleSetting(
+            key="valid_channels",
+            label="Valid channels for typing commands",
+            type="text",
+            placeholder="",
+            default="",
+        ),
+    ]
+
+    def __init__(self, bot):
+        super().__init__(bot)
+        self.bot = bot
+
+    async def giveaway_join(self, bot, author, channel, message, args):
+        with DBManager.create_session_scope() as db_session:
+            current_giveaway = Giveaway._get_current_giveaway(db_session)
+            if not current_giveaway:
+                await self.bot.say(channel=channel, message=f"{author.mention}, there is no giveaway running right now.")
+                return False
+
+            registered = GiveawayEntry.is_entered(db_session, str(author.id), current_giveaway.id)
+            if registered:
+                await self.bot.say(channel=channel, message=f"{author.mention}, you already joined the giveaway.")
+                return False
+
+            tickets = self.get_highest_ticket_count(author)
+            giveaway_entry = GiveawayEntry._create(db_session, str(author.id), current_giveaway.id, tickets)
+            if giveaway_entry:
+                await self.bot.say(channel=channel, message=f"{author.mention}, you joined the giveaway for **{current_giveaway.giveaway_item}** with **{tickets}** entr{'y' if tickets == 1 else 'ies' }! The giveaway will end **{current_giveaway.giveaway_deadline}** and you will be notified if you win. Good Luck! :wink:")
+                return True
+
+            await self.bot.say(channel=channel, message=f"{author.mention} failed to add you to the giveaway dm a mod for help :smile:")
+            return False
+
+    def get_highest_ticket_count(self, member):
+        role_dict = {
+            "regular_role_id": self.settings["regular_role_tickets"], 
+            "tier1_sub_role_id": self.settings["tier1_sub_role_tickets"], 
+            "tier2_sub_role_id": self.settings["tier2_sub_role_tickets"], 
+            "tier3_sub_role_id": self.settings["tier3_sub_role_tickets"],
+        }
+
+        tickets = 1
+        for role_id in role_dict:
+            role_id = self.settings[role_id]
+            if not role_id:
+                continue
+
+            role = list(self.bot.filters.get_role([role_id], None, {}))[0] if role_id else None
+            if not role:
+                continue
+
+            tickets = max(tickets, role_dict[role]) if role and role in member.roles else tickets
+
+        return tickets
+
+    async def giveaway_start(self, bot, author, channel, message, args):
+        with DBManager.create_session_scope() as db_session:
+            current_giveaway = Giveaway._get_current_giveaway(db_session)
+            if current_giveaway:
+                await self.bot.say(channel=channel, message="There is already a giveaway running. Please use !wipegiveaway before you start a new one. (Don't forget to chose a winner before you end!)")
+                return False
+
+            
+
+    async def giveaway_wipe(self, bot, author, channel, message, args):
+        pass
+
+    async def giveaway_winner(self, bot, author, channel, message, args):
+        pass 
+    
+    async def giveaway_lock(self, bot, author, channel, message, args):
+        pass 
+
+    async def giveaway_unlock(self, bot, author, channel, message, args):
+        pass 
+
+    def load_commands(self, **options):
+        self.commands["giveaway"] = Command.raw_command(
+            self.giveaway_join,
+            delay_all=0,
+            delay_user=0,
+            channels=json.dumps(self.settings["valid_channels"].split(" ")),
+            can_execute_with_whisper=False,
+            description="Joins the current giveaway",
+        )
+        self.commands["startgiveaway"] = Command.raw_command(
+            self.giveaway_start,
+            delay_all=0,
+            delay_user=0,
+            level=self.settings["level"],
+            channels=json.dumps(self.settings["valid_channels"].split(" ")),
+            can_execute_with_whisper=False,
+            description="Start a giveaway",
+        )
+        self.commands["wipegiveaway"] = Command.raw_command(
+            self.giveaway_wipe,
+            delay_all=0,
+            delay_user=0,
+            level=self.settings["level"],
+            channels=json.dumps(self.settings["valid_channels"].split(" ")),
+            can_execute_with_whisper=False,
+            description="Clears the current giveaway",
+        )
+        self.commands["giveawaywinner"] = Command.raw_command(
+            self.giveaway_winner,
+            delay_all=0,
+            delay_user=0,
+            level=self.settings["level"],
+            channels=json.dumps(self.settings["valid_channels"].split(" ")),
+            can_execute_with_whisper=False,
+            description="Chooses a winner for the current giveaway",
+        )
+        self.commands["lockgiveaway"] = Command.raw_command(
+            self.giveaway_lock,
+            delay_all=0,
+            delay_user=0,
+            level=self.settings["level"],
+            channels=json.dumps(self.settings["valid_channels"].split(" ")),
+            can_execute_with_whisper=False,
+            description="Locks the current giveaway",
+        )
+        self.commands["unlockgiveaway"] = Command.raw_command(
+            self.giveaway_unlock,
+            delay_all=0,
+            delay_user=0,
+            level=self.settings["level"],
+            channels=json.dumps(self.settings["valid_channels"].split(" ")),
+            can_execute_with_whisper=False,
+            description="Unlocks the current giveaway",
+        )
+
+    def enable(self, bot):
+        if not bot:
+            return
+
+    def disable(self, bot):
+        if not bot:
+            return

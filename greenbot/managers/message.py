@@ -31,7 +31,11 @@ class MessageManager:
         with DBManager.create_session_scope() as db_session:
             User._create_or_get_by_discord_id(db_session, str(member.id), str(member))
             db_session.commit()
-            self.new_message(db_session, message)
+            message = self.new_message(db_session, message)
+            if message is None:
+                log.error("Discord api running slow?")
+                return
+
             db_session.commit()
             current_timeout = Timeout._is_timedout(db_session, str(member.id))
             if current_timeout and not_whisper:
@@ -54,7 +58,7 @@ class MessageManager:
         )
 
     def new_message(self, db_session, message):
-        Message._create(
+        return Message._create(
             db_session,
             message.id,
             message.author.id,
