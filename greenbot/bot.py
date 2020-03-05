@@ -6,6 +6,7 @@ from pytz import timezone
 import urllib
 import time
 
+from greenbot.apiwrappers.movienight_api import MovieNightAPI
 from greenbot.models.action import ActionParser
 from greenbot.models.user import User
 from greenbot.models.message import Message
@@ -78,6 +79,9 @@ class Bot:
             log.error(error)
 
         HandlerManager.init_handlers()
+
+        self.movienight_api = MovieNightAPI(self, self.config["wsc"], self.config["wowza_cdn"])
+
         HandlerManager.add_handler(
             "parse_command_from_message", self.parse_command_from_message
         )
@@ -98,19 +102,7 @@ class Bot:
             redis=RedisManager.get(),
             private_loop=self.private_loop,
         )
-        self.twitter_manager = (
-            TwitterManager(self, self.config["twitter"])
-            if utils.contains_value(
-                [
-                    "consumer_key",
-                    "consumer_secret",
-                    "access_token",
-                    "access_token_secret",
-                ],
-                self.config["twitter"],
-            )
-            else None
-        )
+        self.twitter_manager = TwitterManager(self)
         self.filters = Filters(self, self.discord_bot)
         self.functions = Functions(self, self.filters)
 

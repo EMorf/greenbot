@@ -37,6 +37,7 @@ class Timeout(Base):
     unban_reason = Column(TEXT, nullable=True)
     until = Column(UtcDateTime(), nullable=True, server_default="NULL")
     created_at = Column(UtcDateTime(), nullable=False, default=utils.now())
+    unbanned_at = Column(UtcDateTime(), nullable=True, default=None)
 
     @property
     def time_left(self):
@@ -56,6 +57,7 @@ class Timeout(Base):
         self.active = False
         self.unbanned_by_id = (unbanned_by_id,)
         self.unban_reason = unban_reason
+        self.unbanned_at = utils.now()
         return self
 
     @staticmethod

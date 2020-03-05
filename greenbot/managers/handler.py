@@ -195,11 +195,17 @@ class HandlerManager:
 
         # tweepy.StreamListener.on_status(tweet)
         HandlerManager.create_handler("twitter_on_status")
+        HandlerManager.create_handler("twitter_follows")
 
         # Advanced Message Log
 
         # custom_log(embed)
         HandlerManager.create_handler("aml_custom_log")
+
+        # MovieNight
+
+        # movie_night_started()
+        HandlerManager.create_handler("movie_night_started")
 
     @staticmethod
     def create_handler(event):

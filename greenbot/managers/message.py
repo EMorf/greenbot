@@ -3,6 +3,7 @@ import discord
 
 from greenbot.managers.handler import HandlerManager
 from greenbot.managers.db import DBManager
+from greenbot.managers.timeout import TimeoutManager
 from greenbot.models.message import Message
 from greenbot.models.user import User
 from greenbot.models.timeout import Timeout
@@ -30,17 +31,15 @@ class MessageManager:
         with DBManager.create_session_scope() as db_session:
             User._create_or_get_by_discord_id(db_session, str(member.id), str(member))
             db_session.commit()
-            self.new_message(db_session, message)
+            if self.new_message(db_session, message) is None:
+                log.error("Discord api running slow?")
+                return
+
             db_session.commit()
             current_timeout = Timeout._is_timedout(db_session, str(member.id))
             if current_timeout and not_whisper:
                 await message.delete()
-                for channel in self.bot.discord_bot.guild.text_channels:
-                    await channel.set_permissions(
-                        target=member,
-                        send_messages=False,
-                        reason=f"Timedout #{current_timeout.id}",
-                    )
+                await self.bot.timeout_manager.apply_timeout(member, current_timeout)
                 return
 
             user_level = self.bot.psudo_level_member(db_session, member)
@@ -58,7 +57,7 @@ class MessageManager:
         )
 
     def new_message(self, db_session, message):
-        Message._create(
+        return Message._create(
             db_session,
             message.id,
             message.author.id,

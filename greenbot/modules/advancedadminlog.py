@@ -255,8 +255,9 @@ class AdvancedAdminLog(BaseModule):
             colour=await self.get_event_colour(author.guild, "message_edit"),
             timestamp=utils.now(),
         )
-        embed.add_field(name="Now:", value=f"{content[-1]}", inline=False)
-        embed.add_field(name="Previous:", value=f"{content[-2]}", inline=False)
+
+        embed.add_field(name="Now:", value=f"{content[-1]}" if content[-1] else "None", inline=False)
+        embed.add_field(name="Previous:", value=f"{content[-2]}" if content[-2] else "None", inline=False)
         embed.add_field(
             name="Channel:",
             value=f"{sent_in_channel.mention} ({sent_in_channel})\n[Jump to message]({message.jump_url})",
@@ -1029,6 +1030,17 @@ class AdvancedAdminLog(BaseModule):
             return
         await self.bot.say(channel=out_channel, embed=embed)
 
+    async def custom_event_log(self, message=None, embed=None):
+        if message is None and embed is None:
+            return
+
+        out_channel = list(
+            self.bot.filters.get_channel(
+                [int(self.settings["output_channel"])], None, {}
+            )
+        )[0]
+        await self.bot.say(channel=out_channel, message=message, embed=embed)
+
     async def get_permission_change(self, before, after):
         p_msg = ""
         before_perms = {}
@@ -1205,6 +1217,7 @@ class AdvancedAdminLog(BaseModule):
         HandlerManager.add_handler("discord_guild_emojis_update", self.emoji_update)
         HandlerManager.add_handler("discord_invite_create", self.invite_create)
         HandlerManager.add_handler("discord_invite_delete", self.invite_delete)
+        HandlerManager.add_handler("aml_custom_log", self.custom_event_log)
 
     def disable(self, bot):
         if not bot:
@@ -1229,3 +1242,4 @@ class AdvancedAdminLog(BaseModule):
         HandlerManager.remove_handler("discord_guild_emojis_update", self.emoji_update)
         HandlerManager.remove_handler("discord_invite_create", self.invite_create)
         HandlerManager.remove_handler("discord_invite_delete", self.invite_delete)
+        HandlerManager.remove_handler("aml_custom_log", self.custom_event_log)

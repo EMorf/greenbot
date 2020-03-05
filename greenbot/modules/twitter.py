@@ -9,6 +9,7 @@ from datetime import datetime
 from greenbot import utils
 from greenbot.managers.redis import RedisManager
 from greenbot.managers.handler import HandlerManager
+from greenbot.managers.schedule import ScheduleManager
 from greenbot.models.command import Command
 from greenbot.modules import BaseModule
 from greenbot.modules import ModuleSetting
@@ -63,39 +64,29 @@ class Twitter(BaseModule):
             return
 
     async def on_status(self, tweet):
-        if tweet.in_reply_to_status_id is not None:
-            if not self.settings["send_replies"]:
-                return
-        username = tweet.author.screen_name
-        if username not in self.settings["users"].split(" "):
-            return
-        tweet_url = f"https://twitter.com/{username}/status/{tweet.id}"
-        out_channel, _ = await self.bot.functions.func_get_channel(
-            args=[int(self.settings["output_channel"])]
-        )
-        message = self.settings["output_format"].format(
-            username=username, tweet_url=tweet_url
-        )
-        await self.bot.say(channel=out_channel, message=message, ignore_escape=True)
+        try:
+            if tweet.in_reply_to_status_id is not None:
+                if not self.settings["send_replies"]:
+                    return
+            username = tweet.author.screen_name
+            tweet_url = f"https://twitter.com/{username}/status/{tweet.id}"
+            out_channel = list(self.bot.filters.get_channel([int(self.settings["output_channel"])], None, {}))[0]
+            message = self.settings["output_format"].format(
+                username=username, tweet_url=tweet_url
+            )
+            await self.bot.say(channel=out_channel, message=message, ignore_escape=True)
+        except Exception as e:
+            log.error(e)
+
 
     def load_commands(self, **options):
         if not self.bot:
             return
-        if self.process:
-            self.process.kill()
-            self.process.join()
-            self.process = None
-        self.stream = tweepy.Stream(
-            self.bot.twitter_manager.api.auth, self.bot.twitter_manager.tweets_listener
-        )
-        self.process = Process(target=self.start_thread)
-        self.process.start()
 
-    def start_thread(self):
-        self.stream.filter(
-            follow=self.get_users_to_follow(self.settings["users"].split(" ")),
-            languages=["en"],
-        )
+        ScheduleManager.execute_now(self.update_manager)
+
+    async def update_manager(self):
+        await HandlerManager.trigger("twitter_follows", usernames=self.settings["users"].split(" ") if self.settings["users"] else [])
 
     def get_users_to_follow(self, usernames):
         return [
@@ -111,45 +102,5 @@ class Twitter(BaseModule):
     def disable(self, bot):
         if not bot:
             return
-        if self.stream:
-            self.stream.disconnect()
         HandlerManager.remove_handler("twitter_on_status", self.on_status)
-        self.process.kill()
-        self.process.join()
 
-
-class Process(threading.Thread):
-
-    # Thread class with a _stop() method.
-    # The thread itself has to check
-    # regularly for the stopped() condition.
-
-    def __init__(self, *args, **kwargs):
-        threading.Thread.__init__(self, *args, **kwargs)
-        self.killed = False
-
-    # function using _stop function
-    def start(self):
-        self.__run_backup = self.run
-        self.run = self.__run
-        threading.Thread.start(self)
-
-    def __run(self):
-        sys.settrace(self.globaltrace)
-        self.__run_backup()
-        self.run = self.__run_backup
-
-    def globaltrace(self, frame, event, arg):
-        if event == "call":
-            return self.localtrace
-        else:
-            return None
-
-    def localtrace(self, frame, event, arg):
-        if self.killed:
-            if event == "line":
-                raise SystemExit()
-        return self.localtrace
-
-    def kill(self):
-        self.killed = True

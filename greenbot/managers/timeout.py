@@ -20,6 +20,7 @@ class TimeoutManager:
             "log_timeout": False,
             "log_untimeout": False,
             "log_timeout_update": False,
+            "punished_role_id": "",
         }
         self.salt = ""
 
@@ -34,6 +35,8 @@ class TimeoutManager:
                     self.auto_untimeout,
                     args=[timeout.id, self.salt],
                 )
+    def update_settings(self, settings):
+        self.settings = settings
 
     def disable(self):
         self.settings = {
@@ -41,6 +44,7 @@ class TimeoutManager:
             "log_timeout": False,
             "log_untimeout": False,
             "log_timeout_update": False,
+            "punished_role_id": "",
         }
         self.salt = None
 
@@ -92,17 +96,41 @@ class TimeoutManager:
                 db_session, str(member.id), str(banner.id), until, ban_reason
             )
             db_session.commit()
-        for channel in self.bot.discord_bot.guild.text_channels:
-            overwrite = channel.overwrites_for(member)
-            overwrite.send_messages = False
-            await channel.set_permissions(
-                target=member,
-                overwrite=overwrite,
-                reason=f"Timedout #{current_timeout.id}",
-            )
+        await self.apply_timeout(member, new_timeout)
 
-        if self.settings["log_timeout"]:  # TODO
-            pass
+        if self.settings["log_timeout"]:
+            embed = discord.Embed(
+                title="Member has been timedout",
+                timestamp=new_timeout.created_at,
+                colour=member.colour,
+            )
+            embed.set_author(
+                name=f"{member} ({member.id})- Timeout Removed",
+                icon_url=str(member.avatar_url),
+            )
+            embed.add_field(
+                name="Banned on",
+                value=str(new_timeout.created_at.strftime("%b %d %Y %H:%M:%S %Z")),
+                inline=False,
+            )
+            if new_timeout.issued_by_id:
+                issued_by = list(
+                    self.bot.filters.get_member(
+                        [int(new_timeout.issued_by_id)], None, {}
+                    )
+                )[0]
+                embed.add_field(
+                    name="Banned by",
+                    value=issued_by.mention
+                    if issued_by
+                    else f"{new_timeout.issued_by_id}",
+                    inline=False,
+                )
+            if new_timeout.ban_reason:
+                embed.add_field(
+                    name="Ban Reason", value=str(new_timeout.ban_reason), inline=False
+                )
+            await HandlerManager.trigger("aml_custom_log", embed=embed)
         ScheduleManager.execute_delayed(
             new_timeout.time_left + 5,
             self.auto_untimeout,
@@ -121,17 +149,71 @@ class TimeoutManager:
             db_session, str(unbanner.id) if unbanner else None, unban_reason
         )
         db_session.commit()
-        for channel in self.bot.discord_bot.guild.text_channels:
-            overwrite = channel.overwrites_for(member)
-            overwrite.send_messages = None
-            if overwrite.is_empty():
-                overwrite = None
-            await channel.set_permissions(
-                target=member,
-                overwrite=overwrite,
-                reason=f"Timedout #{current_timeout.id}",
-            )
+        role = list(self.bot.filters.get_role([self.settings["punished_role_id"]], None, {}))[0]
+        await self.bot.remove_role(member, role, f"Untimedout by Timeout #{current_timeout.id}")
 
-        if self.settings["log_untimeout"]:  # TODO
-            pass
+        if self.settings["log_untimeout"]:
+            embed = discord.Embed(
+                title="Member timedout has been removed",
+                timestamp=current_timeout.unbanned_at,
+                colour=member.colour,
+            )
+            embed.set_author(
+                name=f"{member} ({member.id})- Timeout Removed",
+                icon_url=str(member.avatar_url),
+            )
+            embed.add_field(
+                name="Banned on",
+                value=str(current_timeout.created_at.strftime("%b %d %Y %H:%M:%S %Z")),
+                inline=False,
+            )
+            embed.add_field(
+                name="Unbanned on",
+                value=str(current_timeout.unbanned_at.strftime("%b %d %Y %H:%M:%S %Z")),
+                inline=False,
+            )
+            if current_timeout.issued_by_id:
+                issued_by = list(
+                    self.bot.filters.get_member(
+                        [int(current_timeout.issued_by_id)], None, {}
+                    )
+                )[0]
+                embed.add_field(
+                    name="Banned by",
+                    value=issued_by.mention
+                    if issued_by
+                    else f"{current_timeout.issued_by_id}",
+                    inline=False,
+                )
+            if current_timeout.ban_reason:
+                embed.add_field(
+                    name="Ban Reason", value=str(current_timeout.ban_reason), inline=False
+                )
+            if current_timeout.unban_reason:
+                embed.add_field(
+                    name="Unban Reason",
+                    value=str(current_timeout.unban_reason),
+                    inline=False,
+                )
+            if current_timeout.unbanned_by_id:
+                unbanned_by = list(
+                    self.bot.filters.get_member(
+                        [int(current_timeout.unbanned_by_id)], None, {}
+                    )
+                )[0]
+                embed.add_field(
+                    name="Unban By",
+                    value=unbanned_by.mention
+                    if unbanned_by
+                    else f"{current_timeout.unbanned_by_id}",
+                    inline=False,
+                )
+            await HandlerManager.trigger("aml_custom_log", embed=embed)
         return True, None
+
+    async def apply_timeout(self, member, timeout):
+        if not self.settings["enabled"]:
+            return False, "Module is not enabled"
+
+        role = list(self.bot.filters.get_role([self.settings["punished_role_id"]], None, {}))[0]
+        await self.bot.add_role(member, role, f"Timedout by Timeout #{timeout.id}")
