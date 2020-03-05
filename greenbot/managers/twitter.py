@@ -11,7 +11,6 @@ from greenbot.managers.handler import HandlerManager
 from greenbot.managers.schedule import ScheduleManager
 from greenbot.models.twitter import TwitterUser
 from greenbot.utils import time_since
-from greenbot.utils import stringify_tweet
 
 log = logging.getLogger(__name__)
 
@@ -141,8 +140,8 @@ class TwitterManager(GenericTwitterManager):
                         and not status.text.startswith("RT ")
                     ):
                         log.debug("On status from tweepy: %s", status.text)
-                        
-                        ScheduleManager.execute_now(self.dispatch_tweet, tweet=status)
+                        tweet = status
+                        ScheduleManager.execute_now(self.dispatch_tweet, tweet)
                         
                 async def dispatch_tweet(self, tweet):
                     await HandlerManager.trigger("twitter_on_status", tweet=tweet)
