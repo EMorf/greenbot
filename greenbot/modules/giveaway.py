@@ -145,7 +145,7 @@ class GiveawayModule(BaseModule):
             if not role:
                 continue
 
-            tickets = max(tickets, role_dict[role]) if role and role in member.roles else tickets
+            tickets = max(tickets, role_dict[role_id]) if role and role in member.roles else tickets
 
         return tickets
 
