@@ -98,19 +98,7 @@ class Bot:
             redis=RedisManager.get(),
             private_loop=self.private_loop,
         )
-        self.twitter_manager = (
-            TwitterManager(self, self.config["twitter"])
-            if utils.contains_value(
-                [
-                    "consumer_key",
-                    "consumer_secret",
-                    "access_token",
-                    "access_token_secret",
-                ],
-                self.config["twitter"],
-            )
-            else None
-        )
+        self.twitter_manager = TwitterManager(self)
         self.filters = Filters(self, self.discord_bot)
         self.functions = Functions(self, self.filters)
 

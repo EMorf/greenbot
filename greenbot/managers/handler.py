@@ -195,6 +195,7 @@ class HandlerManager:
 
         # tweepy.StreamListener.on_status(tweet)
         HandlerManager.create_handler("twitter_on_status")
+        HandlerManager.create_handler("twitter_follows")
 
         # Advanced Message Log
 
