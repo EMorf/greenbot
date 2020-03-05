@@ -16,7 +16,7 @@ from greenbot.modules import ModuleSetting
 log = logging.getLogger(__name__)
 
 
-class RemindMe(BaseModule):
+class GiveawayModule(BaseModule):
     ID = __name__.split(".")[-1]
     NAME = "RemindMe"
     DESCRIPTION = "Allows users to create reminders"

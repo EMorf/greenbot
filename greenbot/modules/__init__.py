@@ -6,7 +6,7 @@ from greenbot.modules.basic import BasicCommandsModule
 from greenbot.modules.basic.admincommands import AdminCommandsModule
 from greenbot.modules.advancedadminlog import AdvancedAdminLog
 from greenbot.modules.activitytracker import ActivityTracker
-from greenbot.modules.giveaway import Giveaway
+from greenbot.modules.giveaway import GiveawayModule
 from greenbot.modules.memes import Memes
 from greenbot.modules.movienight import MovieNight
 from greenbot.modules.remindme import RemindMe
@@ -20,7 +20,7 @@ available_modules = [
     AdvancedAdminLog,
     ActivityTracker,
     BasicCommandsModule,
-    Giveaway,
+    GiveawayModule,
     Memes,
     MovieNight,
     RemindMe,
