@@ -106,25 +106,25 @@ class GiveawayModule(BaseModule):
         with DBManager.create_session_scope() as db_session:
             current_giveaway = Giveaway._get_current_giveaway(db_session)
             if not current_giveaway:
-                await self.bot.say(channel=channel, message=f"{author.mention}, there is no giveaway running right now.")
+                await self.bot.say(channel=channel, message=f"{author.mention}, there is no giveaway running right now.", ignore_escape=True)
                 return False
 
             if current_giveaway.locked:
-                await self.bot.say(channel=channel, message=f"{author.mention}, the current giveaway is locked.")
+                await self.bot.say(channel=channel, message=f"{author.mention}, the current giveaway is locked.", ignore_escape=True)
                 return False
 
             registered = GiveawayEntry.is_entered(db_session, str(author.id), current_giveaway.id)
             if registered:
-                await self.bot.say(channel=channel, message=f"{author.mention}, you already joined the giveaway.")
+                await self.bot.say(channel=channel, message=f"{author.mention}, you already joined the giveaway.", ignore_escape=True)
                 return False
 
             tickets = self.get_highest_ticket_count(author)
             giveaway_entry = GiveawayEntry._create(db_session, str(author.id), current_giveaway.id, tickets)
             if giveaway_entry:
-                await self.bot.say(channel=channel, message=f"{author.mention}, you joined the giveaway for **{current_giveaway.giveaway_item}** with **{tickets}** entr{'y' if tickets == 1 else 'ies' }! The giveaway will end **{current_giveaway.giveaway_deadline}** and you will be notified if you win. Good Luck! :wink:")
+                await self.bot.say(channel=channel, message=f"{author.mention}, you joined the giveaway for **{current_giveaway.giveaway_item}** with **{tickets}** entr{'y' if tickets == 1 else 'ies' }! The giveaway will end **{current_giveaway.giveaway_deadline}** and you will be notified if you win. Good Luck! :wink:", ignore_escape=True)
                 return True
 
-            await self.bot.say(channel=channel, message=f"{author.mention} failed to add you to the giveaway dm a mod for help :smile:")
+            await self.bot.say(channel=channel, message=f"{author.mention} failed to add you to the giveaway dm a mod for help :smile:", ignore_escape=True)
             return False
 
     def get_highest_ticket_count(self, member):
@@ -153,19 +153,19 @@ class GiveawayModule(BaseModule):
         with DBManager.create_session_scope() as db_session:
             current_giveaway = Giveaway._get_current_giveaway(db_session)
             if current_giveaway:
-                await self.bot.say(channel=channel, message="There is already a giveaway running. Please use !wipegiveaway before you start a new one. (Don't forget to chose a winner before you end!)")
+                await self.bot.say(channel=channel, message="There is already a giveaway running. Please use !wipegiveaway before you start a new one. (Don't forget to chose a winner before you end!)", ignore_escape=True)
                 return False
 
             desc_array = re.findall(r'"([^"]*)"', message)
             if not len(desc_array) == 2:
-                await self.bot.say(channel=channel, message='Please set 2 arguments between quotation marks. `!startgiveaway "<item>" "<deadline>"`\nExample: `!startgiveaway "a new GTX2900" "10 days"`')
+                await self.bot.say(channel=channel, message='Please set 2 arguments between quotation marks. `!startgiveaway "<item>" "<deadline>"`\nExample: `!startgiveaway "a new GTX2900" "10 days"`', ignore_escape=True)
                 return False
 
             if Giveaway._create(db_session, str(author.id), desc_array[0], desc_array[1]):
-                await self.bot.say(channel=channel, message="New giveaway was started! Use !giveawaywinner to chose a winner when the time has passed.")
+                await self.bot.say(channel=channel, message="New giveaway was started! Use !giveawaywinner to chose a winner when the time has passed.", ignore_escape=True)
                 return True
 
-            await self.bot.say(channel=channel, message="An unknown error has occurred, please contact a moderator")
+            await self.bot.say(channel=channel, message="An unknown error has occurred, please contact a moderator", ignore_escape=True)
             return False
 
     async def giveaway_wipe(self, bot, author, channel, message, args):
@@ -195,13 +195,13 @@ class GiveawayModule(BaseModule):
                 winning_entry = random.choice(pool)
                 winning_user = list(self.bot.filters.get_member([int(winning_entry.user_id)], None, {}))[0]
 
-            await self.bot.say(channel=channel, message="Shuffling giveaway list...")
+            await self.bot.say(channel=channel, message="Shuffling giveaway list...", ignore_escape=True)
             await asyncio.sleep(5)
-            await self.bot.say(channel=channel, message="*Shuffling intensifies...*")
+            await self.bot.say(channel=channel, message="*Shuffling intensifies...*", ignore_escape=True)
             await asyncio.sleep(5)
-            await self.bot.say(channel=channel, message="**And the winner is...**")
+            await self.bot.say(channel=channel, message="**And the winner is...**", ignore_escape=True)
             await asyncio.sleep(5)
-            await self.bot.say(channel=channel, message=f"Congatulations {winning_user.mention} you won **{current_giveaway.giveaway_item}**!!!")
+            await self.bot.say(channel=channel, message=f"Congatulations {winning_user.mention} you won **{current_giveaway.giveaway_item}**!!!", ignore_escape=True)
         return True
 
     
