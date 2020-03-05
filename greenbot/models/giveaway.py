@@ -67,7 +67,7 @@ class GiveawayEntry(Base):
     id = Column(INT, primary_key=True, autoincrement=True)
     user_id = Column(TEXT, ForeignKey("user.discord_id", ondelete="CASCADE"))
     user = relationship("User")
-    giveaway_id = Column(INT, ForeignKey('giveaways.id'), ondelete="CASCADE")
+    giveaway_id = Column(INT, ForeignKey('giveaways.id', ondelete="CASCADE"))
     giveaway = relationship("Giveaway", back_populates="entries")
     date_entered = Column(UtcDateTime(), nullable=False)
     tickets = Column(INT, nullable=False, default=1)
