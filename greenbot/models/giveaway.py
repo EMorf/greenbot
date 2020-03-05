@@ -43,7 +43,7 @@ class Giveaway(Base):
         return self
 
     def _disable(self, db_session):
-        self.active = False
+        self.enabled = False
         db_session.merge(self)
         return self
 
