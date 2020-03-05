@@ -96,7 +96,6 @@ class TimeoutManager:
                 db_session, str(member.id), str(banner.id), until, ban_reason
             )
             db_session.commit()
-        
         await self.apply_timeout(member, new_timeout)
 
         if self.settings["log_timeout"]:
