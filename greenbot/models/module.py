@@ -113,7 +113,7 @@ class ModuleManager:
         """ Load module classes """
 
         from greenbot.modules import available_modules
-
+        log.info(self.bot)
         self.all_modules = [module(self.bot) for module in available_modules]
 
         with DBManager.create_session_scope() as db_session:
