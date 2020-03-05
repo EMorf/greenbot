@@ -40,16 +40,21 @@ class GenericTwitterManager:
             self.twitter_client = None
 
     async def on_twitter_follows(self, usernames):
+        worth_reload = False
         for username in usernames:
             if username and username not in self.listener.relevant_users:
                 self.follow_user(username)
+                worth_reload = True
         for username in self.listener.relevant_users:
             if username and username not in usernames:
                 self.unfollow_user(username)
+                worth_reload = True
+    
+        if not worth_reload:
+            return
 
         self.reload()
         self.quit()
-        await self.connect()
 
     def reload(self):
         if self.listener:
@@ -205,6 +210,3 @@ class TwitterManager(GenericTwitterManager):
     def quit(self):
         if self.twitter_stream:
             self.twitter_stream.disconnect()
-
-    async def connect(self):
-        await self.check_twitter_connection()
