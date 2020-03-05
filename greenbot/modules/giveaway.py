@@ -202,6 +202,7 @@ class GiveawayModule(BaseModule):
             await self.bot.say(channel=channel, message="**And the winner is...**", ignore_escape=True)
             await asyncio.sleep(5)
             await self.bot.say(channel=channel, message=f"Congatulations {winning_user.mention} you won **{current_giveaway.giveaway_item}**!!!", ignore_escape=True)
+            current_giveaway._disable(db_session)
         return True
 
     
