@@ -64,20 +64,22 @@ class Twitter(BaseModule):
             return
 
     async def on_status(self, tweet):
-        if tweet.in_reply_to_status_id is not None:
-            if not self.settings["send_replies"]:
-                return
-        username = tweet.author.screen_name
-        if username not in self.settings["users"].split(" "):
-            return
-        tweet_url = f"https://twitter.com/{username}/status/{tweet.id}"
-        out_channel, _ = await self.bot.functions.func_get_channel(
-            args=[int(self.settings["output_channel"])]
-        )
-        message = self.settings["output_format"].format(
-            username=username, tweet_url=tweet_url
-        )
-        await self.bot.say(channel=out_channel, message=message, ignore_escape=True)
+        try:
+            if tweet.in_reply_to_status_id is not None:
+                if not self.settings["send_replies"]:
+                    return
+            username = tweet.author.screen_name
+            tweet_url = f"https://twitter.com/{username}/status/{tweet.id}"
+            out_channel, _ = await self.bot.functions.func_get_channel(
+                args=[int(self.settings["output_channel"])]
+            )
+            message = self.settings["output_format"].format(
+                username=username, tweet_url=tweet_url
+            )
+            await self.bot.say(channel=out_channel, message=message, ignore_escape=True)
+        except Exception as e:
+            log.error(e)
+
 
     def load_commands(self, **options):
         if not self.bot:
