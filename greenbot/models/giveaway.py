@@ -58,7 +58,7 @@ class Giveaway(Base):
 
     @staticmethod
     def _get_current_giveaway(db_session):
-        return db_session.query(GiveawayEntry).filter_by(active=True).one_or_none()
+        return db_session.query(Giveaway).filter_by(active=True).one_or_none()
 
     
 class GiveawayEntry(Base):
