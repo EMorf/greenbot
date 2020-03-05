@@ -121,7 +121,7 @@ class TwitterManager(GenericTwitterManager):
             return
 
         try:
-            ScheduleManager.now(self.check_twitter_connection)
+            ScheduleManager.execute_now(self.check_twitter_connection)
             ScheduleManager.execute_every(60 * 5, self.check_twitter_connection)
         except:
             log.exception("Twitter authentication failed.")
