@@ -144,11 +144,12 @@ class TwitterManager(GenericTwitterManager):
                         status.user.screen_name.lower() in self.relevant_users
                         and not status.text.startswith("RT ")
                     ):
-                        log.debug("On status from tweepy: %s", status.text)
+                        log.info("On status from tweepy: %s", status.text)
                         tweet = status
                         ScheduleManager.execute_now(self.dispatch_tweet, args=[tweet])
                         
                 async def dispatch_tweet(self, tweet):
+                    log.info("Ran here")
                     await HandlerManager.trigger("twitter_on_status", tweet=tweet)
 
                 def on_error(self, status_code):
