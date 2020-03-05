@@ -35,7 +35,7 @@ class Giveaway(Base):
     winner = relationship("User", foreign_keys=[winner_id])
     entries = relationship("GiveawayEntry", back_populates="giveaway", foreign_keys=[])
 
-    active = Column(BOOLEAN, nullable=False, default=True)
+    enabled = Column(BOOLEAN, nullable=False, default=True)
 
     def _lock_state(self, db_session, lock):
         self.locked = lock
@@ -58,7 +58,7 @@ class Giveaway(Base):
 
     @staticmethod
     def _get_current_giveaway(db_session):
-        return db_session.query(Giveaway).filter_by(active=True).one_or_none()
+        return db_session.query(Giveaway).filter_by(enabled=True).one_or_none()
 
     
 class GiveawayEntry(Base):
