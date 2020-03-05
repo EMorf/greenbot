@@ -43,6 +43,10 @@ class GenericTwitterManager:
         for username in usernames:
             if username and username not in self.listener.relevant_users:
                 self.follow_user(username)
+        for username in self.listener.relevant_users:
+            if username and username not in usernames:
+                self.unfollow_user(username)
+
         self.reload()
         self.quit()
 
