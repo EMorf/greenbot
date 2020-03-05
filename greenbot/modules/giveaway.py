@@ -218,7 +218,7 @@ class GiveawayModule(BaseModule):
             await asyncio.sleep(5)
             await self.bot.say(channel=channel, message="*Shuffling intensifies...*", ignore_escape=True)
             await asyncio.sleep(5)
-            await self.bot.say(channel=channel, message="**And the winner{'s' if count > 1 else ''} is...**", ignore_escape=True)
+            await self.bot.say(channel=channel, message=f"**And the winner{'s' if count > 1 else ''} is...**", ignore_escape=True)
             await asyncio.sleep(5)
             for winning_user in winning_users:
                 await self.bot.say(channel=channel, message=f"Congatulations {winning_user.mention} you won **{current_giveaway.giveaway_item}**!!!", ignore_escape=True)
