@@ -30,6 +30,9 @@ class GenericTwitterManager:
 
         twitter_config = bot.config["twitter"]
 
+        if not (twitter_config.get("consumer_key", False) and twitter_config.get("consumer_secret", False) and twitter_config.get("access_token", False) and twitter_config.get("access_token_secret", False)):
+            return
+
         try:
             self.twitter_auth = tweepy.OAuthHandler(twitter_config["consumer_key"], twitter_config["consumer_secret"])
             self.twitter_auth.set_access_token(twitter_config["access_token"], twitter_config["access_token_secret"])
