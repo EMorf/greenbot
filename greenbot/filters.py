@@ -28,6 +28,7 @@ class Filters:
         return getattr(role, key) if role else None, None
 
     def get_member(self, args, key, extra):
+        log.info(args)
         member = self.discord_bot.get_member(args[0]) if args[0] else extra["author"]
         return getattr(member, key) if key and member else member, None
 
