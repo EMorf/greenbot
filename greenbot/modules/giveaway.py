@@ -103,12 +103,12 @@ class GiveawayModule(BaseModule):
         self.bot = bot
 
     async def giveaway_info(self, bot, author, channel, message, args):
-        data = discord.Embed(
+        embed = discord.Embed(
             description=("Giveaway Info"), colour=discord.Colour.dark_gold()
         )
         with DBManager.create_session_scope() as db_session:
             current_giveaway = Giveaway._get_current_giveaway(db_session)
-            data.add_field(
+            embed.add_field(
                 name=("Current Giveaway"),
                 value=f"**{current_giveaway.giveaway_item}** ending **{current_giveaway.giveaway_deadline}**" if current_giveaway else "No giveaway is running right now",
             )
@@ -129,7 +129,7 @@ class GiveawayModule(BaseModule):
                 continue
             entries = role_dict[role_name]
             chances_value += f"{role.mention} {entries} entr{'ies' if entries > 1 else 'y'}\n"
-        data.add_field(
+        embed.add_field(
             name=("Chances to win!"),
             value=chances_value[:-2],
         )
