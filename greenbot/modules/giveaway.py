@@ -111,6 +111,7 @@ class GiveawayModule(BaseModule):
             embed.add_field(
                 name=("Current Giveaway"),
                 value=f"**{current_giveaway.giveaway_item}** ending **{current_giveaway.giveaway_deadline}**" if current_giveaway else "No giveaway is running right now",
+                inline=False,
             )
         role_dict = {
             "regular_role_id": self.settings["regular_role_tickets"], 
@@ -132,6 +133,7 @@ class GiveawayModule(BaseModule):
         embed.add_field(
             name=("Chances to win!"),
             value=chances_value[:-2],
+            inline=False,
         )
         
         await self.bot.say(channel=channel, embed=embed)
