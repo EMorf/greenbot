@@ -78,7 +78,7 @@ class TimeoutModule(BaseModule):
             )
             return False
 
-        member = list(self.bot.filters.get_member_value([command_args[0]], None, {}))[0]
+        member = list(self.bot.filters.get_member([command_args[0]], None, {}))[0]
         if not member:
             await self.bot.say(
                 channel=channel, message=f"Cant find member, {command_args[0]}"
@@ -122,7 +122,7 @@ class TimeoutModule(BaseModule):
             )
             return False
 
-        member = list(self.bot.filters.get_member_value([command_args[0]], None, {}))[0]
+        member = list(self.bot.filters.get_member([command_args[0]], None, {}))[0]
         if not member:
             await self.bot.say(
                 channel=channel, message=f"Cant find member, {command_args[0]}"
@@ -143,7 +143,7 @@ class TimeoutModule(BaseModule):
 
     async def query_timeouts(self, bot, author, channel, message, args):
         command_args = message.split(" ") if message else []
-        member = list(self.bot.filters.get_member_value([command_args[0]], None, {}))[0]
+        member = list(self.bot.filters.get_member([command_args[0]], None, {}))[0]
         if not member:
             await self.bot.say(
                 channel=channel, message=f"Cant find member, {command_args[0]}"
@@ -226,7 +226,7 @@ class TimeoutModule(BaseModule):
 
     async def is_timedout(self, bot, author, channel, message, args):
         command_args = message.split(" ") if message else []
-        member = list(self.bot.filters.get_member_value([command_args[0]], None, {}))[0]
+        member = list(self.bot.filters.get_member([command_args[0]], None, {}))[0]
         if not member:
             await self.bot.say(
                 channel=channel, message=f"Cant find member, {command_args[0]}"

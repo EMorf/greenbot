@@ -28,17 +28,14 @@ class Filters:
         return getattr(role, key) if role else None, None
 
     def get_member(self, args, key, extra):
-        member = self.discord_bot.get_member(args[0]) if args[0] else extra["author"]
+        member = (self.discord_bot.get_member(args[0]) or self.discord_bot.get_member_by_name(args[0])) or self.discord_bot.get_member(args[0][3:][:-1]) if args[0] else extra["author"] 
         return getattr(member, key) if key and member else member, None
-
-    def get_member_value(self, args, key, extra):
-        return list(self.get_member([args[0][3:][:-1]], key, extra))[0], None
 
     def get_currency(self, args, key, extra):
         return self.bot.get_currency().get(key) if key else None, None
 
     def get_user(self, args, key, extra):
-        member = list(self.get_member_value([args[0]], None, extra))[0]
+        member = list(self.get_member([args[0]], None, extra))[0]
         if not member:
             member = extra["author"]
         with DBManager.create_session_scope() as db_session:

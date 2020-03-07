@@ -352,6 +352,12 @@ class DiscordBotManager:
             return False
         return True
 
+    def get_member_by_name(self, member_name):
+        for member in self.guild.members:
+            if str(member) == member_name:
+                return member
+        return None
+
     def get_member(self, member_id):
         try:
             return self.guild.get_member(int(member_id))

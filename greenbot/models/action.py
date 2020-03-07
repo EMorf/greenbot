@@ -142,8 +142,7 @@ class MappingMethods:
         try:
             method_mapping["role"] = bot.filters.get_role if bot else None
             method_mapping["_role"] = bot.filters.get_role_value if bot else None
-            method_mapping["_member"] = bot.filters.get_member if bot else None
-            method_mapping["member"] = bot.filters.get_member_value if bot else None
+            method_mapping["member"] = bot.filters.get_member if bot else None
             method_mapping["currency"] = bot.filters.get_currency if bot else None
             method_mapping["user"] = bot.filters.get_user if bot else None
             method_mapping["userinfo"] = bot.filters.get_user_info if bot else None
