@@ -28,7 +28,6 @@ class Filters:
         return getattr(role, key) if role else None, None
 
     def get_member(self, args, key, extra):
-        log.info(args)
         member = self.discord_bot.get_member(args[0]) if args[0] else extra["author"]
         return getattr(member, key) if key and member else member, None
 
@@ -48,9 +47,8 @@ class Filters:
 
     def get_user_info(self, args, key, extra):
         try:
-            log.info(args)
-            log.info(type(args))
             member = list(self.get_member(int(args[0]), None, extra))[0]
+            log.info(member)
         except:
             member = None
         message = extra["message_raw"]
