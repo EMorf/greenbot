@@ -128,10 +128,12 @@ class ActivityTracker(BaseModule):
                 member = list(self.bot.filters.get_member([user.discord_id], None, {}))[
                     0
                 ]
+                if not member:
+                    continue
+
                 count = Message._get_week_count_user(db_session, str(member.id))
                 if (
-                    (not member
-                    or sub_role not in member.roles)
+                    sub_role not in member.roles
                     or (regular_role in member.roles
                     or count < self.settings["min_msgs_per_week"])
                 ):
