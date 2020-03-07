@@ -239,8 +239,9 @@ class Functions:
         return f"args: {args}\nextra: {extra}", None
 
     async def func_embed_image(self, args, extra={}):
-        if args[0] == "" or not args[0]:
+        if not args[0]:
             return None, None
+
         data = discord.Embed()
         data.set_image(url=args[0])
         return None, data
