@@ -3,6 +3,7 @@ import logging
 import json
 import random
 import asyncio
+import operator
 import regex as re
 import discord
 from datetime import datetime
@@ -119,6 +120,7 @@ class GiveawayModule(BaseModule):
             "tier2_sub_role_id": self.settings["tier2_sub_role_tickets"], 
             "tier3_sub_role_id": self.settings["tier3_sub_role_tickets"],
         }
+        role_dict = dict(sorted(role_dict.items(), key=operator.itemgetter(1)))
         chances_value = "@everyone 1 entry\n"
         for role_name in role_dict:
             role_id = self.settings[role_name]
@@ -170,6 +172,7 @@ class GiveawayModule(BaseModule):
             "tier2_sub_role_id": self.settings["tier2_sub_role_tickets"], 
             "tier3_sub_role_id": self.settings["tier3_sub_role_tickets"],
         }
+        role_dict = dict(sorted(role_dict.items(), key=operator.itemgetter(1)))
 
         tickets = 1
         for role_name in role_dict:
