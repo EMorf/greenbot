@@ -226,8 +226,8 @@ class Filters:
         channel = self.discord_bot.guild.get_channel(args[0])
         return getattr(channel, key) if key and channel else channel, None
 
-    def get_emoji(self, agrs, key, extra):
-        match = re.match(r'([0-9]+)', agrs[0])
+    def get_emoji(self, args, key, extra):
+        match = re.match(r'([0-9]+)', args[0])
         if not match:
             return None, None
 
