@@ -193,7 +193,7 @@ class AdvancedAdminLog(BaseModule):
             colour=await self.get_event_colour(author.guild, "message_delete"),
             timestamp=utils.now(),
         )
-        embed.add_field(name="Message", value=content[-1], inline=False)
+        embed.add_field(name="Message", value=content[-1] if content[-1] else "None", inline=False)
         embed.add_field(name="Channel", value=sent_in_channel, inline=False)
         embed.add_field(
             name="ID",
