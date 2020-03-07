@@ -47,6 +47,7 @@ class Filters:
 
     def get_user_info(self, args, key, extra):
         try:
+            log.info(args[0])
             member = list(self.get_member(int(args[0]), None, extra))[0]
         except:
             member = None
