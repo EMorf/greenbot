@@ -226,10 +226,13 @@ class Filters:
         channel = self.discord_bot.guild.get_channel(args[0])
         return getattr(channel, key) if key and channel else channel, None
 
-    def get_emoji_id(self, args, key, extra):
-        match = re.search(r'([0-9]+)', args[0])
-        log.info(match.group(1))
-        return None if not match else match.group(1), None
+    def get_emoji_url(self, args, key, extra):
+        match = re.match(r'\<(\a)?\:\w+\:([0-9]+)\>', args[0])
+        if not match:
+            return None, None
+
+        is_animated = bool(match.group(1))
+        return None if not match else f"https://cdn.discordapp.com/emojis/{match.group(2)}.{'gif' if is_animated else 'png'}", None
 
     @staticmethod
     def get_command_value(args, key, extra):
