@@ -227,12 +227,13 @@ class GiveawayModule(BaseModule):
 
         with DBManager.create_session_scope() as db_session:
             current_giveaway = Giveaway._get_current_giveaway(db_session)
-            if not current_giveaway.locked:
-                current_giveaway._lock_state(db_session, True)
-                db_session.commit()
             if not current_giveaway:
                 await self.bot.say(channel=channel, message="There is no giveaway running.")
                 return False
+
+            if not current_giveaway.locked:
+                current_giveaway._lock_state(db_session, True)
+                db_session.commit()
             pool = []
             for entry in current_giveaway.entries:
                 member = list(self.bot.filters.get_member([int(entry.user_id)], None, {}))[0]
