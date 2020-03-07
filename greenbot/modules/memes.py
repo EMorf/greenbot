@@ -194,6 +194,7 @@ class Memes(BaseModule):
             await role.edit(colour=dcol)
         await role.edit(colour=discord.Colour.from_rgb(r, g, b))
         self.mod_pride_running = False
+        return True
 
     async def vroom(self, bot, author, channel, message, args):
         if len(self.vroom_races) < self.settings["max_vroom_races"]:
