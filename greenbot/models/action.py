@@ -67,10 +67,10 @@ class Function:
 
 class Substitution:
     substitution_regex = re.compile(
-        r"(?<!\\)\$\((\w+);\[((((\"([^\"]|\\[\$\"])*\")|(\d+)),?)*)\]:(\w*)\)"
+        r"(?<!\\)\$\((\w+);\[(((([\"\']([^\"]|\\[\$\"])*[\"\'])|(\d+)),?)*)\]:(\w*)\)"
     )
 
-    args_sub_regex = re.compile(r"\"([^\"]*)\"")
+    args_sub_regex = re.compile(r"[\"\']([^\"\']*)[\"|\']")
 
     user_args_sub_regex = re.compile(r"(?<!\\)\$\((\d+)(\+?)\)")
 
