@@ -318,8 +318,8 @@ class DiscordBotManager:
             ban = await self.guild.fetch_ban(user)
             if ban:
                 return False
-        except Exception as e:
-            pass
+        except:
+            return False
         try:
             resp_timeout = utils.seconds_to_resp(timeout_in_seconds)
             reason += (
