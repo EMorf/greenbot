@@ -72,6 +72,9 @@ class GiveawayEntry(Base):
     date_entered = Column(UtcDateTime(), nullable=False)
     tickets = Column(INT, nullable=False, default=1)
 
+    def _remove(self, db_session):
+        db_session.delete(self)
+
     @staticmethod
     def _create(db_session, user_id, giveaway_id, tickets):
         if GiveawayEntry.is_entered(db_session, user_id, giveaway_id):

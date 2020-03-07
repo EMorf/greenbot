@@ -227,6 +227,9 @@ class GiveawayModule(BaseModule):
 
         with DBManager.create_session_scope() as db_session:
             current_giveaway = Giveaway._get_current_giveaway(db_session)
+            if not current_giveaway.locked:
+                current_giveaway._lock_state(db_session, True)
+                db_session.commit()
             if not current_giveaway:
                 await self.bot.say(channel=channel, message="There is no giveaway running.")
                 return False
@@ -237,7 +240,6 @@ class GiveawayModule(BaseModule):
                     pool.append(entry)
 
             winning_users = []
-            winning_entries = []
             while len(winning_users) < count:
                 if len(pool) == 0:
                     break
@@ -245,7 +247,7 @@ class GiveawayModule(BaseModule):
                 winning_user = list(self.bot.filters.get_member([int(winning_entry.user_id)], None, {}))[0]
                 if winning_user and winning_user not in winning_users:
                     winning_users.append(winning_user)
-                    winning_entries.append(winning_entry)
+                    winning_entry._remove(db_session)
                     pool = list(filter(lambda x: x != winning_entry, pool))
 
             current_giveaway._disable(db_session)
