@@ -49,11 +49,12 @@ class Filters:
     def get_user_info(self, args, key, extra):
         try:
             log.info(args)
+            log.info(type(args))
             member = list(self.get_member(int(args[0]), None, extra))[0]
         except:
             member = None
         message = extra["message_raw"]
-        if member is None:
+        if not member:
             member = extra["author"]
 
         roles = member.roles[-1:0:-1]
