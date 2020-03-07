@@ -53,7 +53,7 @@ class Filters:
         except:
             member = None
         message = extra["message_raw"]
-        if not member:
+        if member is None:
             member = extra["author"]
 
         roles = member.roles[-1:0:-1]
