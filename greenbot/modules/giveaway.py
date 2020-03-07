@@ -132,7 +132,7 @@ class GiveawayModule(BaseModule):
             chances_value += f"{role.mention} {entries} entr{'ies' if entries > 1 else 'y'}\n"
         embed.add_field(
             name=("Chances to win!"),
-            value=chances_value[:-2],
+            value=chances_value[:-1],
             inline=False,
         )
         
