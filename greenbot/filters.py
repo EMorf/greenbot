@@ -46,10 +46,10 @@ class Filters:
             return getattr(db_user, key) if key and db_user else db_user, None
 
     def get_user_info(self, args, key, extra):
-        member = list(self.get_member(args[0][3:][:-1], None, extra))[0]
+        member = list(self.get_member(args[0], None, extra))[0]
         message = extra["message_raw"]
         if not member:
-            user = extra["author"]
+            member = extra["author"]
 
         roles = member.roles[-1:0:-1]
 
