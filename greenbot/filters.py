@@ -48,7 +48,6 @@ class Filters:
     def get_user_info(self, args, key, extra):
         try:
             member = list(self.get_member([int(args[0])], None, extra))[0]
-            log.info(member)
         except:
             member = None
         message = extra["message_raw"]
