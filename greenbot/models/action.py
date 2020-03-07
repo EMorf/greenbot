@@ -59,9 +59,9 @@ class Function:
             resp, embed = await MappingMethods.func_methods()[func_name](
                 array_args, extra
             )
-            if private_message and (resp or embed):
+            if private_message and (resp is not None or embed is not None):
                 await bot.private_message(user=author, message=resp, embed=embed)
-            elif (resp or embed):
+            elif (resp is not None or embed is not None):
                 await bot.say(channel=channel, message=resp, embed=embed)
 
 
