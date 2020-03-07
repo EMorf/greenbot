@@ -306,7 +306,7 @@ class GiveawayModule(BaseModule):
                     channels=json.dumps(self.settings["valid_channels"].split(" ")),
                     can_execute_with_whisper=False,
                     description="Joins the current giveaway",
-                )
+                ),
                 "info": Command.raw_command(
                     self.giveaway_info,
                     delay_all=0,
