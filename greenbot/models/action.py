@@ -76,7 +76,6 @@ class Substitution:
 
     @staticmethod
     def apply_subs(_input, args, extra):
-        log.info(_input)
         count = 0
         embeds = []
         for user_sub_key in Substitution.user_args_sub_regex.finditer(_input):
@@ -103,7 +102,6 @@ class Substitution:
             key = sub_key.group(8)
             array_args = []
             for arg in Substitution.args_sub_regex.finditer(args):
-                log.info(arg.group(0))
                 array_args.append(
                     list(
                         Substitution.apply_subs(
@@ -114,7 +112,6 @@ class Substitution:
 
             final_sub = needle
             if filter_name in MappingMethods.subs_methods():
-                log.info(array_args)
                 resp, embed = MappingMethods.subs_methods()[filter_name](
                     args=array_args, key=key, extra=extra
                 )
