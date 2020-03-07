@@ -76,6 +76,7 @@ class Substitution:
 
     @staticmethod
     def apply_subs(_input, args, extra):
+        log.info(_input)
         count = 0
         embeds = []
         for user_sub_key in Substitution.user_args_sub_regex.finditer(_input):
