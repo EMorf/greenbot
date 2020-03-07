@@ -250,8 +250,6 @@ class GiveawayModule(BaseModule):
                     winning_entry._remove(db_session)
                     pool = list(filter(lambda x: x != winning_entry, pool))
 
-            current_giveaway._disable(db_session)
-
             if len(winning_users) == 0:
                 await self.bot.say(channel=channel, message="The giveaway ended but nobody entered!", ignore_escape=True)
                 return True
