@@ -131,7 +131,7 @@ class TwitterManager(GenericTwitterManager):
         self.twitter_stream = None
         self.listener = None
 
-        if "twitter" not in bot.config:
+        if "twitter" not in bot.config or not self.twitter_client:
             return
 
         try:
