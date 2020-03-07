@@ -100,7 +100,7 @@ class ActivityTracker(BaseModule):
                     count < self.settings["min_msgs_per_week"]
                     or sub_role not in member.roles
                 ):
-                    await self.bot.remove_role(member, regular_role)
+                    await self.bot.remove_role(member, regular_role, "They failed to meet the requirements to keep the role")
             db_session.commit()
             messages = Message._get_last_hour(db_session)
             channels_to_listen_in = (
@@ -134,7 +134,7 @@ class ActivityTracker(BaseModule):
                     or regular_role in member.roles
                 ):
                     continue
-                await self.bot.add_role(member, regular_role)
+                await self.bot.add_role(member, regular_role, "They met the requirements to get the role")
 
     def enable(self, bot):
         if not bot:
