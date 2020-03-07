@@ -162,9 +162,13 @@ class Bot:
         ScheduleManager.execute_every(period, function, *args, **kwargs)
 
     def quit_bot(self):
-        self.module_manager.disable_all()
+        try:
+            self.module_manager.disable_all()
+            self.socket_manager.quit()
+        except:
+            pass
+        
         self.private_loop.call_soon_threadsafe(self.private_loop.stop)
-        self.socket_manager.quit()
         sys.exit(0)
 
     def connect(self):
