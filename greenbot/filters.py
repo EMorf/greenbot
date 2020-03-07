@@ -28,7 +28,7 @@ class Filters:
         return getattr(role, key) if role else None, None
 
     def get_member(self, args, key, extra):
-        member = ((self.discord_bot.get_member(args[0]) or self.discord_bot.get_member_by_name(args[0])) or self.discord_bot.get_member(args[0][3:][:-1]) if args[0] else None) or extra["author"]
+        member = ((self.discord_bot.get_member(args[0]) or self.discord_bot.get_member_by_name(args[0])) or self.discord_bot.get_member(args[0][3:][:-1]) if args[0] else None) or extra.get("author", None)
         return getattr(member, key) if key and member else member, None
 
     def get_currency(self, args, key, extra):
