@@ -417,7 +417,7 @@ class Command(Base):
             user = User._create_or_get_by_discord_id(
                 db_session, str(author.id), str(author)
             )
-            if self.cost > 0 and not user.can_afford(self.cost):
+            if self.cost > 0 and not user.can_afford(self.cost) and args["user_level"] < Command.BYPASS_DELAY_LEVEL:
                 # User does not have enough points to use the command
                 return False
 
@@ -438,7 +438,7 @@ class Command(Base):
             user = User._create_or_get_by_discord_id(
                 db_session, str(author.id), str(author)
             )
-            with user.spend_currency_context(self.cost):
+            with user.spend_currency_context(self.cost if args["user_level"] < Command.BYPASS_DELAY_LEVEL else 0):
                 ret = await self.action.run(bot, author, channel, message, args)
                 if not ret:
                     raise FailedCommand("return currency")
