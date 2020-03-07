@@ -274,6 +274,9 @@ class DiscordBotManager:
             log.exception(e)
             self.redis.set(f"{self.bot.bot_name}:timeouts-discord", json.dumps({}))
 
+    async def get_channel(self, channel_id):
+        return await self.guild.get_channel(int(channel_id))
+
     def get_role_by_name(self, role_name):
         for role in self.guild.roles:
             if role.name == role_name:

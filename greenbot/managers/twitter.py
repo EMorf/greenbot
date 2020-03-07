@@ -139,6 +139,8 @@ class TwitterManager(GenericTwitterManager):
         except:
             log.exception("Twitter authentication failed.")
 
+        log.info("Started Twitter")
+
     def initialize_listener(self):
         if self.listener is None:
 
@@ -203,7 +205,6 @@ class TwitterManager(GenericTwitterManager):
             t = threading.Thread(target=self._run_twitter_stream, name="Twitter")
             t.daemon = True
             t.start()
-            log.info("Started Twitter")
         except:
             log.error("Caught exception while checking twitter connection")
 

@@ -179,6 +179,12 @@ class GiveawayModule(BaseModule):
         return True
 
     async def giveaway_winner(self, bot, author, channel, message, args):
+        args_split = message.split(" ")
+        try:
+            count = int(args_split[0])
+        except:
+            count = 1
+
         with DBManager.create_session_scope() as db_session:
             current_giveaway = Giveaway._get_current_giveaway(db_session)
             if not current_giveaway:
