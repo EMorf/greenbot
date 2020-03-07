@@ -228,6 +228,7 @@ class Filters:
 
     def get_emoji_id(self, args, key, extra):
         match = re.search(r'([0-9]+)', args[0])
+        log.info(match.group(1))
         return None if not match else match.group(1), None
 
     @staticmethod
