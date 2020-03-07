@@ -181,7 +181,7 @@ class Functions:
             return "You cannot set a level higher then your own!", None
 
         with DBManager.create_session_scope() as db_session:
-            user = User._create_or_get_by_discord_id(db_session, str(member.id))
+            user = User._create_or_get_by_discord_id(db_session, str(member.id), str(member))
             if user.level >= extra["user_level"]:
                 return (
                     "You cannot set a level of a user with a higher then your own!",
@@ -207,7 +207,7 @@ class Functions:
             )
 
         with DBManager.create_session_scope() as db_session:
-            user = User._create_or_get_by_discord_id(db_session, str(member.id))
+            user = User._create_or_get_by_discord_id(db_session, str(member.id), str(member))
             user.points = amount
         currency = self.bot.get_currency().get("name").capitalize()
         return f"{currency} balance for {member.mention} set to {amount}", None
@@ -229,7 +229,7 @@ class Functions:
             )
 
         with DBManager.create_session_scope() as db_session:
-            user = User._create_or_get_by_discord_id(db_session, str(member.id))
+            user = User._create_or_get_by_discord_id(db_session, str(member.id), str(member))
             user.points += amount
         action = "added to" if amount > 0 else "removed from"
         currency = self.bot.get_currency().get("name")

@@ -45,7 +45,8 @@ class User(Base):
         ).one_or_none() or User._create(
             db_session, discord_id=discord_id, user_name=user_name
         )
-        user.user_name = user_name
+        if user_name:
+            user.user_name = user_name
         return user
 
     @staticmethod

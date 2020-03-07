@@ -108,7 +108,7 @@ class Bot:
 
     def psudo_level_member(self, db_session, member):
         user_level = 100
-        user = User._create_or_get_by_discord_id(db_session, str(member.id))
+        user = User._create_or_get_by_discord_id(db_session, str(member.id), str(member))
         for role_id in self.roles:
             role = list(self.filters.get_role([role_id], None, {}))[0]
             if not role:

@@ -274,6 +274,16 @@ class DiscordBotManager:
             log.exception(e)
             self.redis.set(f"{self.bot.bot_name}:timeouts-discord", json.dumps({}))
 
+        with DBManager.create_session_scope() as db_session:
+            unnamed_users = db_session.query(User).filter_by(user_name="").all()
+            for user in unnamed_users:
+                member = self.get_member(int(user.discord_id))
+                if not member:
+                    db_session.delete(user)
+                    continue
+
+                user.user_name = str(member)
+
     def get_role_by_name(self, role_name):
         for role in self.guild.roles:
             if role.name == role_name:

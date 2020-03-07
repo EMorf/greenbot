@@ -38,11 +38,11 @@ class Filters:
         return self.bot.get_currency().get(key) if key else None, None
 
     def get_user(self, args, key, extra):
-        user = list(self.get_member_value([args[0]], None, extra))[0]
+        member = list(self.get_member_value([args[0]], None, extra))[0]
         if not user:
-            user = extra["author"]
+            member = extra["author"]
         with DBManager.create_session_scope() as db_session:
-            db_user = User._create_or_get_by_discord_id(db_session, user.id)
+            db_user = User._create_or_get_by_discord_id(db_session, member.id, str(member))
             return getattr(db_user, key) if key and db_user else db_user, None
 
     def get_user_info(self, args, key, extra):
