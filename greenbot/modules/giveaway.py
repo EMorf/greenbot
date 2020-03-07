@@ -246,7 +246,7 @@ class GiveawayModule(BaseModule):
                 if winning_user and winning_user not in winning_users:
                     winning_users.append(winning_user)
                     winning_entries.append(winning_entry)
-                    pool.remove(winning_entry)
+                    pool = list(filter(lambda x: x != winning_entry, pool))
 
             current_giveaway._disable(db_session)
 
