@@ -39,47 +39,47 @@ class Filters:
 
     def get_user(self, args, key, extra):
         member = list(self.get_member_value([args[0]], None, extra))[0]
-        if not user:
+        if not member:
             member = extra["author"]
         with DBManager.create_session_scope() as db_session:
             db_user = User._create_or_get_by_discord_id(db_session, member.id, str(member))
             return getattr(db_user, key) if key and db_user else db_user, None
 
     def get_user_info(self, args, key, extra):
-        user = list(self.get_member(args[0][3:][:-1], None, extra))[0]
+        member = list(self.get_member(args[0][3:][:-1], None, extra))[0]
         message = extra["message_raw"]
-        if not user:
+        if not member:
             user = extra["author"]
 
-        roles = user.roles[-1:0:-1]
+        roles = member.roles[-1:0:-1]
 
-        joined_at = user.joined_at
-        since_created = (message.created_at - user.created_at).days
+        joined_at = member.joined_at
+        since_created = (message.created_at - member.created_at).days
         if joined_at is not None:
             since_joined = (message.created_at - joined_at).days
             user_joined = joined_at.strftime("%d %b %Y %H:%M")
         else:
             since_joined = "?"
             user_joined = "Unknown"
-        user_created = user.created_at.strftime("%d %b %Y %H:%M")
-        voice_state = user.voice
+        user_created = member.created_at.strftime("%d %b %Y %H:%M")
+        voice_state = member.voice
 
         created_on = ("{}\n({} days ago)").format(user_created, since_created)
         joined_on = ("{}\n({} days ago)").format(user_joined, since_joined)
 
-        activity = ("Chilling in {} status").format(user.status)
-        if user.activity is None:  # Default status
+        activity = ("Chilling in {} status").format(member.status)
+        if member.activity is None:  # Default status
             pass
-        elif user.activity.type == discord.ActivityType.playing:
-            activity = ("Playing {}").format(user.activity.name)
-        elif user.activity.type == discord.ActivityType.streaming:
+        elif member.activity.type == discord.ActivityType.playing:
+            activity = ("Playing {}").format(member.activity.name)
+        elif member.activity.type == discord.ActivityType.streaming:
             activity = ("Streaming [{}]({})").format(
-                user.activity.name, user.activity.url
+                member.activity.name, member.activity.url
             )
-        elif user.activity.type == discord.ActivityType.listening:
-            activity = ("Listening to {}").format(user.activity.name)
-        elif user.activity.type == discord.ActivityType.watching:
-            activity = ("Watching {}").format(user.activity.name)
+        elif member.activity.type == discord.ActivityType.listening:
+            activity = ("Listening to {}").format(member.activity.name)
+        elif member.activity.type == discord.ActivityType.watching:
+            activity = ("Watching {}").format(member.activity.name)
 
         if roles:
             role_str = ", ".join([x.mention for x in roles])
@@ -111,7 +111,7 @@ class Filters:
         else:
             role_str = None
 
-        data = discord.Embed(description=activity, colour=user.colour)
+        data = discord.Embed(description=activity, colour=member.colour)
         data.add_field(name=("Joined Discord on"), value=created_on)
         data.add_field(name=("Joined this server on"), value=joined_on)
         if role_str is not None:
@@ -122,12 +122,12 @@ class Filters:
                 value="{0.mention} ID: {0.id}".format(voice_state.channel),
                 inline=False,
             )
-        data.set_footer(text=(f"User ID: {user.id}"))
+        data.set_footer(text=(f"User ID: {member.id}"))
 
-        name = str(user)
-        name = " ~ ".join((name, user.nick)) if user.nick else name
-        if user.avatar:
-            avatar = user.avatar_url_as(static_format="png")
+        name = str(member)
+        name = " ~ ".join((name, member.nick)) if member.nick else name
+        if member.avatar:
+            avatar = member.avatar_url_as(static_format="png")
             data.set_author(name=name, url=avatar)
             data.set_thumbnail(url=avatar)
         else:
