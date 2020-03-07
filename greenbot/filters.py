@@ -227,7 +227,7 @@ class Filters:
         return getattr(channel, key) if key and channel else channel, None
 
     def get_emoji_url(self, args, key, extra):
-        match = re.search(r'\<(a\:)?\w+\:([0-9]+)\>', args[0])
+        match = re.search(r'\<(a)?:\w+\:([0-9]+)\>', args[0])
         if not match:
             return None, None
 
