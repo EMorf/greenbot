@@ -228,7 +228,7 @@ class Memes(BaseModule):
             random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)
         )
         await role.edit(colour=dcol)
-        return True
+        return role not in (list(self.bot.filters.get_member([author.id], None, {}))[0].roles)
 
     def load_commands(self, **options):
         if self.settings["mod_role_id"]:

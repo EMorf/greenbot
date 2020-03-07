@@ -5,6 +5,7 @@ from greenbot.models.user import User
 
 import discord
 import datetime
+import regex as re
 
 log = logging.getLogger("greenbot")
 
@@ -223,7 +224,15 @@ class Filters:
 
     def get_channel(self, args, key, extra):
         channel = self.discord_bot.guild.get_channel(args[0])
-        return getattr(channel, key) if key else (channel if channel else None), None
+        return getattr(channel, key) if key and channel else channel, None
+
+    def get_emoji(self, agrs, key, extra):
+        match = re.match(r'([0-9]+)', agrs[0])
+        if not match:
+            return None, None
+
+        emoji = self.discord_bot.client.get_emoji(int(match.group(1)))
+        return getattr(emoji, key) if key and emoji else emoji, None
 
     @staticmethod
     def get_command_value(args, key, extra):
