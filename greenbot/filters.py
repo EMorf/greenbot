@@ -230,7 +230,7 @@ class Filters:
         match = re.match(r'([0-9]+)', args[0])
         if not match:
             return None, None
-
+        log.info(int(match.group(1)))
         emoji = self.discord_bot.client.get_emoji(int(match.group(1)))
         return getattr(emoji, key) if key and emoji else emoji, None
 
