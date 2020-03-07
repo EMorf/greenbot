@@ -226,13 +226,9 @@ class Filters:
         channel = self.discord_bot.guild.get_channel(args[0])
         return getattr(channel, key) if key and channel else channel, None
 
-    def get_emoji(self, args, key, extra):
+    def get_emoji_id(self, args, key, extra):
         match = re.search(r'([0-9]+)', args[0])
-        if not match:
-            return None, None
-        emoji = self.discord_bot.client.get_emoji(int(match.group(1)))
-        log.info(emoji)
-        return getattr(emoji, key) if key and emoji else emoji, None
+        return None if not match else match.group(1), None
 
     @staticmethod
     def get_command_value(args, key, extra):
