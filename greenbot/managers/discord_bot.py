@@ -354,7 +354,7 @@ class DiscordBotManager:
 
     def get_member_by_name(self, member_name):
         for member in self.guild.members:
-            if str(member).lower() == member_name.lower() or str(member.display_name).lower() == member_name.lower():
+            if (str(member).lower() == member_name.lower() or str(member.display_name).lower() == member_name.lower()) or str(member.name).lower() == member_name.lower():
                 return member
         return None
 
