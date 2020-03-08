@@ -217,10 +217,9 @@ class MovieNightAPI:
                 window_seconds=int(self.wowza_cdn_expiration_time),
                 key=self.wowza_cdn_trusted_shared_secret,
                 verbose=True,
+                token_name="hdnts",
             )
             token = generator.generate_acl_token("*")
-            if generator.warnings:
-                log.warning("\n".join(generator.warnings))
             log.info(f"{token}")
 
             return token
