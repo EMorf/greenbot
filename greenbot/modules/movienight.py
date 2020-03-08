@@ -89,7 +89,7 @@ class MovieNight(BaseModule):
         # query api, returns is_online, is_ull, key 
         is_online, is_ull, key = self.bot.movienight_api.is_online()
         if not is_online:
-            await self.bot.say.send(channel=channel, message="Movienight is offline right now :(")
+            await self.bot.say(channel=channel, message="Movienight is offline right now :(")
             return False
 
         if is_ull:
@@ -123,7 +123,7 @@ class MovieNight(BaseModule):
                 value=f"https://{self.settings['player_domain']}/cdn_player.html?key={key}",
                 inline=True,
             )
-        await self.bot.say.send(channel=channel, embed=embed)
+        await self.bot.say(channel=channel, embed=embed)
         return True
 
     async def moviestart_ull(self, bot, author, channel, message, args):
