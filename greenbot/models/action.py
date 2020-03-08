@@ -41,7 +41,7 @@ class Function:
         r"(?<!\\)\$\((\w+);\[((((\"([^\"]|\\[\$\"])*\")|(\d+)),?\s?)*)\]\)"
     )
 
-    args_sub_regex = re.compile(r"[\"\'](\\\"|\\\'|[^\"\'])*[\"\']")
+    args_sub_regex = re.compile(r"[\"\']((?:\\\"|\\\'|[^\"\'])*)[\"\']")
 
     @staticmethod
     async def run_functions(_input, args, extra, author, channel, private_message, bot):
@@ -70,7 +70,7 @@ class Substitution:
         r"(?<!\\)\$\((\w+);\[(((([\"\']([^\"]|\\[\$\"])*[\"\'])|(\d+)),?)*)\]:(\w*)\)"
     )
 
-    args_sub_regex = re.compile(r"[\"\'](\\\"|\\\'|[^\"\'])*[\"\']")
+    args_sub_regex = re.compile(r"[\"\']((?:\\\"|\\\'|[^\"\'])*)[\"\']")
 
     user_args_sub_regex = re.compile(r"(?<!\\)\$\((\d+)(\+?)\)")
 
