@@ -109,6 +109,7 @@ class TimeoutModule(BaseModule):
                 db_session, member, author, utils.now() + timedelta, ban_reason
             )
             if success:
+                await self.bot.say(channel=channel, message=f"Member {member.mention} has been timedout for {utils.seconds_to_resp(timedelta.total_seconds())}")
                 return True
 
             await self.bot.say(channel=channel, message=resp)
@@ -136,6 +137,7 @@ class TimeoutModule(BaseModule):
                 db_session, member, author, unban_reason
             )
             if success:
+                await self.bot.say(channel=channel, message=f"Member {member.mention} has been untimedout")
                 return True
 
             self.bot.say(channel=channel, message=resp)
