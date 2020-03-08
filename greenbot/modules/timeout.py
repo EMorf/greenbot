@@ -282,6 +282,7 @@ class TimeoutModule(BaseModule):
     def load_commands(self, **options):
         self.commands["timeout"] = Command.raw_command(
             self.timeout_user,
+            command="timeout",
             delay_all=0,
             delay_user=0,
             level=int(self.settings["level_for_command"]),
@@ -290,6 +291,7 @@ class TimeoutModule(BaseModule):
         )
         self.commands["untimeout"] = Command.raw_command(
             self.untimeout_user,
+            command="untimeout",
             delay_all=0,
             delay_user=0,
             level=int(self.settings["level_for_command"]),
@@ -298,6 +300,7 @@ class TimeoutModule(BaseModule):
         )
         self.commands["timeouts"] = Command.raw_command(
             self.query_timeouts,
+            command="timeouts",
             delay_all=0,
             delay_user=0,
             level=int(self.settings["level_for_command"]),
@@ -306,6 +309,7 @@ class TimeoutModule(BaseModule):
         )
         self.commands["istimedout"] = Command.raw_command(
             self.is_timedout,
+            command="istimedout",
             delay_all=0,
             delay_user=0,
             level=int(self.settings["level_for_command"]),

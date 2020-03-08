@@ -307,6 +307,7 @@ class GiveawayModule(BaseModule):
             commands={
                 "join": Command.raw_command(
                     self.giveaway_join,
+                    command="giveaway join",
                     delay_all=0,
                     delay_user=0,
                     channels=json.dumps(self.settings["valid_channels"].split(" ")),
@@ -315,6 +316,7 @@ class GiveawayModule(BaseModule):
                 ),
                 "info": Command.raw_command(
                     self.giveaway_info,
+                    command="giveaway info",
                     delay_all=0,
                     delay_user=0,
                     channels=json.dumps(self.settings["valid_channels"].split(" ")),
@@ -325,6 +327,7 @@ class GiveawayModule(BaseModule):
         )
         self.commands["startgiveaway"] = Command.raw_command(
             self.giveaway_start,
+            command="startgiveaway",
             delay_all=0,
             delay_user=0,
             level=self.settings["level"],
@@ -334,6 +337,7 @@ class GiveawayModule(BaseModule):
         )
         self.commands["wipegiveaway"] = Command.raw_command(
             self.giveaway_wipe,
+            command="wipegiveaway",
             delay_all=0,
             delay_user=0,
             level=self.settings["level"],
@@ -343,6 +347,7 @@ class GiveawayModule(BaseModule):
         )
         self.commands["giveawaywinner"] = Command.raw_command(
             self.giveaway_winner,
+            command="giveawaywinner",
             delay_all=0,
             delay_user=0,
             level=self.settings["level"],
@@ -352,6 +357,7 @@ class GiveawayModule(BaseModule):
         )
         self.commands["lockgiveaway"] = Command.raw_command(
             self.giveaway_lock,
+            command="lockgiveaway",
             delay_all=0,
             delay_user=0,
             level=self.settings["level"],
@@ -361,6 +367,7 @@ class GiveawayModule(BaseModule):
         )
         self.commands["unlockgiveaway"] = Command.raw_command(
             self.giveaway_unlock,
+            command="unlockgiveaway",
             delay_all=0,
             delay_user=0,
             level=self.settings["level"],

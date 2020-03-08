@@ -234,6 +234,7 @@ class Memes(BaseModule):
         if self.settings["mod_role_id"]:
             self.commands["modpride"] = Command.raw_command(
                 self.modpride,
+                command="modpride",
                 delay_all=0,
                 delay_user=0,
                 cost=self.settings["cost_mod_pride"],
@@ -243,6 +244,7 @@ class Memes(BaseModule):
         if self.settings["dank_role_id"]:
             self.commands["dank"] = Command.raw_command(
                 self.dank,
+                command="dank",
                 delay_all=self.settings["dank_cooldown"],
                 delay_user=self.settings["dank_cooldown"],
                 cost=self.settings["cost_dank"],
@@ -251,6 +253,7 @@ class Memes(BaseModule):
             )
         self.commands["vroom"] = Command.raw_command(
             self.vroom,
+            command="vroom",
             delay_all=0,
             delay_user=0,
             can_execute_with_whisper=False,

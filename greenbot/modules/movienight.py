@@ -243,6 +243,7 @@ class MovieNight(BaseModule):
             commands={
                 "ull": Command.raw_command(
                     self.moviestart_ull,
+                    command="moviestart ull",
                     delay_all=0,
                     delay_user=0,
                     level=self.settings["level"],
@@ -252,6 +253,7 @@ class MovieNight(BaseModule):
                 ),
                 "cdn": Command.raw_command(
                     self.moviestart_cdn,
+                    command="moviestart cdn",
                     delay_all=0,
                     delay_user=0,
                     level=self.settings["level"],

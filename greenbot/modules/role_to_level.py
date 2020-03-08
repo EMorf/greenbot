@@ -103,6 +103,7 @@ class RoleToLevel(BaseModule):
     def load_commands(self, **options):
         self.commands["addrolelevel"] = Command.raw_command(
             self.add_role_level,
+            command="addrolelevel",
             delay_all=0,
             delay_user=0,
             level=int(self.settings["level"]),
@@ -111,6 +112,7 @@ class RoleToLevel(BaseModule):
         )
         self.commands["removerolelevel"] = Command.raw_command(
             self.remove_role_level,
+            command="removerolelevel",
             delay_all=0,
             delay_user=0,
             level=int(self.settings["level"]),

@@ -179,6 +179,7 @@ class RemindMe(BaseModule):
     def load_commands(self, **options):
         self.commands["remindme"] = Command.raw_command(
             self.create_reminder,
+            command="remindme",
             delay_all=0,
             delay_user=0,
             cost=int(self.settings["cost"]),
@@ -187,6 +188,7 @@ class RemindMe(BaseModule):
         )
         self.commands["forgetme"] = Command.raw_command(
             self.forgetme,
+            command="forgetme",
             delay_all=0,
             delay_user=0,
             can_execute_with_whisper=False,
