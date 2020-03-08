@@ -177,7 +177,7 @@ class Functions:
         return f"Level, {level}, set for {member.mention}!", None
 
     async def func_set_balance(self, args, extra={}):
-        if len(args) == 2:
+        if len(args) != 2:
             return "Invalid Comand Args", None
 
         member = list(self.filters.get_member([args[0]], None, {}))[0]
@@ -199,7 +199,7 @@ class Functions:
         return f"{currency} balance for {member.mention} set to {amount}", None
 
     async def func_adj_balance(self, args, extra={}):
-        if len(args) == 2:
+        if len(args) != 2:
             return "Invalid Comand Args", None
 
         member = list(self.filters.get_member([args[0]], None, {}))[0]
@@ -225,7 +225,7 @@ class Functions:
         return f"args: {args}\nextra: {extra}", None
 
     async def func_embed_image(self, args, extra={}):
-        if not args[0]:
+        if len(args) != 1 or not args[0]:
             return None, None
 
         data = discord.Embed()
