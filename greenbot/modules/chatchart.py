@@ -103,9 +103,9 @@ class ChatChart(BaseModule):
 
         for message in history:
             if len(message.author.name) >= 20:
-                short_name = "{}...".format(message.author.name[:20]).replace("$", "\$")
+                short_name = "{}...".format(message.author.name[:20]).replace("$", "\\$")
             else:
-                short_name = message.author.name.replace("$", "\$")
+                short_name = message.author.name.replace("$", "\\$")
             whole_name = "{}#{}".format(short_name, message.author.discriminator)
             if message.author.bot:
                 pass
@@ -121,15 +121,15 @@ class ChatChart(BaseModule):
             await sent_message.delete()
             return await self.bot.say(channel=channel, message=f'Only bots have sent messages in {channel.mention}')
 
-        for usr in sent_message["users"]:
-            pd = float(sent_message["users"][usr]["msgcount"]) / float(sent_message["total count"])
-            sent_message["users"][usr]["percent"] = round(pd * 100, 1)
+        for usr in message_data["users"]:
+            pd = float(message_data["users"][usr]["msgcount"]) / float(message_data["total count"])
+            message_data["users"][usr]["percent"] = round(pd * 100, 1)
 
         top_ten = heapq.nlargest(
             20,
             [
-                (x, sent_message["users"][x]["percent"])
-                for x in sent_message["users"]
+                (x, message_data["users"][x]["percent"])
+                for x in message_data["users"]
             ],
             key=lambda x: x[1],
         )
