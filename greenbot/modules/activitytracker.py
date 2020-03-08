@@ -7,7 +7,6 @@ from greenbot.exc import InvalidPointAmount
 from greenbot.managers.db import DBManager
 from greenbot.managers.schedule import ScheduleManager
 from greenbot.models.command import Command
-from greenbot.models.command import CommandExample
 from greenbot.models.message import Message
 from greenbot.models.user import User
 from greenbot.modules import BaseModule

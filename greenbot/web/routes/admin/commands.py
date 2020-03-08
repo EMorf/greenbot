@@ -159,7 +159,7 @@ def init(page):
         for alias, command in command_manager.items():
             command_aliases.append(alias)
             if command.command and len(command.command) > 0:
-                command_aliases.extend(command.command.split("|"))
+                command_aliases.extend(command.aliases)
 
         command_aliases = set(command_aliases)
 

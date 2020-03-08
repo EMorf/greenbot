@@ -173,9 +173,11 @@ class CommandManager(UserDict):
 
     def create_command(self, alias_str, **options):
         aliases = alias_str.lower().replace("!", "").split("|")
+        group = options.get("group", "")
+        group = f"{group} " if group else ""
         for alias in aliases:
-            if alias in self.data:
-                return self.data[alias], False, alias
+            if f"{group}{alias}" in self.data:
+                return self.data[f"{group}{alias}"], False, alias
 
         command = Command(command=alias_str, **options)
         command.data = CommandData(command.id, **options)
@@ -193,13 +195,18 @@ class CommandManager(UserDict):
         return command, True, ""
 
     def edit_command(self, command_to_edit, **options):
+        if "group" in options:
+            self.remove_command_aliases(command_to_edit)
         command_to_edit.set(**options)
         command_to_edit.data.set(**options)
         DBManager.session_add_expunge(command_to_edit)
+        if "group" in options:
+            self.add_db_command_aliases(command_to_edit)
         self.commit()
+        self.rebuild()
 
     def remove_command_aliases(self, command):
-        aliases = command.command.split("|")
+        aliases = command.aliases
         for alias in aliases:
             if alias in self.db_commands:
                 del self.db_commands[alias]
@@ -219,9 +226,9 @@ class CommandManager(UserDict):
         self.rebuild()
 
     def add_db_command_aliases(self, command):
-        aliases = command.command.split("|")
+        aliases = command.aliases
         for alias in aliases:
-            self.db_commands[command._parent_command + alias] = command
+            self.db_commands[alias] = command
 
         return len(aliases)
 
@@ -311,7 +318,7 @@ class CommandManager(UserDict):
             self.db_session.expunge(command)
             if command.data is None:
                 log.info(
-                    f"Creating command data for {command._parent_command}{command.command}"
+                    f"Creating command data for {command.command}"
                 )
                 command.data = CommandData(command.id)
             self.db_session.add(command.data)
@@ -339,7 +346,7 @@ class CommandManager(UserDict):
         parser.add_argument("--level", type=int, dest="level")
         parser.add_argument("--cost", type=int, dest="cost")
         parser.add_argument("--channel", "-c", action="append", dest="channels")
-        parser.add_argument("--parent", type=str, dest="parent_command")
+        parser.add_argument("--group", "-g", type=str, dest="group", default="")
 
         try:
             args, unknown = parser.parse_known_args(message)

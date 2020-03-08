@@ -72,20 +72,22 @@ class Dispatch:
     @staticmethod
     async def edit_command(bot, author, channel, message, args):
         """Dispatch method for editing commands.
-        Usage: !edit command ALIAS [options] RESPONSE
+        Usage: !edit command "ALIAS" [options] RESPONSE
         See greenbot/managers/command.py parse_command_arguments for available options
         """
 
         if message:
             # Make sure we got both an alias and a response
-            message_parts = message.split()
-            if len(message_parts) < 2:
+            search = re.compile(r"\"([^\"]+)\" (.*)").search(message)
+            alias = search.group(1).replace("!", "").lower()
+            message_parts = search.group(2).split()
+            if not alias or not message_parts:
                 await bot.private_message(
-                    author, "Usage: !add command ALIAS [options] RESPONSE"
+                    author, "Usage: !add command \"ALIAS\" [options] RESPONSE"
                 )
                 return False
 
-            options, response = bot.commands.parse_command_arguments(message_parts[1:])
+            options, response = bot.commands.parse_command_arguments(message_parts)
 
             options["edited_by"] = str(author.id)
 
@@ -93,7 +95,6 @@ class Dispatch:
                 await bot.private_message(author, "Invalid command")
                 return False
 
-            alias = message_parts[0].replace("!", "").lower()
             type = "reply"
             if options["privatemessage"] is True:
                 type = "privatemessage"
@@ -127,10 +128,10 @@ class Dispatch:
             await bot.private_message(author, f"Updated the command (ID: {command.id})")
 
             if len(new_message) > 0:
-                log_msg = f'The !{command.command.split("|")[0]} command has been updated from "{old_message}" to "{new_message}"'
+                log_msg = f'The !{command.aliases[0]} command has been updated from "{old_message}" to "{new_message}"'
             else:
                 log_msg = (
-                    f"The !{command.command.split('|')[0]} command has been updated"
+                    f"The !{command.aliases[0]} command has been updated"
                 )
 
             AdminLogManager.add_entry(
@@ -269,7 +270,7 @@ class Dispatch:
             message_parts = message.split()
             if len(message_parts) < 2:
                 await bot.private_message(
-                    author, "Usage: !add alias existingalias newalias"
+                    author, "Usage: !add alias EXISTING_ALIAS NEW_ALIAS_1 NEW_ALIAS_2 ..."
                 )
                 return False
 
@@ -297,11 +298,11 @@ class Dispatch:
                 return False
 
             for alias in set(new_aliases):
-                if alias in bot.commands:
+                if f"{command.group}{alias}" in bot.commands:
                     already_used_aliases.append(alias)
                 else:
                     added_aliases.append(alias)
-                    bot.commands[command._parent_command + alias] = command
+                    bot.commands[f"{command.group}{alias}"] = command
 
             if len(added_aliases) > 0:
                 new_aliases = f"{command.command}|{'|'.join(added_aliases)}"
@@ -330,47 +331,47 @@ class Dispatch:
         if message:
             aliases = re.split(r"\|| ", message.lower())
             if len(aliases) < 1:
+                await bot.private_message(author, "Usage: !remove alias EXISTING_ALIAS_1|EXISTING_ALIAS_2|...")
+                return False
+            for alias in aliases:
+                if alias not in bot.commands:
+                    await bot.private_message(
+                        author, f"{alias} is not currently an alias",
+                    )
+                    continue
+
+                command = bot.commands[alias]
+
+                # error out on commands that are not from the DB, e.g. module commands like !8ball that cannot have
+                # aliases registered. (command.command and command.data are None on those commands)
+                if command.data is None or command.command is None:
+                    await bot.private_message(
+                        author, f"That command, {alias}, cannot have aliases removed from."
+                    )
+                    continue
+
+                current_aliases = command.aliases
+                current_aliases.remove(alias)
+
+                if len(current_aliases) == 0:
+                    await bot.private_message(
+                        author,
+                        f"{alias} is the only remaining alias for this command and can't be removed.",
+                    )
+                    continue
+
+                new_aliases = "|".join(current_aliases)
+                bot.commands.edit_command(command, command=new_aliases.replace(command.group, ""))
+
+                del bot.commands[alias]
+                log_msg = (
+                    f"The alias {alias} has been removed from {new_aliases.split('|')[0]}"
+                )
+                AdminLogManager.add_entry("Alias removed", str(author.id), log_msg)
+
+                await bot.private_message(author, f"Successfully removed aliase {alias}.")
+            else:
                 await bot.private_message(author, "Usage: !remove alias EXISTINGALIAS")
-                return False
-            alias = " ".join(aliases)
-            if alias not in bot.commands:
-                await bot.private_message(
-                    author, f"{alias} is not currently an alias",
-                )
-                return
-
-            command = bot.commands[alias]
-
-            # error out on commands that are not from the DB, e.g. module commands like !8ball that cannot have
-            # aliases registered. (command.command and command.data are None on those commands)
-            if command.data is None or command.command is None:
-                await bot.private_message(
-                    author, "That command cannot have aliases removed from."
-                )
-                return False
-
-            current_aliases = command.command.split("|")
-            current_aliases.remove(alias.replace(command._parent_command, ""))
-
-            if len(current_aliases) == 0:
-                await bot.private_message(
-                    author,
-                    f"{alias} is the only remaining alias for this command and can't be removed.",
-                )
-                return
-
-            new_aliases = "|".join(current_aliases)
-            bot.commands.edit_command(command, command=new_aliases)
-
-            del bot.commands[alias]
-            log_msg = (
-                f"The alias {alias} has been removed from {new_aliases.split('|')[0]}"
-            )
-            AdminLogManager.add_entry("Alias removed", str(author.id), log_msg)
-
-            await bot.private_message(author, f"Successfully removed aliase {alias}.")
-        else:
-            await bot.private_message(author, "Usage: !remove alias EXISTINGALIAS")
 
     @staticmethod
     async def remove_command(bot, author, channel, message, args):
@@ -387,7 +388,7 @@ class Dispatch:
                 potential_cmd = "".join(split[:1]).lower().replace("!", "")
                 if potential_cmd in bot.commands:
                     command = bot.commands[potential_cmd]
-                potential_cmd += " " + split[1] if len(split) > 1 else ""
+                potential_cmd += (" " + split[1]) if len(split) > 1 else ""
                 if potential_cmd in bot.commands:
                     command = bot.commands[potential_cmd]
             else:
@@ -419,7 +420,7 @@ class Dispatch:
             await bot.private_message(
                 author, f"Successfully removed command with id {command.id}"
             )
-            log_msg = f"The !{command.command.split('|')[0]} command has been removed"
+            log_msg = f"The !{command.aliases[0]} command has been removed"
             AdminLogManager.add_entry("Command removed", str(author.id), log_msg)
             bot.commands.remove_command(command)
         else:
