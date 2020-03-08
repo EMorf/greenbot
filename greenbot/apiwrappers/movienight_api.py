@@ -220,9 +220,9 @@ class MovieNightAPI:
                 token_name="hdnts",
             )
             token = generator.generate_acl_token("*")
-            log.info(f"{token}")
+            log.info(f"hdnts={token}")
 
-            return token
+            return f"hdnts={token}"
 
         except EdgeAuthError as ex:
             log.error(f"{ex}")
