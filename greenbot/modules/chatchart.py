@@ -89,18 +89,18 @@ class ChatChart(BaseModule):
 
         message_args = message.split(" ")
 
-        requested_channel = message[0] if len(message) > 0 else None
+        requested_channel = (self.bot.filters.get_channel([message[0]], None, {})[0] if len(message) > 0 else None) or channel
         limit = message[1] if len(message) > 1 else 5000
         limit = None if limit == "all" else limit
 
         history = []
-        if not channel.permissions_for(author).read_messages == True:
+        if not requested_channel.permissions_for(author).read_messages == True:
             await sent_message.delete()
             await self.bot.say(channel=channel, message="You're not allowed to access that channel.")
             return False
 
         try:
-            async for message in channel.history(limit=limit):
+            async for message in requested_channel.history(limit=limit):
                 history.append(message)
         except discord.errors.Forbidden:
             await sent_message.delete()
@@ -128,7 +128,7 @@ class ChatChart(BaseModule):
 
         if message_data['users'] == {}:
             await sent_message.delete()
-            return await self.bot.say(channel=channel, message=f'Only bots have sent messages in {channel.mention}')
+            return await self.bot.say(channel=channel, message=f'Only bots have sent messages in {requested_channel.mention}')
 
         for usr in message_data["users"]:
             pd = float(message_data["users"][usr]["msgcount"]) / float(message_data["total count"])
@@ -143,7 +143,7 @@ class ChatChart(BaseModule):
             key=lambda x: x[1],
         )
         others = 100 - sum(x[1] for x in top_ten)
-        img = self.create_chart(top_ten, others, channel)
+        img = self.create_chart(top_ten, others, requested_channel)
         await sent_message.delete()
         await self.bot.say(channel=channel, file=discord.File(img, "chart.png"))
         return True
