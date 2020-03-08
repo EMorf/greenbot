@@ -438,6 +438,7 @@ class Command(Base):
             with user.spend_currency_context(self.cost if args["user_level"] < Command.BYPASS_DELAY_LEVEL else 0):
                 ret = await self.action.run(bot, author, channel, message, args)
                 if not ret:
+                    log.info("here")
                     raise FailedCommand("return currency")
 
                 # Only spend points, and increment num_uses if the action succeded
@@ -447,11 +448,13 @@ class Command(Base):
 
                 # TODO: Will this be an issue?
                 self.last_run = cur_time
-                self.last_run_by_user[args["user_level"]] = cur_time
+                self.last_run_by_user[str(author.id)] = cur_time
 
                 if ret == "return currency":
+                    log.info("here2")
                     db_session.commit()
                     raise FailedCommand("return currency")
+                log.info("here3")
 
     def jsonify(self):
         """ jsonify will only be called from the web interface.
