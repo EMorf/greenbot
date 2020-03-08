@@ -203,6 +203,7 @@ class CommandManager(UserDict):
         if "group" in options:
             self.add_db_command_aliases(command_to_edit)
         self.commit()
+        self.rebuild()
 
     def remove_command_aliases(self, command):
         aliases = command.aliases
