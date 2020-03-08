@@ -449,6 +449,9 @@ class Command(Base):
                 self.last_run = cur_time
                 self.last_run_by_user[args["user_level"]] = cur_time
 
+                if ret == "return currency":
+                    raise FailedCommand("return currency")
+
     def jsonify(self):
         """ jsonify will only be called from the web interface.
         we assume that commands have been run throug the parse_command_for_web method """
