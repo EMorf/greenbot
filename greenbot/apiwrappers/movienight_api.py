@@ -180,7 +180,7 @@ class MovieNightAPI:
             async with session.get(req["url"], headers=req["header"]) as res:
                 jres = await res.json()
 
-                log.info("ULL state: " + jres["stream_target_ull"]["state"])
+                # log.debug("ULL state: " + jres["stream_target_ull"]["state"])
 
                 if jres["stream_target_ull"]["state"] == "started":
                     if not self.ull_stream_running:
@@ -198,7 +198,7 @@ class MovieNightAPI:
                 # -----------------------------------------
                 jres = await self.fetch_cdn_stream_state()
 
-                log.info("CDN state: " + jres["live_stream"]["state"])
+                # log.debug("CDN state: " + jres["live_stream"]["state"])
 
                 if jres["live_stream"]["state"] == "started":
                     if not self.cdn_stream_running:
