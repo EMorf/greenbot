@@ -315,8 +315,8 @@ class MessageAction(BaseAction):
             return None, None
 
         return Substitution.apply_subs(
-            self.response, extra["message"].split(" "), extra
-        )
+            self.response, [x.replace("$", "\\$") for x in extra["message"].split(" ")], extra
+        ).replace("\\$", "$")
 
     @staticmethod
     def get_extra_data(author, channel, message, args):
