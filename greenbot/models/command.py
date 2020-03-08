@@ -394,7 +394,7 @@ class Command(Base):
 
         if (
             time_since_last_run < self.delay_all
-            and args["user_level"] < Command.BYPASS_DELAY_LEVEL
+            # and args["user_level"] < Command.BYPASS_DELAY_LEVEL
         ):
             await bot.private_message(user=author, message=f"The command **{self.command}** was executed too recently please try again in {int(self.delay_all-time_since_last_run)} seconds")
             return False
@@ -405,7 +405,7 @@ class Command(Base):
 
         if (
             time_since_last_run_user < self.delay_user
-            and args["user_level"] < Command.BYPASS_DELAY_LEVEL
+            # and args["user_level"] < Command.BYPASS_DELAY_LEVEL
         ):
             await bot.private_message(user=author, message=f"You executed the command **{self.command}** too recently please try again in {int(self.delay_user-time_since_last_run_user)} seconds")
             return False
@@ -413,7 +413,7 @@ class Command(Base):
             user = User._create_or_get_by_discord_id(
                 db_session, str(author.id), str(author)
             )
-            if self.cost > 0 and not user.can_afford(self.cost) and args["user_level"] < Command.BYPASS_DELAY_LEVEL:
+            if self.cost > 0 and not user.can_afford(self.cost): # and args["user_level"] < Command.BYPASS_DELAY_LEVEL:
                 # User does not have enough points to use the command
                 await bot.private_message(user=author, message=f"You need {self.cost} points to execute that command")
                 return False
