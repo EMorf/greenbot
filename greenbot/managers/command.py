@@ -173,9 +173,11 @@ class CommandManager(UserDict):
 
     def create_command(self, alias_str, **options):
         aliases = alias_str.lower().replace("!", "").split("|")
+        group = options.get("group", "")
+        group = f"{group} " if group else ""
         for alias in aliases:
             if alias in self.data:
-                return self.data[alias], False, alias
+                return self.data[f"{group}{alias}"], False, alias
 
         command = Command(command=alias_str, **options)
         command.data = CommandData(command.id, **options)
