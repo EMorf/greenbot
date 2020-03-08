@@ -127,7 +127,7 @@ class GiveawayModule(BaseModule):
             if not role_id:
                 continue
 
-            role = list(self.bot.filters.get_role([role_id], None, {}))[0] if role_id else None
+            role = self.bot.filters.get_role([role_id], None, {})[0] if role_id else None
             if not role:
                 continue
             entries = role_dict[role_name]
@@ -180,7 +180,7 @@ class GiveawayModule(BaseModule):
             if not role_id:
                 continue
 
-            role = list(self.bot.filters.get_role([role_id], None, {}))[0] if role_id else None
+            role = self.bot.filters.get_role([role_id], None, {})[0] if role_id else None
             if not role:
                 continue
 
@@ -236,7 +236,7 @@ class GiveawayModule(BaseModule):
                 db_session.commit()
             pool = []
             for entry in current_giveaway.entries:
-                member = list(self.bot.filters.get_member([int(entry.user_id)], None, {}))[0]
+                member = self.bot.filters.get_member([int(entry.user_id)], None, {})[0]
                 for _ in range(max(entry.tickets, self.get_highest_ticket_count(member))):
                     pool.append(entry)
 
@@ -245,7 +245,7 @@ class GiveawayModule(BaseModule):
                 if len(pool) == 0:
                     break
                 winning_entry = random.choice(pool)
-                winning_user = list(self.bot.filters.get_member([int(winning_entry.user_id)], None, {}))[0]
+                winning_user = self.bot.filters.get_member([int(winning_entry.user_id)], None, {})[0]
                 if winning_user and winning_user not in winning_users:
                     winning_users.append(winning_user)
                     winning_entry._remove(db_session)

@@ -188,7 +188,7 @@ class MovieNight(BaseModule):
         if not is_online:
             return
 
-        out_chnanel = list(self.bot.filters.get_channel([self.settings["alert_channel_id"]], None, {}))[0]
+        out_chnanel = self.bot.filters.get_channel([self.settings["alert_channel_id"]], None, {})[0]
         if is_ull:
             embed = discord.Embed(
                 title="Movienight is online!",

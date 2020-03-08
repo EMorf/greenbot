@@ -78,7 +78,7 @@ class TimeoutModule(BaseModule):
             )
             return False
 
-        member = list(self.bot.filters.get_member([command_args[0]], None, {}))[0]
+        member = self.bot.filters.get_member([command_args[0]], None, {})[0]
         if not member:
             await self.bot.say(
                 channel=channel, message=f"Cant find member, {command_args[0]}"
@@ -124,7 +124,7 @@ class TimeoutModule(BaseModule):
             )
             return False
 
-        member = list(self.bot.filters.get_member([command_args[0]], None, {}))[0]
+        member = self.bot.filters.get_member([command_args[0]], None, {})[0]
         if not member:
             await self.bot.say(
                 channel=channel, message=f"Cant find member, {command_args[0]}"
@@ -146,7 +146,7 @@ class TimeoutModule(BaseModule):
 
     async def query_timeouts(self, bot, author, channel, message, args):
         command_args = message.split(" ") if message else []
-        member = list(self.bot.filters.get_member([command_args[0]], None, {}))[0]
+        member = self.bot.filters.get_member([command_args[0]], None, {})[0]
         if not member:
             await self.bot.say(
                 channel=channel, message=f"Cant find member, {command_args[0]}"
@@ -190,11 +190,9 @@ class TimeoutModule(BaseModule):
                         inline=False,
                     )
                 if timeout.issued_by_id:
-                    issued_by = list(
-                        self.bot.filters.get_member(
+                    issued_by = self.bot.filters.get_member(
                             [int(timeout.issued_by_id)], None, {}
-                        )
-                    )[0]
+                        )[0]
                     embed.add_field(
                         name="Banned by",
                         value=issued_by.mention
@@ -213,11 +211,9 @@ class TimeoutModule(BaseModule):
                         inline=False,
                     )
                 if timeout.active and timeout.unbanned_by_id:
-                    unbanned_by = list(
-                        self.bot.filters.get_member(
+                    unbanned_by = self.bot.filters.get_member(
                             [int(timeout.unbanned_by_id)], None, {}
-                        )
-                    )[0]
+                        )[0]
                     embed.add_field(
                         name="Unban By",
                         value=unbanned_by.mention
@@ -229,7 +225,7 @@ class TimeoutModule(BaseModule):
 
     async def is_timedout(self, bot, author, channel, message, args):
         command_args = message.split(" ") if message else []
-        member = list(self.bot.filters.get_member([command_args[0]], None, {}))[0]
+        member = self.bot.filters.get_member([command_args[0]], None, {})[0]
         if not member:
             await self.bot.say(
                 channel=channel, message=f"Cant find member, {command_args[0]}"

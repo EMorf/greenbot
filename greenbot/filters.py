@@ -23,7 +23,7 @@ class Filters:
 
     def get_role_value(self, args, key, extra):
         role_name = args[0]
-        role = list(self.get_role([role_name], None, extra))[0]
+        role = self.get_role([role_name], None, extra)[0]
         if not role:
             return f"Role {role_name} not found"
         return getattr(role, key) if role else None, None
@@ -36,14 +36,14 @@ class Filters:
         return self.bot.get_currency().get(key) if key else None, None
 
     def get_user(self, args, key, extra):
-        member = list(self.get_member([args[0]], None, extra))[0]
+        member = self.get_member([args[0]], None, extra)[0]
         with DBManager.create_session_scope() as db_session:
             db_user = User._create_or_get_by_discord_id(db_session, member.id, str(member))
             return getattr(db_user, key) if key and db_user else db_user, None
 
     def get_user_info(self, args, key, extra):
         try:
-            member = list(self.get_member([int(args[0])], None, extra))[0]
+            member = self.get_member([int(args[0])], None, extra)[0]
         except:
             member = None
         message = extra["message_raw"]
@@ -135,7 +135,7 @@ class Filters:
 
     def get_role_info(self, args, key, extra):
         role_name = extra["message"]
-        role = list(self.get_role([role_name], None, extra))[0]
+        role = self.get_role([role_name], None, extra)[0]
         if not role:
             return f"Role {role_name} not found", None
         data = discord.Embed(colour=role.colour)

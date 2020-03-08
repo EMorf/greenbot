@@ -20,7 +20,7 @@ class Functions:
             return "Invalid Comand Args", None
 
         author = extra["author"]
-        member = list(self.filters.get_member([args[0]], None, {}))[0]
+        member = self.filters.get_member([args[0]], None, {})[0]
         if not member:
             return "Member not found", None
 
@@ -41,7 +41,7 @@ class Functions:
     async def func_ban_member(self, args, extra={}):
         if len(args) != 4:
             return "Invalid Comand Args", None
-        member = list(self.filters.get_member([args[0]], None, {}))[0]
+        member = self.filters.get_member([args[0]], None, {})[0]
         author = extra["author"]
         if not member:
             return "Member not found", None
@@ -107,11 +107,11 @@ class Functions:
             return "Invalid Comand Args", None
 
         author = extra["author"]
-        member = list(self.filters.get_member([args[0]], None, {}))[0]
+        member = self.filters.get_member([args[0]], None, {})[0]
         if not member:
             return f"Invalid Member, {args[0]}", None
 
-        role = list(self.filters.get_role([args[1]], None, {}))[0]
+        role = self.filters.get_role([args[1]], None, {})[0]
         if not role:
             return f"Invalid Role, {args[1]}", None
 
@@ -129,11 +129,11 @@ class Functions:
             return "Invalid Comand Args", None
 
         author = extra["author"]
-        member = list(self.filters.get_member([args[0]], None, {}))[0]
+        member = self.filters.get_member([args[0]], None, {})[0]
         if not member:
             return f"Invalid Member {args[0]}", None
 
-        role = list(self.filters.get_role([args[1]], None, {}))[0]
+        role = self.filters.get_role([args[1]], None, {})[0]
         if not role:
             return f"Invalid Role {args[1]}", None
 
@@ -150,7 +150,7 @@ class Functions:
         if len(args) != 2:
             return "Invalid Comand Args", None
 
-        member = list(self.filters.get_member([args[0]], None, {}))[0]
+        member = self.filters.get_member([args[0]], None, {})[0]
         if not member:
             return f"Invalid Member {args[0]}", None
 
@@ -180,7 +180,7 @@ class Functions:
         if len(args) != 2:
             return "Invalid Comand Args", None
 
-        member = list(self.filters.get_member([args[0]], None, {}))[0]
+        member = self.filters.get_member([args[0]], None, {})[0]
         if not member:
             return f"Invalid Member {args[0]}", None
 
@@ -202,7 +202,7 @@ class Functions:
         if len(args) != 2:
             return "Invalid Comand Args", None
 
-        member = list(self.filters.get_member([args[0]], None, {}))[0]
+        member = self.filters.get_member([args[0]], None, {})[0]
         if not member:
             return f"Invalid Member {args[0]}", None
 
@@ -236,7 +236,7 @@ class Functions:
         if len(args) != 2:
             return None, None
 
-        member = list(self.filters.get_member([args[0]], None, extra))[0]
+        member = self.filters.get_member([args[0]], None, extra)[0]
         if not member:
             return None, None
 

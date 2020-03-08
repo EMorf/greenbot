@@ -45,7 +45,7 @@ class Function:
 
     @staticmethod
     async def run_functions(_input, args, extra, author, channel, private_message, bot):
-        _input = list(Substitution.apply_subs(_input, args, extra))[0]
+        _input = Substitution.apply_subs(_input, args, extra)[0]
         for sub_key in Function.function_regex.finditer(_input):
             func_name = sub_key.group(1)
             args = sub_key.group(2)
@@ -103,17 +103,15 @@ class Substitution:
             array_args = []
             for arg in Substitution.args_sub_regex.finditer(args):
                 array_args.append(
-                    list(
-                        Substitution.apply_subs(
-                            arg.group(1) if arg.group(1) else "", args, extra
-                        )
-                    )[0].replace("\\$", "$").replace("\\'", "'").replace("\\\"", "\"")
+                    Substitution.apply_subs(
+                        arg.group(1) if arg.group(1) else "", args, extra
+                    )[0]
                 )
 
             final_sub = needle
             if filter_name in MappingMethods.subs_methods():
                 resp, embed = MappingMethods.subs_methods()[filter_name](
-                    args=array_args, key=key, extra=extra
+                    args=escape_args(array_args), key=key, extra=extra
                 )
                 if embed != None:
                     embeds.append(embed)
@@ -302,6 +300,12 @@ class MultiAction(BaseAction):
         return None
 
 
+def escape_args(args):
+    return [x.replace("$", "\\$").replace("'", "\\'").replace("\"", "\\\"") for x in args]
+
+def revert_escape_args(resp):
+    return resp.replace("\\$", "$").replace("\\'", "'").replace("\\\"", "\"")
+
 class MessageAction(BaseAction):
     type = "message"
 
@@ -315,9 +319,9 @@ class MessageAction(BaseAction):
             return None, None
 
         resp, embeds = Substitution.apply_subs(
-            self.response, [x.replace("$", "\\$").replace("'", "\\'").replace("\"", "\\\"") for x in extra["message"].split(" ")], extra
+            self.response, escape_args(extra["message"].split(" ")), extra
         )
-        return resp.replace("\\$", "$").replace("\\'", "'").replace("\\\"", "\""), embeds
+        return revert_escape_args(resp), embeds
 
     @staticmethod
     def get_extra_data(author, channel, message, args):
@@ -335,7 +339,7 @@ class ReplyAction(MessageAction):
         MappingMethods.init(bot)
         await Function.run_functions(
             self.functions,
-            extra["message"].split(" "),
+            escape_args(extra["message"].split(" ")),
             extra,
             author,
             channel,

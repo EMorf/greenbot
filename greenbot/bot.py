@@ -110,7 +110,7 @@ class Bot:
         user_level = 100
         user = User._create_or_get_by_discord_id(db_session, str(member.id), str(member))
         for role_id in self.roles:
-            role = list(self.filters.get_role([role_id], None, {}))[0]
+            role = self.filters.get_role([role_id], None, {})[0]
             if not role:
                 continue
             if role in member.roles:

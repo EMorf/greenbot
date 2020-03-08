@@ -88,12 +88,8 @@ class ActivityTracker(BaseModule):
 
     async def process_messages(self):
         with DBManager.create_session_scope() as db_session:
-            regular_role = list(
-                self.bot.filters.get_role([self.settings["regular_role_id"]], None, {})
-            )[0]
-            sub_role = list(
-                self.bot.filters.get_role([self.settings["sub_role_id"]], None, {})
-            )[0]
+            regular_role = self.bot.filters.get_role([self.settings["regular_role_id"]], None, {})[0]
+            sub_role = self.bot.filters.get_role([self.settings["sub_role_id"]], None, {})[0]
             counts_by_week = Message._get_week_count_by_user(db_session)
             for member in regular_role.members:
                 count = counts_by_week.get(str(member.id), 0)
@@ -122,7 +118,7 @@ class ActivityTracker(BaseModule):
             for user in User._get_users_with_points(
                 db_session, self.settings["min_regular_points"]
             ):
-                member = list(self.bot.filters.get_member([user.discord_id], None, {}))[
+                member = self.bot.filters.get_member([user.discord_id], None, {})[
                     0
                 ]
                 if not member:

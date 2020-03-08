@@ -58,9 +58,7 @@ class TimeoutManager:
             if not timeout.active:
                 return
 
-            member = list(
-                self.bot.filters.get_member([int(timeout.user_id)], None, {})
-            )[0]
+            member = self.bot.filters.get_member([int(timeout.user_id)], None, {})[0]
             if member:
                 await self.untimeout_user(db_session, member, None, "Timeout removed by timer")
                 return
@@ -115,11 +113,9 @@ class TimeoutManager:
                 inline=False,
             )
             if new_timeout.issued_by_id:
-                issued_by = list(
-                    self.bot.filters.get_member(
+                issued_by = self.bot.filters.get_member(
                         [int(new_timeout.issued_by_id)], None, {}
-                    )
-                )[0]
+                    )[0]
                 embed.add_field(
                     name="Banned by",
                     value=issued_by.mention
@@ -151,7 +147,7 @@ class TimeoutManager:
             db_session, str(unbanner.id) if unbanner else None, unban_reason
         )
         db_session.commit()
-        role = list(self.bot.filters.get_role([self.settings["punished_role_id"]], None, {}))[0]
+        role = self.bot.filters.get_role([self.settings["punished_role_id"]], None, {})[0]
         await self.bot.remove_role(member, role, f"Untimedout by Timeout #{current_timeout.id}")
 
         if self.settings["log_untimeout"]:
@@ -175,11 +171,9 @@ class TimeoutManager:
                 inline=False,
             )
             if current_timeout.issued_by_id:
-                issued_by = list(
-                    self.bot.filters.get_member(
+                issued_by = self.bot.filters.get_member(
                         [int(current_timeout.issued_by_id)], None, {}
-                    )
-                )[0]
+                    )[0]
                 embed.add_field(
                     name="Banned by",
                     value=issued_by.mention
@@ -198,11 +192,9 @@ class TimeoutManager:
                     inline=False,
                 )
             if current_timeout.unbanned_by_id:
-                unbanned_by = list(
-                    self.bot.filters.get_member(
+                unbanned_by = self.bot.filters.get_member(
                         [int(current_timeout.unbanned_by_id)], None, {}
-                    )
-                )[0]
+                    )[0]
                 embed.add_field(
                     name="Unban By",
                     value=unbanned_by.mention
@@ -217,5 +209,5 @@ class TimeoutManager:
         if not self.settings["enabled"]:
             return False, "Module is not enabled"
 
-        role = list(self.bot.filters.get_role([self.settings["punished_role_id"]], None, {}))[0]
+        role = self.bot.filters.get_role([self.settings["punished_role_id"]], None, {})[0]
         await self.bot.add_role(member, role, f"Timedout by Timeout #{timeout.id}")
