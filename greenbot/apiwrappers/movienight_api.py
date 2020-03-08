@@ -215,11 +215,10 @@ class MovieNightAPI:
         try:
             generator = EdgeAuth(
                 window_seconds=self.wowza_cdn_expiration_time,
-                acl_delimiter="*",
                 key=self.wowza_cdn_trusted_shared_secret,
                 verbose=True,
             )
-            token = generator.generateToken()
+            token = generator.generate_acl_token("*")
             if generator.warnings:
                 log.warning("\n".join(generator.warnings))
             log.info("%s" % token)
