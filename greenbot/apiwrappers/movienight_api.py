@@ -1,7 +1,7 @@
 import logging
 import requests
 import json
-import asyncio
+import asyncio, aiohttp
 
 from greenbot.managers.handler import HandlerManager
 from greenbot.managers.schedule import ScheduleManager
@@ -94,74 +94,78 @@ class MovieNightAPI:
             "url": f"{self.host_version}/transcoders/trans_id/{state}",
         }
 
-    def fetch_latest_ull_target_id(self):
+    async def fetch_latest_ull_target_id(self):
         req = self.create_ull_fetch_targets_request()
-        res = requests.get(req["url"], headers=req["header"])
-        jres = json.loads(res.content)
+        async with aiohttp.ClientSession() as session:
+            async with session.get(req["url"], headers=req["header"]) as res:
+                jres = json.loads(res.content)
 
-        latest_target = None
+                latest_target = None
 
-        for target in jres["stream_targets_ull"]:
-            if latest_target is None:
-                latest_target = target
-            elif datetime.strptime(
-                latest_target["created_at"], "%Y-%m-%dT%H:%M:%S.%fZ"
-            ) < datetime.strptime(target["created_at"], "%Y-%m-%dT%H:%M:%S.%fZ"):
-                latest_target = target
-        if latest_target:
-            return latest_target["id"]
-
+                for target in jres["stream_targets_ull"]:
+                    if latest_target is None:
+                        latest_target = target
+                    elif datetime.strptime(
+                        latest_target["created_at"], "%Y-%m-%dT%H:%M:%S.%fZ"
+                    ) < datetime.strptime(target["created_at"], "%Y-%m-%dT%H:%M:%S.%fZ"):
+                        latest_target = target
+                if latest_target:
+                    return latest_target["id"]
         return None
 
-    def fetch_cdn_stream_state(self):
+    async def fetch_cdn_stream_state(self):
         req = self.create_stream_state_request(self.wowza_cdn_live_stream_id)
-        res = requests.get(req["url"], headers=req["header"])
-        return json.loads(res.content)
+        async with aiohttp.ClientSession() as session:
+            async with session.get(req["url"], headers=req["header"]) as res:
+                return json.loads(res.content)
 
-    def create_ull_target(self):
+    async def create_ull_target(self):
         stream_name = "Movienight(ULL)-{}".format(
             datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         )
         req = self.create_ull_target_request(stream_name)
-        res = requests.post(
-            req["url"], data=json.dumps(req["payload"]), headers=req["header"]
-        )
-        jres = json.loads(res.content)
+        async with aiohttp.ClientSession() as session:
+            async with session.post(
+                req["url"], data=json.dumps(req["payload"]), headers=req["header"]
+            ) as res:
+                jres = json.loads(res.content)
 
-        endpoint = jres["stream_target_ull"]["primary_url"]
-        server = "/".join(endpoint.split("/")[:4])
-        stream_key = endpoint.split("/")[4]
+                endpoint = jres["stream_target_ull"]["primary_url"]
+                server = "/".join(endpoint.split("/")[:4])
+                stream_key = endpoint.split("/")[4]
 
-        return server, stream_key
+                return server, stream_key
 
     async def start_cdn_target(self):
         req = self.transcoder_request("state")
-        res = requests.get(req["url"], headers=req["header"])
-        jres = json.loads(res.content)
-
-        if not res.status_code == 200:
-            log.error("Unable to fetch transcoder")
-
-        if jres["transcoder"]["state"] == "started":
-            log.warning("Transcoder is already running")
-            return True
-
-        req = self.transcoder_request("start")
-        res = requests.put(req["url"], headers=req["header"])
-        jres = json.loads(res.content)
-
-        if not res.status_code == 200:
-            log.error("Transcoder start request failed")
-        else:
-            req = self.transcoder_request("state")
-            for _ in range(30):
-                res = requests.get(req["url"], headers=req["header"])
+        async with aiohttp.ClientSession() as session:
+            async with session.get(req["url"], headers=req["header"]) as res:
                 jres = json.loads(res.content)
 
+                if not res.status_code == 200:
+                    log.error("Unable to fetch transcoder")
+
                 if jres["transcoder"]["state"] == "started":
+                    log.warning("Transcoder is already running")
                     return True
-                await asyncio.sleep(1)
-            log.error("Transcoder startup timed out")
+
+                req = self.transcoder_request("start")
+
+            async with session.put(req["url"], headers=req["header"]) as res:
+                jres = json.loads(res.content)
+
+                if not res.status_code == 200:
+                    log.error("Transcoder start request failed")
+                else:
+                    req = self.transcoder_request("state")
+                    for _ in range(30):
+                        async with session.get(req["url"], headers=req["header"])as res:
+                            jres = json.loads(res.content)
+
+                            if jres["transcoder"]["state"] == "started":
+                                return True
+                            await asyncio.sleep(1)
+                    log.error("Transcoder startup timed out")
 
         return False
 
@@ -170,39 +174,40 @@ class MovieNightAPI:
 
         # check for ULL stream
         # -----------------------------------------
-        target_id = self.fetch_latest_ull_target_id()
+        target_id = await self.fetch_latest_ull_target_id()
         req = self.create_ull_fetch_targets_request(target_id)
-        res = requests.get(req["url"], headers=req["header"])
-        jres = json.loads(res.content)
+        async with aiohttp.ClientSession() as session:
+            async with session.get(req["url"], headers=req["header"]) as res:
+                jres = json.loads(res.content)
 
-        log.info("ULL state: " + jres["stream_target_ull"]["state"])
+                log.info("ULL state: " + jres["stream_target_ull"]["state"])
 
-        if jres["stream_target_ull"]["state"] == "started":
-            if not self.ull_stream_running:
-                self.ull_playback_key = jres["stream_target_ull"]["playback_urls"]["ws"][1].split("/")[
-                    5
-                ]
-                log.info(f"Detected ull stream (playback key {self.ull_playback_key})")
-                await HandlerManager.trigger("movie_night_started")
-                self.ull_stream_running = True
-            return
-        else:
-            self.ull_stream_running = False
+                if jres["stream_target_ull"]["state"] == "started":
+                    if not self.ull_stream_running:
+                        self.ull_playback_key = jres["stream_target_ull"]["playback_urls"]["ws"][1].split("/")[
+                            5
+                        ]
+                        log.info(f"Detected ull stream (playback key {self.ull_playback_key})")
+                        await HandlerManager.trigger("movie_night_started")
+                        self.ull_stream_running = True
+                    return
+                else:
+                    self.ull_stream_running = False
 
-        # check for CDN stream
-        # -----------------------------------------
-        jres = self.fetch_cdn_stream_state()
+                # check for CDN stream
+                # -----------------------------------------
+                jres = await self.fetch_cdn_stream_state()
 
-        log.info("CDN state: " + jres["live_stream"]["state"])
+                log.info("CDN state: " + jres["live_stream"]["state"])
 
-        if jres["live_stream"]["state"] == "started":
-            if not self.cdn_stream_running:
-                self.cdn_playback_key = self.generate_cdn_token()
-                log.info(f"Detected cnd stream (playback key {self.cdn_playback_key})")
-                await HandlerManager.trigger("movie_night_started")
-                self.cdn_stream_running = True
-        else:
-            self.cdn_stream_running = False
+                if jres["live_stream"]["state"] == "started":
+                    if not self.cdn_stream_running:
+                        self.cdn_playback_key = self.generate_cdn_token()
+                        log.info(f"Detected cnd stream (playback key {self.cdn_playback_key})")
+                        await HandlerManager.trigger("movie_night_started")
+                        self.cdn_stream_running = True
+                else:
+                    self.cdn_stream_running = False
 
     def generate_cdn_token(self):
         try:
