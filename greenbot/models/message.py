@@ -96,7 +96,7 @@ class Message(Base):
     @staticmethod
     def _get_day_count_by_user(db_session):
         query = (
-            db_session.query(Message.user_id.alias('user_id'), func.count(Message.message_id).alias('count'))
+            db_session.query(Message.user_id.label("user_id"), func.count(Message.message_id).label("count"))
             .filter(Message.credited == True)
             .filter(Message.time_sent > utils.now() - timedelta(days=1))
             .group_by(Message.user_id).all()
@@ -109,7 +109,7 @@ class Message(Base):
     @staticmethod
     def _get_week_count_by_user(db_session):
         query = (
-            db_session.query(Message.user_id.alias('user_id'), func.count(Message.message_id).alias('count'))
+            db_session.query(Message.user_id.label("user_id"), func.count(Message.message_id).label("count"))
             .filter(Message.time_sent > utils.now() - timedelta(days=7))
             .group_by(Message.user_id).all()
         )
