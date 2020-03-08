@@ -212,7 +212,7 @@ class Command(Base):
     action_json = Column("action", TEXT, nullable=False)
     extra_extra_args = Column("extra_args", TEXT)
     _command = Column("command", TEXT, nullable=False)
-    _group = Column("group", TEXT, nullable=True)
+    _group = Column("command_group", TEXT, nullable=True)
     description = Column(TEXT, nullable=True)
     delay_all = Column(INT, nullable=False, default=5)
     delay_user = Column(INT, nullable=False, default=15)
@@ -269,7 +269,7 @@ class Command(Base):
             self.extra_args.update(options["extra_args"])
             self.extra_extra_args = json.dumps(options["extra_args"])
         self._command = options.get("command", self._command)
-        self._group = options.get("command_group", self._group)
+        self._group = options.get("group", self._group)
         self.description = options.get("description", self.description)
         self.delay_all = options.get("delay_all", self.delay_all)
         if self.delay_all < 0:
