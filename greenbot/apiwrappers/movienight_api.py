@@ -99,8 +99,7 @@ class MovieNightAPI:
         async with aiohttp.ClientSession() as session:
             log.info(req["url"])
             async with session.get(req["url"], headers=req["header"]) as res:
-                log.info(res.content)
-                jres = json.loads(res.content)
+                jres = await res.json()
 
                 latest_target = None
 
@@ -119,7 +118,7 @@ class MovieNightAPI:
         req = self.create_stream_state_request(self.wowza_cdn_live_stream_id)
         async with aiohttp.ClientSession() as session:
             async with session.get(req["url"], headers=req["header"]) as res:
-                return json.loads(res.content)
+                return await res.json()
 
     async def create_ull_target(self):
         stream_name = "Movienight(ULL)-{}".format(
@@ -130,7 +129,7 @@ class MovieNightAPI:
             async with session.post(
                 req["url"], data=json.dumps(req["payload"]), headers=req["header"]
             ) as res:
-                jres = json.loads(res.content)
+                jres = await res.json()
 
                 endpoint = jres["stream_target_ull"]["primary_url"]
                 server = "/".join(endpoint.split("/")[:4])
@@ -142,7 +141,7 @@ class MovieNightAPI:
         req = self.transcoder_request("state")
         async with aiohttp.ClientSession() as session:
             async with session.get(req["url"], headers=req["header"]) as res:
-                jres = json.loads(res.content)
+                jres = await res.json()
 
                 if not res.status_code == 200:
                     log.error("Unable to fetch transcoder")
@@ -154,7 +153,7 @@ class MovieNightAPI:
                 req = self.transcoder_request("start")
 
             async with session.put(req["url"], headers=req["header"]) as res:
-                jres = json.loads(res.content)
+                jres = await res.json()
 
                 if not res.status_code == 200:
                     log.error("Transcoder start request failed")
@@ -162,7 +161,7 @@ class MovieNightAPI:
                     req = self.transcoder_request("state")
                     for _ in range(30):
                         async with session.get(req["url"], headers=req["header"])as res:
-                            jres = json.loads(res.content)
+                            jres = await res.json()
 
                             if jres["transcoder"]["state"] == "started":
                                 return True
@@ -180,7 +179,7 @@ class MovieNightAPI:
         req = self.create_ull_fetch_targets_request(target_id)
         async with aiohttp.ClientSession() as session:
             async with session.get(req["url"], headers=req["header"]) as res:
-                jres = json.loads(res.content)
+                jres = await res.json()
 
                 log.info("ULL state: " + jres["stream_target_ull"]["state"])
 
