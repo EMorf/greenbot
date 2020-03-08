@@ -91,7 +91,7 @@ class MovieNightAPI:
     def transcoder_request(self, state):
         return {
             "header": self.header,
-            "url": f"{self.host_version}/transcoders/trans_id/{state}",
+            "url": f"{self.host_version}/transcoders/{self.wowza_cdn_live_stream_id}/{state}",
         }
 
     async def fetch_latest_ull_target_id(self):
@@ -144,6 +144,7 @@ class MovieNightAPI:
                 log.info(jres)
                 if not res.status == 200:
                     log.error("Unable to fetch transcoder")
+                    return False
 
                 if jres["transcoder"]["state"] == "started":
                     log.warning("Transcoder is already running")
@@ -156,16 +157,17 @@ class MovieNightAPI:
 
                 if not res.status == 200:
                     log.error("Transcoder start request failed")
-                else:
-                    req = self.transcoder_request("state")
-                    for _ in range(30):
-                        async with session.get(req["url"], headers=req["header"])as res:
-                            jres = await res.json()
+                    return False
 
-                            if jres["transcoder"]["state"] == "started":
-                                return True
-                            await asyncio.sleep(1)
-                    log.error("Transcoder startup timed out")
+                req = self.transcoder_request("state")
+                for _ in range(30):
+                    async with session.get(req["url"], headers=req["header"])as res:
+                        jres = await res.json()
+
+                        if jres["transcoder"]["state"] == "started":
+                            return True
+                        await asyncio.sleep(1)
+                log.error("Transcoder startup timed out")
 
         return False
 
