@@ -72,20 +72,22 @@ class Dispatch:
     @staticmethod
     async def edit_command(bot, author, channel, message, args):
         """Dispatch method for editing commands.
-        Usage: !edit command ALIAS [options] RESPONSE
+        Usage: !edit command "ALIAS" [options] RESPONSE
         See greenbot/managers/command.py parse_command_arguments for available options
         """
 
         if message:
             # Make sure we got both an alias and a response
-            message_parts = message.split()
-            if len(message_parts) < 2:
+            search = re.compile(r"\"([^\"]+)\" (.*)").search(message)
+            alias = search.group(1)
+            message_parts = search.group(2).split()
+            if not alias or not message_parts:
                 await bot.private_message(
-                    author, "Usage: !add command ALIAS [options] RESPONSE"
+                    author, "Usage: !add command \"ALIAS\" [options] RESPONSE"
                 )
                 return False
 
-            options, response = bot.commands.parse_command_arguments(message_parts[1:])
+            options, response = bot.commands.parse_command_arguments(message_parts)
 
             options["edited_by"] = str(author.id)
 
