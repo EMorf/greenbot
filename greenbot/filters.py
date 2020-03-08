@@ -223,7 +223,13 @@ class Filters:
         return None, None
 
     def get_channel(self, args, key, extra):
-        channel = self.discord_bot.guild.get_channel(args[0])
+        try:
+            channel = self.discord_bot.guild.get_channel(int(args[0]))
+        except:
+            try:
+                channel = self.discord_bot.guild.get_channel(int(args[0][2:][:-1]))
+            except:
+                channel = None
         if not channel:
             for _channel in self.discord_bot.guild.channels:
                 if isinstance(channel, discord.TextChannel):
