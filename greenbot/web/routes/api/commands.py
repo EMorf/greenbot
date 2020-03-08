@@ -190,10 +190,10 @@ class APICommandUpdate(Resource):
             command.data.set(**options)
 
             if old_message and len(old_message) > 0 and old_message != new_message:
-                log_msg = f'The !{command.command.split("|")[0]} command has been updated from "{old_message}" to "{new_message}"'
+                log_msg = f'The !{command.aliases[0]} command has been updated from "{old_message}" to "{new_message}"'
             else:
                 log_msg = (
-                    f"The !{command.command.split('|')[0]} command has been updated"
+                    f"The !{command.aliases[0]} command has been updated"
                 )
 
             AdminLogManager.add_entry(
@@ -232,10 +232,10 @@ class APICommandCheckAlias(Resource):
         command_aliases = []
 
         for alias, command in command_manager.items():
-            command_aliases.append(command._parent_command + alias)
+            command_aliases.append(alias)
             if command.command and len(command.command) > 0:
                 command_aliases.extend(
-                    [command._parent_command + x for x in command.command.split("|")]
+                    [x for x in command.aliases]
                 )
 
         command_aliases = set(command_aliases)

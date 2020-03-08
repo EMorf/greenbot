@@ -55,7 +55,7 @@ def parse_command_for_web(alias, command, list):
 
     if command.action is not None and command.action.type == "multi":
         if command.command is not None:
-            command.main_alias = command.command.split("|")[0]
+            command.main_alias = command.aliases[0]
         for inner_alias, inner_command in command.action.commands.items():
             parse_command_for_web(
                 alias
@@ -66,9 +66,9 @@ def parse_command_for_web(alias, command, list):
             )
     else:
         test = re.compile(r"[^\w]")
-        first_alias = command.command.split("|")[0]
+        first_alias = command.aliases[0]
         command.resolve_string = test.sub("", first_alias.replace(" ", "_"))
-        command.main_alias = "!" + command._parent_command + first_alias
+        command.main_alias = f"!{first_alias}"
         if not command.parsed_description:
             if command.action is not None:
                 if command.action.type == "message":
@@ -211,8 +211,8 @@ class Command(Base):
     level = Column(INT, nullable=False, default=100)
     action_json = Column("action", TEXT, nullable=False)
     extra_extra_args = Column("extra_args", TEXT)
-    command = Column(TEXT, nullable=False)
-    parent_command = Column(TEXT, nullable=False)
+    _command = Column("command", TEXT, nullable=False)
+    _group = Column("group", TEXT, nullable=True)
     description = Column(TEXT, nullable=True)
     delay_all = Column(INT, nullable=False, default=5)
     delay_user = Column(INT, nullable=False, default=15)
@@ -246,8 +246,8 @@ class Command(Base):
         self.cost = 0
         self.can_execute_with_whisper = False
         self.run_through_banphrases = False
-        self.command = None
-        self.parent_command = None
+        self._command = None
+        self._group = None
         self.channels = "[]"
 
         self.last_run = 0
@@ -268,8 +268,8 @@ class Command(Base):
             self.extra_args = {"command": self}
             self.extra_args.update(options["extra_args"])
             self.extra_extra_args = json.dumps(options["extra_args"])
-        self.command = options.get("command", self.command)
-        self.parent_command = options.get("parent_command", self.parent_command)
+        self._command = options.get("command", self._command)
+        self._group = options.get("group", self._group)
         self.description = options.get("description", self.description)
         self.delay_all = options.get("delay_all", self.delay_all)
         if self.delay_all < 0:
@@ -291,11 +291,19 @@ class Command(Base):
         self.notify_on_error = options.get("notify_on_error", self.notify_on_error)
 
     def __str__(self):
-        return f"Command(!{self._parent_command}{self.command})"
+        return f"Command(!{self.command})"
 
     @property
-    def _parent_command(self):
-        return self.parent_command + " " if self.parent_command else ""
+    def aliases(self):
+        return [f"{self.group}{x}" for x in self._command.split("|")]
+
+    @property
+    def command(self):
+        return f"{self.group}{self._command}"
+
+    @property
+    def group(self):
+        return f"{self._group} " if self._group else ""
 
     @property
     def channels_web(self):
@@ -459,8 +467,7 @@ class Command(Base):
             "id": self.id,
             "level": self.level,
             "main_alias": self.main_alias,
-            "parent_command": self.parent_command,
-            "aliases": self.command.split("|"),
+            "aliases": self.aliases,
             "description": self.description,
             "channels": self.channels,
             "long_description": self.long_description,
