@@ -20,20 +20,12 @@ class Functions:
             return "Invalid Comand Args", None
 
         author = extra["author"]
-        member = list(self.filters.get_member([args[0]], None, extra))[0]
+        member = list(self.filters.get_member([args[0]], None, {}))[0]
         if not member:
             return "Member not found", None
 
         with DBManager.create_session_scope() as db_session:
-            author_user = User._create_or_get_by_discord_id(
-                db_session, str(author.id), user_name=str(author)
-            )
-            member_user = User._create_or_get_by_discord_id(
-                db_session, str(member.id), user_name=str(member)
-            )
-            if max(author_user.level, self.bot.psudo_level_member(author_user)) <= max(
-                member_user.level, self.bot.psudo_level_member(member_user)
-            ):
+            if extra["user_level"] < self.bot.psudo_level_member(db_session, member):
                 return (
                     "You cannot kick someone who has the same or a higher level than you :)",
                     None,
@@ -49,23 +41,16 @@ class Functions:
     async def func_ban_member(self, args, extra={}):
         if len(args) != 4:
             return "Invalid Comand Args", None
-        member = list(self.filters.get_member([args[0]], None, extra))[0]
+        member = list(self.filters.get_member([args[0]], None, {}))[0]
         author = extra["author"]
         if not member:
             return "Member not found", None
+
         with DBManager.create_session_scope() as db_session:
-            author_user = User._create_or_get_by_discord_id(
-                db_session, str(author.id), user_name=str(author)
-            )
-            member_user = User._create_or_get_by_discord_id(
-                db_session, str(member.id), user_name=str(member)
-            )
             if author.id == member.id:
                 return "You cannot ban yourself :)", None
 
-            if max(author_user.level, self.bot.psudo_level_member(author_user)) <= max(
-                member_user.level, self.bot.psudo_level_member(member_user)
-            ):
+            if extra["user_level"] < self.bot.psudo_level_member(db_session, member):
                 return (
                     "You cannot ban someone who has the same or a higher level than you :)",
                     None,
@@ -114,6 +99,7 @@ class Functions:
         )
         if not resp:
             return f"Failed to unban member <@!{member_id}>!", None
+
         return f"Member <@!{member_id}> has been unbanned!", None
 
     async def func_add_role_member(self, args, extra={}):
@@ -121,11 +107,11 @@ class Functions:
             return "Invalid Comand Args", None
 
         author = extra["author"]
-        member = list(self.filters.get_member([args[0]], None, extra))[0]
+        member = list(self.filters.get_member([args[0]], None, {}))[0]
         if not member:
             return f"Invalid Member, {args[0]}", None
 
-        role = list(self.filters.get_role([args[1]], None, extra))[0]
+        role = list(self.filters.get_role([args[1]], None, {}))[0]
         if not role:
             return f"Invalid Role, {args[1]}", None
 
@@ -143,11 +129,11 @@ class Functions:
             return "Invalid Comand Args", None
 
         author = extra["author"]
-        member = list(self.filters.get_member([args[0]], None, extra))[0]
+        member = list(self.filters.get_member([args[0]], None, {}))[0]
         if not member:
             return f"Invalid Member {args[0]}", None
 
-        role = list(self.filters.get_role([args[1]], None, extra))[0]
+        role = list(self.filters.get_role([args[1]], None, {}))[0]
         if not role:
             return f"Invalid Role {args[1]}", None
 
@@ -164,7 +150,7 @@ class Functions:
         if len(args) != 2:
             return "Invalid Comand Args", None
 
-        member = list(self.filters.get_member([args[0]], None, extra))[0]
+        member = list(self.filters.get_member([args[0]], None, {}))[0]
         if not member:
             return f"Invalid Member {args[0]}", None
 
@@ -194,7 +180,7 @@ class Functions:
         if len(args) == 2:
             return "Invalid Comand Args", None
 
-        member = list(self.filters.get_member([args[0]], None, extra))[0]
+        member = list(self.filters.get_member([args[0]], None, {}))[0]
         if not member:
             return f"Invalid Member {args[0]}", None
 
@@ -216,7 +202,7 @@ class Functions:
         if len(args) == 2:
             return "Invalid Comand Args", None
 
-        member = list(self.filters.get_member([args[0]], None, extra))[0]
+        member = list(self.filters.get_member([args[0]], None, {}))[0]
         if not member:
             return f"Invalid Member {args[0]}", None
 
