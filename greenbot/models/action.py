@@ -314,9 +314,10 @@ class MessageAction(BaseAction):
         if not self.response:
             return None, None
 
-        return Substitution.apply_subs(
+        resp, embeds = Substitution.apply_subs(
             self.response, [x.replace("$", "\\$") for x in extra["message"].split(" ")], extra
-        ).replace("\\$", "$")
+        )
+        return resp.replace("\\$", "$"), embeds
 
     @staticmethod
     def get_extra_data(author, channel, message, args):
