@@ -41,7 +41,7 @@ class Function:
         r"(?<!\\)\$\((\w+);\[((((\"([^\"]|\\[\$\"])*\")|(\d+)),?\s?)*)\]\)"
     )
 
-    args_sub_regex = re.compile(r"\"([^\"]*)\"")
+    args_sub_regex = re.compile(r"[\"\'](\\\"|\\\'|[^\"\'])*[\"\']")
 
     @staticmethod
     async def run_functions(_input, args, extra, author, channel, private_message, bot):
@@ -70,7 +70,7 @@ class Substitution:
         r"(?<!\\)\$\((\w+);\[(((([\"\']([^\"]|\\[\$\"])*[\"\'])|(\d+)),?)*)\]:(\w*)\)"
     )
 
-    args_sub_regex = re.compile(r"[\"\']([^\"\']*)[\"|\']")
+    args_sub_regex = re.compile(r"[\"\'](\\\"|\\\'|[^\"\'])*[\"\']")
 
     user_args_sub_regex = re.compile(r"(?<!\\)\$\((\d+)(\+?)\)")
 
@@ -107,7 +107,7 @@ class Substitution:
                         Substitution.apply_subs(
                             arg.group(1) if arg.group(1) else "", args, extra
                         )
-                    )[0]
+                    )[0].replace("\\$", "$").replace("\\'", "'").replace("\\\"", "\"")
                 )
 
             final_sub = needle
@@ -315,9 +315,9 @@ class MessageAction(BaseAction):
             return None, None
 
         resp, embeds = Substitution.apply_subs(
-            self.response, [x.replace("$", "\\$") for x in extra["message"].split(" ")], extra
+            self.response, [x.replace("$", "\\$").replace("'", "\\'").replace("\"", "\\\"") for x in extra["message"].split(" ")], extra
         )
-        return resp.replace("\\$", "$"), embeds
+        return resp.replace("\\$", "$").replace("\\'", "'").replace("\\\"", "\""), embeds
 
     @staticmethod
     def get_extra_data(author, channel, message, args):
