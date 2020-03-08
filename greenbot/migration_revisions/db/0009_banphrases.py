@@ -9,5 +9,5 @@ def up(cursor, bot):
         """ALTER TABLE "banphrase" DROP COLUMN notify"""
     )
     cursor.execute(
-        """ALTER TABLE "banphrase" DROP COLUMN sub_immunitys"""
+        """ALTER TABLE "banphrase" DROP COLUMN sub_immunity"""
     )
