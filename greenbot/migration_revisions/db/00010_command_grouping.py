@@ -1,6 +1,6 @@
 def up(cursor, bot):
     cursor.execute(
-        """ALTER TABLE command_data DROP CONSTRAINT command_data_command_id_fkey;"""
+        """ALTER TABLE command_data DROP CONSTRAINT IF EXISTS command_data_command_id_fkey;"""
     )
     cursor.execute(
         """
@@ -12,7 +12,7 @@ def up(cursor, bot):
         """
     )
     cursor.execute(
-        """ALTER TABLE command_data DROP CONSTRAINT command_example_command_id_fkey;"""
+        """ALTER TABLE command_data DROP CONSTRAINT IF EXISTS command_example_command_id_fkey;"""
     )
     cursor.execute(
         """ALTER TABLE command_example
