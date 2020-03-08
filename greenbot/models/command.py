@@ -450,6 +450,7 @@ class Command(Base):
                 self.last_run_by_user[args["user_level"]] = cur_time
 
                 if ret == "return currency":
+                    db_session.commit()
                     raise FailedCommand("return currency")
 
     def jsonify(self):
