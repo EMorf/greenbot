@@ -23,11 +23,11 @@ def up(cursor, bot):
         """
     )
     cursor.execute(
-        """DELETE FROM "command" WHERE parent_command IS NOT NULL"""
+        """DELETE FROM "command" WHERE parent_command IS NOT NULL;"""
     )
     cursor.execute(
-        """ALTER TABLE "command" DELETE COLUMN parent_command"""
+        """ALTER TABLE "command" DELETE COLUMN parent_command;"""
     )
     cursor.execute(
-        """ALTER TABLE "command" ADD COLUMN group TEXT"""
+        """ALTER TABLE "command" ADD COLUMN group TEXT;"""
     )
