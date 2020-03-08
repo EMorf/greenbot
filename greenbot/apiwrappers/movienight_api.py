@@ -99,6 +99,7 @@ class MovieNightAPI:
         async with aiohttp.ClientSession() as session:
             log.info(req["url"])
             async with session.get(req["url"], headers=req["header"]) as res:
+                log.info(res.content)
                 jres = json.loads(res.content)
 
                 latest_target = None
