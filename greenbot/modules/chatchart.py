@@ -90,10 +90,12 @@ class ChatChart(BaseModule):
         message_args = message.split(" ")
 
         requested_channel = (self.bot.filters.get_channel([message_args[0]], None, {})[0] if len(message_args) > 0 else None) or channel
-        try:
-            limit = int(message_args[1]) if len(message_args) > 1 else 5000
-        except:
-            limit = None if limit == "all" else 5000
+        limit = 5000
+        if len(message_args) > 1:
+            try:
+                limit = int(message_args[1])
+            except:
+                limit = None if message_args[1] == "all" else limit
 
         history = []
         if not requested_channel.permissions_for(author).read_messages == True:
