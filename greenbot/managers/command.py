@@ -201,7 +201,7 @@ class CommandManager(UserDict):
         command_to_edit.data.set(**options)
         DBManager.session_add_expunge(command_to_edit)
         if "group" in options:
-            self.add_db_command_aliases(command)
+            self.add_db_command_aliases(command_to_edit)
         self.commit()
 
     def remove_command_aliases(self, command):
