@@ -51,7 +51,7 @@ class Function:
             args = sub_key.group(2)
             array_args = []
             for arg in Substitution.args_sub_regex.finditer(args):
-                array_args.append(arg.group(1))
+                array_args.append(revert_escape_args(arg.group(1)))
             if func_name not in MappingMethods.func_methods():
                 log.error(f"function {func_name} not found!")
                 continue
@@ -107,7 +107,6 @@ class Substitution:
                         arg.group(1) if arg.group(1) else "", args, extra
                     )[0])
                 )
-            log.info(array_args)
 
             final_sub = needle
             if filter_name in MappingMethods.subs_methods():
