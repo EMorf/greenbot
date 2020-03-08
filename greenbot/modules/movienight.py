@@ -221,10 +221,6 @@ class MovieNight(BaseModule):
         await self.bot.say(channel=out_chnanel, embed=embed)
 
     def load_commands(self, **options):
-        if not self.bot.movienight_api.active:
-            log.error("API is not running!")
-            return
-
         self.commands["movienight"] = Command.raw_command(
             self.movienight,
             delay_all=0,
@@ -262,7 +258,13 @@ class MovieNight(BaseModule):
                     description="Starts a normal cdn target with transcoder (higher latency, adaptive bitrate)",
                 ),
             },
-        )
+        ) 
+        if not self.bot:
+            return
+
+        if not self.bot.movienight_api.active:
+            log.error("API is not running!")
+            return
 
     def enable(self, bot):
         if not bot:
