@@ -194,6 +194,7 @@ class Memes(BaseModule):
             await role.edit(colour=dcol)
         await role.edit(colour=discord.Colour.from_rgb(r, g, b))
         self.mod_pride_running = False
+        return True
 
     async def vroom(self, bot, author, channel, message, args):
         if len(self.vroom_races) < self.settings["max_vroom_races"]:
@@ -227,11 +228,13 @@ class Memes(BaseModule):
             random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)
         )
         await role.edit(colour=dcol)
+        return True if role not in (self.bot.filters.get_member([author.id], None, {})[0].roles) else "return currency"
 
     def load_commands(self, **options):
         if self.settings["mod_role_id"]:
             self.commands["modpride"] = Command.raw_command(
                 self.modpride,
+                command="modpride",
                 delay_all=0,
                 delay_user=0,
                 cost=self.settings["cost_mod_pride"],
@@ -241,6 +244,7 @@ class Memes(BaseModule):
         if self.settings["dank_role_id"]:
             self.commands["dank"] = Command.raw_command(
                 self.dank,
+                command="dank",
                 delay_all=self.settings["dank_cooldown"],
                 delay_user=self.settings["dank_cooldown"],
                 cost=self.settings["cost_dank"],
@@ -249,6 +253,7 @@ class Memes(BaseModule):
             )
         self.commands["vroom"] = Command.raw_command(
             self.vroom,
+            command="vroom",
             delay_all=0,
             delay_user=0,
             can_execute_with_whisper=False,

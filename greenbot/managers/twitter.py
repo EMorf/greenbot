@@ -30,6 +30,9 @@ class GenericTwitterManager:
 
         twitter_config = bot.config["twitter"]
 
+        if not (twitter_config.get("consumer_key", False) and twitter_config.get("consumer_secret", False) and twitter_config.get("access_token", False) and twitter_config.get("access_token_secret", False)):
+            return
+
         try:
             self.twitter_auth = tweepy.OAuthHandler(twitter_config["consumer_key"], twitter_config["consumer_secret"])
             self.twitter_auth.set_access_token(twitter_config["access_token"], twitter_config["access_token_secret"])
@@ -131,7 +134,7 @@ class TwitterManager(GenericTwitterManager):
         self.twitter_stream = None
         self.listener = None
 
-        if "twitter" not in bot.config:
+        if "twitter" not in bot.config or not self.twitter_client:
             return
 
         try:
@@ -198,7 +201,6 @@ class TwitterManager(GenericTwitterManager):
         If it's not running, try to restart it.
         """
         if self.twitter_stream and self.twitter_stream.running:
-            log.info("Twitter is runnning")
             return
 
         try:

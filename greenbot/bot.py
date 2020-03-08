@@ -109,9 +109,9 @@ class Bot:
 
     def psudo_level_member(self, db_session, member):
         user_level = 100
-        user = User._create_or_get_by_discord_id(db_session, str(member.id))
+        user = User._create_or_get_by_discord_id(db_session, str(member.id), str(member))
         for role_id in self.roles:
-            role = list(self.filters.get_role([role_id], None, {}))[0]
+            role = self.filters.get_role([role_id], None, {})[0]
             if not role:
                 continue
             if role in member.roles:
@@ -164,9 +164,13 @@ class Bot:
         ScheduleManager.execute_every(period, function, *args, **kwargs)
 
     def quit_bot(self):
-        self.module_manager.disable_all()
+        try:
+            self.module_manager.disable_all()
+            self.socket_manager.quit()
+        except:
+            pass
+        
         self.private_loop.call_soon_threadsafe(self.private_loop.stop)
-        self.socket_manager.quit()
         sys.exit(0)
 
     def connect(self):
@@ -190,19 +194,19 @@ class Bot:
         return await self.discord_bot.kick(user=user, reason=reason)
 
     async def private_message(
-        self, user, message=None, embed=None, ignore_escape=False
+        self, user, message=None, embed=None, file=None, ignore_escape=False
     ):
-        if message is None and embed is None:
+        if message is None and embed is None and file is None:
             return None
         return await self.discord_bot.private_message(
-            user, message, embed, ignore_escape
+            user, message, embed, file, ignore_escape
         )
 
-    async def say(self, channel, message=None, embed=None, ignore_escape=False):
-        if message is None and embed is None:
+    async def say(self, channel, message=None, embed=None, file=None, ignore_escape=False):
+        if message is None and embed is None and file is None:
             log.error("sent invalid message")
             return None
-        return await self.discord_bot.say(channel, message, embed, ignore_escape)
+        return await self.discord_bot.say(channel, message, embed, file, ignore_escape)
 
     async def parse_command_from_message(
         self, message, content, user_level, author, not_whisper, channel

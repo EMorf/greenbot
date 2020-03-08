@@ -38,7 +38,7 @@ class RoleToLevel(BaseModule):
 
     async def add_role_level(self, bot, author, channel, message, args):
         command_args = message.split(" ") if message else []
-        role = list(self.bot.filters.get_role([command_args[0]], None, {}))[0]
+        role = self.bot.filters.get_role([command_args[0]], None, {})[0]
         if not role:
             await self.bot.say(channel, f"Invalid role id {command_args[0]}")
             return
@@ -78,7 +78,7 @@ class RoleToLevel(BaseModule):
             )
             await self.bot.say(channel, f"Removed role with id {command_args[0]}")
             return
-        role = list(self.bot.filters.get_role([command_args[0]], None, {}))[0]
+        role = self.bot.filters.get_role([command_args[0]], None, {})[0]
         if not role:
             await self.bot.say(channel, f"Invalid role id {command_args[0]}")
             return
@@ -103,6 +103,7 @@ class RoleToLevel(BaseModule):
     def load_commands(self, **options):
         self.commands["addrolelevel"] = Command.raw_command(
             self.add_role_level,
+            command="addrolelevel",
             delay_all=0,
             delay_user=0,
             level=int(self.settings["level"]),
@@ -111,6 +112,7 @@ class RoleToLevel(BaseModule):
         )
         self.commands["removerolelevel"] = Command.raw_command(
             self.remove_role_level,
+            command="removerolelevel",
             delay_all=0,
             delay_user=0,
             level=int(self.settings["level"]),

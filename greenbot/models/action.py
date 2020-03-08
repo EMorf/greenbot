@@ -41,17 +41,17 @@ class Function:
         r"(?<!\\)\$\((\w+);\[((((\"([^\"]|\\[\$\"])*\")|(\d+)),?\s?)*)\]\)"
     )
 
-    args_sub_regex = re.compile(r"\"([^\"]*)\"")
+    args_sub_regex = re.compile(r"[\"\']((?:\\\"|\\\'|[^\"\'])*)[\"\']")
 
     @staticmethod
     async def run_functions(_input, args, extra, author, channel, private_message, bot):
-        _input = list(Substitution.apply_subs(_input, args, extra))[0]
+        _input = Substitution.apply_subs(_input, args, extra)[0]
         for sub_key in Function.function_regex.finditer(_input):
             func_name = sub_key.group(1)
             args = sub_key.group(2)
             array_args = []
             for arg in Substitution.args_sub_regex.finditer(args):
-                array_args.append(arg.group(1))
+                array_args.append(revert_escape_args(arg.group(1)))
             if func_name not in MappingMethods.func_methods():
                 log.error(f"function {func_name} not found!")
                 continue
@@ -59,18 +59,18 @@ class Function:
             resp, embed = await MappingMethods.func_methods()[func_name](
                 array_args, extra
             )
-            if private_message:
+            if private_message and (resp is not None or embed is not None):
                 await bot.private_message(user=author, message=resp, embed=embed)
-            else:
+            elif (resp is not None or embed is not None):
                 await bot.say(channel=channel, message=resp, embed=embed)
 
 
 class Substitution:
     substitution_regex = re.compile(
-        r"(?<!\\)\$\((\w+);\[((((\"([^\"]|\\[\$\"])*\")|(\d+)),?)*)\]:(\w*)\)"
+        r"(?<!\\)\$\((\w+);\[(((([\"\']([^\"]|\\[\$\"])*[\"\'])|(\d+)),?)*)\]:(\w*)\)"
     )
 
-    args_sub_regex = re.compile(r"\"([^\"]*)\"")
+    args_sub_regex = re.compile(r"[\"\']((?:\\\"|\\\'|[^\"\'])*)[\"\']")
 
     user_args_sub_regex = re.compile(r"(?<!\\)\$\((\d+)(\+?)\)")
 
@@ -103,11 +103,9 @@ class Substitution:
             array_args = []
             for arg in Substitution.args_sub_regex.finditer(args):
                 array_args.append(
-                    list(
-                        Substitution.apply_subs(
-                            arg.group(1) if arg.group(1) else "", args, extra
-                        )
-                    )[0]
+                    revert_escape_args(Substitution.apply_subs(
+                        arg.group(1) if arg.group(1) else "", args, extra
+                    )[0])
                 )
 
             final_sub = needle
@@ -142,8 +140,7 @@ class MappingMethods:
         try:
             method_mapping["role"] = bot.filters.get_role if bot else None
             method_mapping["_role"] = bot.filters.get_role_value if bot else None
-            method_mapping["_member"] = bot.filters.get_member if bot else None
-            method_mapping["member"] = bot.filters.get_member_value if bot else None
+            method_mapping["member"] = bot.filters.get_member if bot else None
             method_mapping["currency"] = bot.filters.get_currency if bot else None
             method_mapping["user"] = bot.filters.get_user if bot else None
             method_mapping["userinfo"] = bot.filters.get_user_info if bot else None
@@ -157,6 +154,7 @@ class MappingMethods:
             method_mapping["author"] = bot.filters.get_author_value if bot else None
             method_mapping["_channel"] = bot.filters.get_channel_value if bot else None
             method_mapping["channel"] = bot.filters.get_channel if bot else None
+            method_mapping["emoji"] = bot.filters.get_emoji_url if bot else None
         except AttributeError:
             pass
         return method_mapping
@@ -184,6 +182,7 @@ class MappingMethods:
             )
             method_mapping["output"] = bot.functions.func_output if bot else None
             method_mapping["embed"] = bot.functions.func_embed_image if bot else None
+            method_mapping["rename"] = bot.functions.func_rename if bot else None
         except AttributeError:
             pass
         return method_mapping
@@ -301,6 +300,12 @@ class MultiAction(BaseAction):
         return None
 
 
+def escape_args(args):
+    return [x.replace("$", "\\$").replace("'", "\\'").replace("\"", "\\\"") for x in args]
+
+def revert_escape_args(resp):
+    return resp.replace("\\$", "$").replace("\\'", "'").replace("\\\"", "\"")
+
 class MessageAction(BaseAction):
     type = "message"
 
@@ -313,9 +318,10 @@ class MessageAction(BaseAction):
         if not self.response:
             return None, None
 
-        return Substitution.apply_subs(
-            self.response, extra["message"].split(" "), extra
+        resp, embeds = Substitution.apply_subs(
+            self.response, escape_args(extra["message"].split(" ")), extra
         )
+        return revert_escape_args(resp), embeds
 
     @staticmethod
     def get_extra_data(author, channel, message, args):
@@ -333,7 +339,7 @@ class ReplyAction(MessageAction):
         MappingMethods.init(bot)
         await Function.run_functions(
             self.functions,
-            extra["message"].split(" "),
+            escape_args(extra["message"].split(" ")),
             extra,
             author,
             channel,
@@ -343,7 +349,7 @@ class ReplyAction(MessageAction):
 
         resp, embeds = self.get_response(bot, extra)
         if not resp and not embeds:
-            return False
+            return True
 
         messages = []
         if resp:
@@ -358,7 +364,7 @@ class ReplyAction(MessageAction):
                 if args["whisper"]
                 else await bot.say(channel, embed=embed)
             )
-        return messages
+        return True
 
 
 class PrivateMessageAction(MessageAction):
@@ -379,11 +385,11 @@ class PrivateMessageAction(MessageAction):
 
         resp, embeds = self.get_response(bot, extra)
         if not resp and not embeds:
-            return False
+            return True
 
         messages = []
         if resp:
             messages.append(await bot.private_message(author, resp))
         for embed in embeds:
             messages.append(await bot.private_message(author, embed=embed))
-        return messages
+        return True

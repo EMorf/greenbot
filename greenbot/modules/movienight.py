@@ -24,6 +24,13 @@ class MovieNight(BaseModule):
 
     SETTINGS = [
         ModuleSetting(
+            key="cdn_server_address",
+            label="Server address for cdn",
+            type="text",
+            placeholder="",
+            default="",
+        ),
+        ModuleSetting(
             key="cdn_stream_key",
             label="Stream key for cdn",
             type="text",
@@ -40,20 +47,6 @@ class MovieNight(BaseModule):
         ModuleSetting(
             key="cdn_password",
             label="Password for cdn",
-            type="text",
-            placeholder="",
-            default="",
-        ),
-        ModuleSetting(
-            key="valid_channels",
-            label="Channel IDs commands can be executed in",
-            type="text",
-            placeholder="",
-            default="",
-        ),
-        ModuleSetting(
-            key="valid_channels",
-            label="Channel IDs commands can be executed in",
             type="text",
             placeholder="",
             default="",
@@ -103,7 +96,7 @@ class MovieNight(BaseModule):
         # query api, returns is_online, is_ull, key 
         is_online, is_ull, key = self.bot.movienight_api.is_online()
         if not is_online:
-            await self.bot.say.send(channel=channel, message="Movienight is offline right now :(")
+            await self.bot.say(channel=channel, message="Movienight is offline right now :(")
             return False
 
         if is_ull:
@@ -137,11 +130,12 @@ class MovieNight(BaseModule):
                 value=f"https://{self.settings['player_domain']}/cdn_player.html?key={key}",
                 inline=True,
             )
-        await self.bot.say.send(channel=channel, embed=embed)
+        await self.bot.say(channel=channel, embed=embed)
         return True
 
     async def moviestart_ull(self, bot, author, channel, message, args):
-        server, stream_key = self.bot.movienight_api.create_ull_target()
+        await self.bot.private_message(user=author, message="Starting movienight ull, this usually takes less than a minute...")
+        server, stream_key = await self.bot.movienight_api.create_ull_target()
 
         embed = discord.Embed(
             title="A new Wowza ULL target has been created! Use the following OBS settings:",
@@ -166,7 +160,7 @@ class MovieNight(BaseModule):
             )
             embed.set_author(name="Movienight (CDN)")
             embed.add_field(
-                name="Server:", value="rtmp://entrypoint...", inline=False #TODO
+                name="Server:", value=self.settings["cdn_server_address"] if self.settings["cdn_server_address"] else "Not Specified", inline=False #TODO
             )
             embed.add_field(name="Stream Key:", value=self.settings["cdn_stream_key"] if self.settings["cdn_stream_key"] else "Not Specified", inline=False)
             embed.add_field(name="Authentication:", value="Enabled", inline=False)
@@ -188,7 +182,7 @@ class MovieNight(BaseModule):
         if not is_online:
             return
 
-        out_chnanel = list(self.bot.filters.get_channel([self.settings["alert_channel_id"]], None, {}))[0]
+        out_chnanel = self.bot.filters.get_channel([self.settings["alert_channel_id"]], None, {})[0]
         if is_ull:
             embed = discord.Embed(
                 title="Movienight is online!",
@@ -221,10 +215,6 @@ class MovieNight(BaseModule):
         await self.bot.say(channel=out_chnanel, embed=embed)
 
     def load_commands(self, **options):
-        if not self.bot.movienight_api.active:
-            log.error("API is not running!")
-            return
-
         self.commands["movienight"] = Command.raw_command(
             self.movienight,
             delay_all=0,
@@ -243,6 +233,7 @@ class MovieNight(BaseModule):
             commands={
                 "ull": Command.raw_command(
                     self.moviestart_ull,
+                    command="moviestart ull",
                     delay_all=0,
                     delay_user=0,
                     level=self.settings["level"],
@@ -252,6 +243,7 @@ class MovieNight(BaseModule):
                 ),
                 "cdn": Command.raw_command(
                     self.moviestart_cdn,
+                    command="moviestart cdn",
                     delay_all=0,
                     delay_user=0,
                     level=self.settings["level"],
@@ -260,7 +252,13 @@ class MovieNight(BaseModule):
                     description="Starts a normal cdn target with transcoder (higher latency, adaptive bitrate)",
                 ),
             },
-        )
+        ) 
+        if not self.bot:
+            return
+
+        if not self.bot.movienight_api.active:
+            log.error("API is not running!")
+            return
 
     def enable(self, bot):
         if not bot:
