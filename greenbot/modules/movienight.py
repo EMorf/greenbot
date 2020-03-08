@@ -45,20 +45,6 @@ class MovieNight(BaseModule):
             default="",
         ),
         ModuleSetting(
-            key="valid_channels",
-            label="Channel IDs commands can be executed in",
-            type="text",
-            placeholder="",
-            default="",
-        ),
-        ModuleSetting(
-            key="valid_channels",
-            label="Channel IDs commands can be executed in",
-            type="text",
-            placeholder="",
-            default="",
-        ),
-        ModuleSetting(
             key="player_domain",
             label="Playser Hosting Domain",
             type="text",
