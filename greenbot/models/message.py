@@ -85,32 +85,38 @@ class Message(Base):
         )
 
     @staticmethod
-    def _get_last_hour(db_session):
-        return (
-            db_session.query(Message)
+    def _get_last_hour(db_session, channels=None):
+        query = (db_session.query(Message)
             .filter_by(credited=False)
-            .filter(Message.time_sent > utils.now() - timedelta(hours=1))
-            .all()
-        )
+            .filter(Message.time_sent > utils.now() - timedelta(hours=1)))
+        if channels is not None:
+            query.filter(Message.channel_id.in_(channels))
+        return query.all()
 
     @staticmethod
-    def _get_day_count_user(db_session, user_id):
-        return (
-            db_session.query(func.count(Message.message_id))
+    def _get_day_count_by_user(db_session):
+        query = (
+            db_session.query(Message.user_id.alias('user_id'), func.count(Message.message_id).alias('count'))
             .filter(Message.credited == True)
-            .filter(Message.user_id == str(user_id))
             .filter(Message.time_sent > utils.now() - timedelta(days=1))
-            .scalar()
+            .group_by(Message.user_id).all()
         )
+        return_dict = {}
+        for row in query:
+            return_dict[row.user_id] = int(row.count)
+        return return_dict
 
     @staticmethod
-    def _get_week_count_user(db_session, user_id):
-        return (
-            db_session.query(func.count(Message.message_id))
-            .filter(Message.user_id == str(user_id))
+    def _get_week_count_by_user(db_session):
+        query = (
+            db_session.query(Message.user_id.alias('user_id'), func.count(Message.message_id).alias('count'))
             .filter(Message.time_sent > utils.now() - timedelta(days=7))
-            .scalar()
+            .group_by(Message.user_id).all()
         )
+        return_dict = {}
+        for row in query:
+            return_dict[row.user_id] = int(row.count)
+        return return_dict
 
     @staticmethod
     def _get(db_session, message_id):
