@@ -79,7 +79,7 @@ class Dispatch:
         if message:
             # Make sure we got both an alias and a response
             search = re.compile(r"\"([^\"]+)\" (.*)").search(message)
-            alias = search.group(1)
+            alias = search.group(1).replace("!", "").lower()
             message_parts = search.group(2).split()
             if not alias or not message_parts:
                 await bot.private_message(
@@ -95,7 +95,6 @@ class Dispatch:
                 await bot.private_message(author, "Invalid command")
                 return False
 
-            alias = message_parts[0].replace("!", "").lower()
             type = "reply"
             if options["privatemessage"] is True:
                 type = "privatemessage"
