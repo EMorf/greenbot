@@ -97,7 +97,6 @@ class MovieNightAPI:
     async def fetch_latest_ull_target_id(self):
         req = self.create_ull_fetch_targets_request()
         async with aiohttp.ClientSession() as session:
-            log.info(req["url"])
             async with session.get(req["url"], headers=req["header"]) as res:
                 jres = await res.json()
 
