@@ -16,6 +16,7 @@ except NameError:
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
 log = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO)
 
 
 def run(args):
