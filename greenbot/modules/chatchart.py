@@ -89,7 +89,12 @@ class ChatChart(BaseModule):
 
         message_args = message.split(" ")
 
-        requested_channel = (self.bot.filters.get_channel([message_args[0]], None, {})[0] if len(message_args) > 0 else None) or channel
+        requested_channel = (self.bot.filters.get_channel([message_args[0]], None, {})[0] if len(message_args) > 0 else channel)
+        if not requested_channel:
+            await sent_message.delete()
+            await self.bot.say(channel=channel, message=f"Cant find channel, {message_args[0]}")
+            return False
+
         limit = 5000
         if len(message_args) > 1:
             try:
