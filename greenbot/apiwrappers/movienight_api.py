@@ -142,7 +142,7 @@ class MovieNightAPI:
             async with session.get(req["url"], headers=req["header"]) as res:
                 jres = await res.json()
 
-                if not res.status_code == 200:
+                if not res.status == 200:
                     log.error("Unable to fetch transcoder")
 
                 if jres["transcoder"]["state"] == "started":
@@ -154,7 +154,7 @@ class MovieNightAPI:
             async with session.put(req["url"], headers=req["header"]) as res:
                 jres = await res.json()
 
-                if not res.status_code == 200:
+                if not res.status == 200:
                     log.error("Transcoder start request failed")
                 else:
                     req = self.transcoder_request("state")
