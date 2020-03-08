@@ -223,7 +223,11 @@ class Filters:
         return None, None
 
     def get_channel(self, args, key, extra):
-        channel = self.discord_bot.guild.get_channel(args[0])
+        try:
+            channel = self.discord_bot.guild.get_channel(int(args[0]))
+        except:
+            for channel in self.discord_bot.guild.channels:
+                
         return getattr(channel, key) if key and channel else channel, None
 
     def get_emoji_url(self, args, key, extra):

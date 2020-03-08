@@ -87,18 +87,26 @@ class ChatChart(BaseModule):
         embed.set_thumbnail(url="https://i.imgur.com/vSp4xRk.gif")
         sent_message = await self.bot.say(channel=channel, embed=embed)
 
+        message_args = message.split(" ")
+
+        requested_channel = message[0] if len(message) > 0 else None
+        limit = message[1] if len(message) > 1 else 5000
+        limit = None if limit == "all" else limit
+
         history = []
         if not channel.permissions_for(author).read_messages == True:
             await sent_message.delete()
             await self.bot.say(channel=channel, message="You're not allowed to access that channel.")
             return False
+
         try:
-            async for message in channel.history(limit=5000):
+            async for message in channel.history(limit=limit):
                 history.append(message)
         except discord.errors.Forbidden:
             await sent_message.delete()
             await self.bot.say(channel=channel, message="No permissions to read that channel.")
             return False
+
         message_data = {"total count": 0, "users": {}}
 
         for message in history:
@@ -109,6 +117,7 @@ class ChatChart(BaseModule):
             whole_name = "{}#{}".format(short_name, message.author.discriminator)
             if message.author.bot:
                 pass
+
             elif whole_name in message_data["users"]:
                 message_data["users"][whole_name]["msgcount"] += 1
                 message_data["total count"] += 1
@@ -137,6 +146,7 @@ class ChatChart(BaseModule):
         img = self.create_chart(top_ten, others, channel)
         await sent_message.delete()
         await self.bot.say(channel=channel, file=discord.File(img, "chart.png"))
+        return True
 
     def load_commands(self, **options):
         self.commands["chatchart"] = Command.raw_command(

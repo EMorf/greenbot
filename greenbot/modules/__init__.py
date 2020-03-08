@@ -21,7 +21,6 @@ available_modules = [
     AdvancedAdminLog,
     ActivityTracker,
     BasicCommandsModule,
-    ChatChart,
     GiveawayModule,
     Memes,
     MovieNight,
