@@ -127,7 +127,7 @@ class MovieNight(BaseModule):
         return True
 
     async def moviestart_ull(self, bot, author, channel, message, args):
-        server, stream_key = self.bot.movienight_api.create_ull_target()
+        server, stream_key = await self.bot.movienight_api.create_ull_target()
 
         embed = discord.Embed(
             title="A new Wowza ULL target has been created! Use the following OBS settings:",
