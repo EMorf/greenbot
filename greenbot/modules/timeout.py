@@ -106,10 +106,11 @@ class TimeoutModule(BaseModule):
                 else " ".join(command_args[2:])
             )
             success, resp = await self.bot.timeout_manager.timeout_user(
-                db_session, member, author, utils.now() + timedelta, ban_reason
+                db_session, member, author, (utils.now() + timedelta) if timedelta else None, ban_reason
             )
+            duration =  f"timedout for {utils.seconds_to_resp(timedelta.total_seconds())}" if timedelta else "permanently muted"
             if success:
-                await self.bot.say(channel=channel, message=f"Member {member.mention} has been timedout for {utils.seconds_to_resp(timedelta.total_seconds())}")
+                await self.bot.say(channel=channel, message=f"Member {member.mention} has been {duration}")
                 return True
 
             await self.bot.say(channel=channel, message=resp)

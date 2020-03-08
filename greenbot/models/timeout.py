@@ -45,11 +45,14 @@ class Timeout(Base):
             (self.until - utils.now()).total_seconds()
             if self.until > utils.now() and self.active
             else 0
-        )
+        ) if self.until else None
 
     def check_lengths(self, _date):
         if not self.until:
             return False
+        
+        if not self._date:
+            return True
 
         return self.until < _date if _date else True
 

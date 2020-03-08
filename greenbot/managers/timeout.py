@@ -30,11 +30,12 @@ class TimeoutManager:
         with DBManager.create_session_scope() as db_session:
             current_timeouts = Timeout._active_timeouts(db_session)
             for timeout in current_timeouts:
-                ScheduleManager.execute_delayed(
-                    timeout.time_left + 1,
-                    self.auto_untimeout,
-                    args=[timeout.id, self.salt],
-                )
+                if timeout.time_left:
+                    ScheduleManager.execute_delayed(
+                        timeout.time_left + 1,
+                        self.auto_untimeout,
+                        args=[timeout.id, self.salt],
+                    )
     def update_settings(self, settings):
         self.settings = settings
 
@@ -131,11 +132,12 @@ class TimeoutManager:
                     name="Ban Reason", value=str(new_timeout.ban_reason), inline=False
                 )
             await HandlerManager.trigger("aml_custom_log", embed=embed)
-        ScheduleManager.execute_delayed(
-            new_timeout.time_left + 5,
-            self.auto_untimeout,
-            args=[new_timeout.id, self.salt],
-        )
+        if new_timeout.time_left:
+            ScheduleManager.execute_delayed(
+                new_timeout.time_left + 5,
+                self.auto_untimeout,
+                args=[new_timeout.id, self.salt],
+            )
         return True, None
 
     async def untimeout_user(self, db_session, member, unbanner, unban_reason):
