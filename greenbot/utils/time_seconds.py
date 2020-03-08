@@ -50,4 +50,4 @@ def seconds_to_resp(seconds):
                 f"{time_data[item]} {item}{'s' if time_data[item] > 1 else ''}"
             )
     response_str = ", ".join(response[:-1])
-    return response_str + f"{'and ' if response_str != '' else ''}{response[-1]}"
+    return response_str + f"{' and ' if response_str != '' else ''}{response[-1]}"
