@@ -141,7 +141,7 @@ class MovieNightAPI:
         async with aiohttp.ClientSession() as session:
             async with session.get(req["url"], headers=req["header"]) as res:
                 jres = await res.json()
-
+                log.info(jres)
                 if not res.status == 200:
                     log.error("Unable to fetch transcoder")
 
