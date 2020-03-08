@@ -184,6 +184,7 @@ class MappingMethods:
             )
             method_mapping["output"] = bot.functions.func_output if bot else None
             method_mapping["embed"] = bot.functions.func_embed_image if bot else None
+            method_mapping["rename"] = bot.functions.func_rename if bot else None
         except AttributeError:
             pass
         return method_mapping

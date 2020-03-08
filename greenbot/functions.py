@@ -245,3 +245,20 @@ class Functions:
         data = discord.Embed()
         data.set_image(url=args[0])
         return None, data
+
+    async def func_rename(self, args, extra={}):
+        if len(args) != 2:
+            return None, None
+
+        member = list(self.filters.get_member([args[0]], None, extra))[0]
+        if not member:
+            return None, None
+
+        with DBManager.create_session_scope() as db_session:
+            user_level = self.bot.psudo_level_member(db_session, member)
+            if user_level > extra["user_level"]:
+                return None, None
+            
+            author = extra["author"]
+            await member.edit(nick=args[1], reason=f"Nickname changed by {author.mention}")
+        return "Nickname Changed", None
