@@ -40,3 +40,4 @@ pytest==5.1.2
 akamai-authtoken==0.4.3
 akamai-edgeauth==0.3.1
 aiohttp==3.6.2
+matplotlib==3.2.0
