@@ -555,7 +555,7 @@ class AdvancedAdminLog(BaseModule):
         created_on = f"{user_created}\n({since_created} days ago)"
 
         embed = discord.Embed(
-            description=member.mention,
+            description=f"@{member}",
             colour=await self.get_event_colour(guild, "user_join"),
             timestamp=member.joined_at if member.joined_at else utils.now(),
         )
