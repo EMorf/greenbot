@@ -66,7 +66,7 @@ class MovieNightAPI:
     def create_ull_fetch_targets_request(self, target_id=None):
         return {
             "header": self.header,
-            "url": f"{self.host_version}/stream_targets/ull" + f"/{target_id}" if target_id else "",
+            "url": f"{self.host_version}/stream_targets/ull" + (f"/{target_id}" if target_id else ""),
         }
 
     def create_stream_state_request(self, target_id):
