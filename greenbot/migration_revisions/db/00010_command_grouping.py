@@ -26,7 +26,7 @@ def up(cursor, bot):
         """DELETE FROM "command" WHERE parent_command IS NOT NULL;"""
     )
     cursor.execute(
-        """ALTER TABLE "command" DELETE COLUMN parent_command;"""
+        """ALTER TABLE "command" DROP COLUMN parent_command;"""
     )
     cursor.execute(
         """ALTER TABLE "command" ADD COLUMN group TEXT;"""

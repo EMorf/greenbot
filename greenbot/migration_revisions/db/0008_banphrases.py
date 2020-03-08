@@ -1,13 +1,13 @@
 def up(cursor, bot):
     cursor.execute(
-        """ALTER TABLE "banphrase" DELETE COLUMN permanent"""
+        """ALTER TABLE "banphrase" DROP COLUMN permanent"""
     )
     cursor.execute(
-        """ALTER TABLE "banphrase" DELETE COLUMN warning"""
+        """ALTER TABLE "banphrase" DROP COLUMN warning"""
     )
     cursor.execute(
-        """ALTER TABLE "banphrase" DELETE COLUMN notify"""
+        """ALTER TABLE "banphrase" DROP COLUMN notify"""
     )
     cursor.execute(
-        """ALTER TABLE "banphrase" DELETE COLUMN sub_immunitys"""
+        """ALTER TABLE "banphrase" DROP COLUMN sub_immunitys"""
     )
