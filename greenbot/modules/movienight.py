@@ -24,6 +24,13 @@ class MovieNight(BaseModule):
 
     SETTINGS = [
         ModuleSetting(
+            key="cdn_server_address",
+            label="Server address for cdn",
+            type="text",
+            placeholder="",
+            default="",
+        ),
+        ModuleSetting(
             key="cdn_stream_key",
             label="Stream key for cdn",
             type="text",
@@ -153,7 +160,7 @@ class MovieNight(BaseModule):
             )
             embed.set_author(name="Movienight (CDN)")
             embed.add_field(
-                name="Server:", value="rtmp://entrypoint...", inline=False #TODO
+                name="Server:", value=self.settings["cdn_server_address"] if self.settings["cdn_server_address"] else "Not Specified", inline=False #TODO
             )
             embed.add_field(name="Stream Key:", value=self.settings["cdn_stream_key"] if self.settings["cdn_stream_key"] else "Not Specified", inline=False)
             embed.add_field(name="Authentication:", value="Enabled", inline=False)
