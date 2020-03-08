@@ -103,7 +103,7 @@ class Substitution:
             array_args = []
             for arg in Substitution.args_sub_regex.finditer(args):
                 array_args.append(
-                    revert_escape_args(Substitution.apply_subs(
+                    (Substitution.apply_subs(
                         arg.group(1) if arg.group(1) else "", args, extra
                     )[0])
                 )
