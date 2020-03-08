@@ -50,11 +50,11 @@ def parse_command_for_web(alias, command, list):
         log.exception("Unhandled exception BabyRage")
         return
 
-    if command.command is None:
-        command.command = alias
+    if command._command is None:
+        command._command = alias
 
     if command.action is not None and command.action.type == "multi":
-        if command.command is not None:
+        if command._command is not None:
             command.main_alias = command.aliases[0]
         for inner_alias, inner_command in command.action.commands.items():
             parse_command_for_web(
