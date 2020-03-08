@@ -296,12 +296,12 @@ class DiscordBotManager:
         except:
             return None
 
-    async def say(self, channel, message=None, embed=None, ignore_escape=False):
+    async def say(self, channel, message=None, embed=None, file=None, ignore_escape=False):
         if message and not ignore_escape:
             message = discord.utils.escape_markdown(message, as_needed=True)
-        if not channel or (message is None and embed is None):
+        if not channel or (message is None and embed is None and file is None):
             return
-        return await channel.send(content=message, embed=embed)
+        return await channel.send(content=message, embed=embed, file=file)
 
     async def ban(self, user, timeout_in_seconds=0, reason=None, delete_message_days=0):
         delete_message_days = (
@@ -401,15 +401,15 @@ class DiscordBotManager:
         return True
 
     async def private_message(
-        self, user, message=None, embed=None, ignore_escape=False
+        self, user, message=None, embed=None, file=None, ignore_escape=False
     ):
-        if (message is None and embed is None) or user is None:
+        if (message is None and embed is None and file is None) or user is None:
             return None
         try:
             if message and not ignore_escape:
                 message = discord.utils.escape_markdown(message, as_needed=True)
             await user.create_dm()
-            return await user.dm_channel.send(content=message, embed=embed)
+            return await user.dm_channel.send(content=message, embed=embed, file=file)
         except:
             return None
 
