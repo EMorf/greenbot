@@ -7,6 +7,7 @@ from greenbot.managers.timeout import TimeoutManager
 from greenbot.models.message import Message
 from greenbot.models.user import User
 from greenbot.models.timeout import Timeout
+from greenbot.models.banphrase import BanphraseManager
 
 log = logging.getLogger(__name__)
 
@@ -46,6 +47,13 @@ class MessageManager:
         if message.author.id == self.bot.discord_bot.client.user.id:
             return
 
+        if user_level < 500:
+            matched_phrase = self.bot.banphrase_manager.check_message(message.content)
+            if matched_phrase:
+                await self.bot.banphrase_manager.punish(member, matched_phrase)
+                await message.delete()
+                return
+
         await HandlerManager.trigger(
             "parse_command_from_message",
             message=message,
@@ -71,4 +79,14 @@ class MessageManager:
             if not message:
                 return
 
-            message.edit_message(db_session, payload.data.get("content", ""))
+            new_content = payload.data.get("content", "")
+            message.edit_message(db_session, new_content)
+            member = self.bot.discord_bot.get_member(message.user_id)
+            user_level = self.bot.psudo_level_member(db_session, member) if member else 0
+            if user_level < 500:
+                matched_phrase = self.bot.banphrase_manager.check_message(new_content)
+                if matched_phrase:
+                    await self.bot.banphrase_manager.punish(member, matched_phrase)
+                    channel = await self.bot.discord_bot.get_channel(message.channel_id)
+                    message = await channel.fetch_message(int(message.message_id))
+                    await message.delete()

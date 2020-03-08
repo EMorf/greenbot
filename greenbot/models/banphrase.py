@@ -24,18 +24,10 @@ class Banphrase(Base):
     name = Column(TEXT, nullable=False, default="")
     phrase = Column(TEXT, nullable=False)
     length = Column(INT, nullable=False, default=300)
-    permanent = Column(BOOLEAN, nullable=False, default=False)
     warning = Column(BOOLEAN, nullable=False, default=True)
-    notify = Column(BOOLEAN, nullable=False, default=True)
     case_sensitive = Column(BOOLEAN, nullable=False, default=False)
     remove_accents = Column(BOOLEAN, nullable=False, default=False)
     enabled = Column(BOOLEAN, nullable=False, default=True)
-    sub_immunity = Column(
-        BOOLEAN,
-        nullable=False,
-        default=False,
-        server_default=sqlalchemy.sql.expression.false(),
-    )
     operator = Column(
         TEXT, nullable=False, default="contains", server_default="contains"
     )
@@ -43,15 +35,12 @@ class Banphrase(Base):
     data = relationship("BanphraseData", uselist=False, cascade="", lazy="joined")
 
     DEFAULT_TIMEOUT_LENGTH = 300
-    DEFAULT_NOTIFY = True
 
     def __init__(self, **options):
         self.id = None
         self.name = "No name"
         self.length = self.DEFAULT_TIMEOUT_LENGTH
-        self.permanent = False
         self.warning = True
-        self.notify = self.DEFAULT_NOTIFY
         self.case_sensitive = False
         self.enabled = True
         self.operator = "contains"
@@ -65,11 +54,8 @@ class Banphrase(Base):
         self.name = options.get("name", self.name)
         self.phrase = options.get("phrase", self.phrase)
         self.length = options.get("length", self.length)
-        self.permanent = options.get("permanent", self.permanent)
         self.warning = options.get("warning", self.warning)
-        self.notify = options.get("notify", self.notify)
         self.case_sensitive = options.get("case_sensitive", self.case_sensitive)
-        self.sub_immunity = options.get("sub_immunity", self.sub_immunity)
         self.enabled = options.get("enabled", self.enabled)
         self.operator = options.get("operator", self.operator)
         self.remove_accents = options.get("remove_accents", self.remove_accents)
@@ -121,7 +107,7 @@ class Banphrase(Base):
 
         return self.compiled_regex.search(self.format_message(message))
 
-    def match(self, message, user):
+    def match(self, message):
         """
         Returns True if message matches our banphrase.
         Otherwise it returns False
@@ -131,17 +117,9 @@ class Banphrase(Base):
             log.warning("Banphrase %s is missing a predicate", self.id)
             return False
 
-        if user and self.sub_immunity is True and user.subscriber is True:
-            return False
         return self.predicate(message)
 
     def greater_than(self, other):
-        if other.permanent:
-            return False
-
-        if self.permanent:
-            return True
-
         return self.length > other.length
 
     def exact_match(self, message):
@@ -161,7 +139,6 @@ class Banphrase(Base):
             "name": self.name,
             "phrase": self.phrase,
             "length": self.length,
-            "permanent": self.permanent,
             "operator": self.operator,
             "case_sensitive": self.case_sensitive,
         }
@@ -337,44 +314,27 @@ class BanphraseManager:
         self.db_session.delete(banphrase.data)
         self.commit()
 
-    def punish(self, user, banphrase):
+    async def punish(self, user, banphrase):
         """
         This method is responsible for calculating
         what sort of punishment a user deserves.
-
-        The `permanent` flag takes precedence over the `warning` flag.
-        This means if a banphrase is marked with the `permanent` flag,
-        the user will be permanently banned even if this is his first strike.
         """
 
         if banphrase.data is not None:
             banphrase.data.num_uses += 1
 
+        if banphrase.length == 0:
+            return
+
         reason = f"Banned phrase {banphrase.id} ({banphrase.name})"
-        if banphrase.permanent is True:
-            # Permanently ban user
-            punishment = "permanently banned"
-            self.bot.ban(user, reason=reason)
-        else:
-            # Timeout user
-            timeout_length, punishment = user.timeout(
-                banphrase.length,
-                warning_module=self.bot.module_manager["warning"],
-                use_warnings=banphrase.warning,
-            )
 
-            # Finally, time out the user for whatever timeout length was required.
-            self.bot.timeout(user, timeout_length, reason=reason)
+        # Finally, time out the user for whatever timeout length was required.
+        await self.bot.timeout(member=user, duration=banphrase.length, reason=reason)
 
-        if banphrase.notify is True and user.time_in_chat_online >= timedelta(hours=1):
-            # Notify the user why he has been timed out if the banphrase wishes it.
-            notification_msg = f'You have been {punishment} because your message matched the "{banphrase.name}" banphrase.'
-            self.bot.whisper(user, notification_msg)
-
-    def check_message(self, message, user):
+    def check_message(self, message):
         matched_banphrase = None
         for banphrase in self.enabled_banphrases:
-            if banphrase.match(message, user):
+            if banphrase.match(message):
                 if not matched_banphrase:
                     matched_banphrase = banphrase
                     continue
@@ -403,12 +363,6 @@ class BanphraseManager:
         parser.add_argument("--length", dest="length", type=int)
         parser.add_argument("--time", dest="length", type=int)
         parser.add_argument("--duration", dest="length", type=int)
-        parser.add_argument("--notify", dest="notify", action="store_true")
-        parser.add_argument("--no-notify", dest="notify", action="store_false")
-        parser.add_argument("--perma", dest="permanent", action="store_true")
-        parser.add_argument("--no-perma", dest="permanent", action="store_false")
-        parser.add_argument("--permanent", dest="permanent", action="store_true")
-        parser.add_argument("--no-permanent", dest="permanent", action="store_false")
         parser.add_argument(
             "--casesensitive", dest="case_sensitive", action="store_true"
         )
@@ -417,10 +371,6 @@ class BanphraseManager:
         )
         parser.add_argument("--warning", dest="warning", action="store_true")
         parser.add_argument("--no-warning", dest="warning", action="store_false")
-        parser.add_argument("--subimmunity", dest="sub_immunity", action="store_true")
-        parser.add_argument(
-            "--no-subimmunity", dest="sub_immunity", action="store_false"
-        )
         parser.add_argument(
             "--removeaccents", dest="remove_accents", action="store_true"
         )
@@ -431,11 +381,8 @@ class BanphraseManager:
         parser.add_argument("--name", nargs="+", dest="name")
         parser.set_defaults(
             length=None,
-            notify=None,
-            permanent=None,
             case_sensitive=None,
             warning=None,
-            sub_immunity=None,
             remove_accents=None,
             operator="contains",
         )

@@ -11,6 +11,7 @@ from greenbot.models.action import ActionParser
 from greenbot.models.user import User
 from greenbot.models.message import Message
 from greenbot.models.module import ModuleManager
+from greenbot.models.banphrase import BanphraseManager
 from greenbot.managers.sock import SocketManager
 from greenbot.managers.schedule import ScheduleManager
 from greenbot.managers.db import DBManager
@@ -126,6 +127,7 @@ class Bot:
         self.socket_manager = SocketManager(self.bot_name, self.execute_now)
         self.message_manager = MessageManager(self)
         self.timeout_manager = TimeoutManager(self)
+        self.banphrase_manager = BanphraseManager(self)
         self.module_manager = ModuleManager(self.socket_manager, bot=self).load()
 
         self.commands = CommandManager(
