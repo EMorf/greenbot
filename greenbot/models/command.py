@@ -404,9 +404,7 @@ class Command(Base):
             time_since_last_run < self.delay_all
             and args["user_level"] < Command.BYPASS_DELAY_LEVEL
         ):
-            log.debug(
-                f"Command was run {time_since_last_run:.2f} seconds ago, waiting..."
-            )
+            await bot.private_message(user=author, message=f"The command **{self.command}** was executed too recently please try again in {greenbot.utils.seconds_to_resp(int(self.delay_all-time_since_last_run))}", ignore_escape=True)
             return False
 
         time_since_last_run_user = (
@@ -417,16 +415,15 @@ class Command(Base):
             time_since_last_run_user < self.delay_user
             and args["user_level"] < Command.BYPASS_DELAY_LEVEL
         ):
-            log.debug(
-                f"{author.name}#{author.discriminator} ran command {time_since_last_run_user:.2f} seconds ago, waiting..."
-            )
+            await bot.private_message(user=author, message=f"You executed the command **{self.command}** too recently please try again in {greenbot.utils.seconds_to_resp(int(self.delay_user-time_since_last_run_user))}", ignore_escape=True)
             return False
         with DBManager.create_session_scope() as db_session:
             user = User._create_or_get_by_discord_id(
                 db_session, str(author.id), str(author)
             )
-            if self.cost > 0 and not user.can_afford(self.cost):
+            if self.cost > 0 and not user.can_afford(self.cost) and args["user_level"] < Command.BYPASS_DELAY_LEVEL:
                 # User does not have enough points to use the command
+                await bot.private_message(user=author, message=f"You need {self.cost} points to execute that command", ignore_escape=True)
                 return False
 
             args.update(self.extra_args)
@@ -446,7 +443,7 @@ class Command(Base):
             user = User._create_or_get_by_discord_id(
                 db_session, str(author.id), str(author)
             )
-            with user.spend_currency_context(self.cost):
+            with user.spend_currency_context(self.cost if args["user_level"] < Command.BYPASS_DELAY_LEVEL else 0):
                 ret = await self.action.run(bot, author, channel, message, args)
                 if not ret:
                     raise FailedCommand("return currency")
@@ -458,7 +455,11 @@ class Command(Base):
 
                 # TODO: Will this be an issue?
                 self.last_run = cur_time
-                self.last_run_by_user[args["user_level"]] = cur_time
+                self.last_run_by_user[str(author.id)] = cur_time
+
+                if ret == "return currency":
+                    db_session.commit()
+                    raise FailedCommand("return currency")
 
     def jsonify(self):
         """ jsonify will only be called from the web interface.

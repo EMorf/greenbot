@@ -3,6 +3,7 @@ import logging
 import json
 import random
 import asyncio
+import operator
 import regex as re
 import discord
 from datetime import datetime
@@ -102,6 +103,43 @@ class GiveawayModule(BaseModule):
         super().__init__(bot)
         self.bot = bot
 
+    async def giveaway_info(self, bot, author, channel, message, args):
+        embed = discord.Embed(
+            description=("Giveaway Info"), colour=discord.Colour.dark_gold()
+        )
+        with DBManager.create_session_scope() as db_session:
+            current_giveaway = Giveaway._get_current_giveaway(db_session)
+            embed.add_field(
+                name=("Current Giveaway"),
+                value=f"**{current_giveaway.giveaway_item}** ending **{current_giveaway.giveaway_deadline}**" if current_giveaway else "No giveaway is running right now",
+                inline=False,
+            )
+        role_dict = {
+            "regular_role_id": self.settings["regular_role_tickets"], 
+            "tier1_sub_role_id": self.settings["tier1_sub_role_tickets"], 
+            "tier2_sub_role_id": self.settings["tier2_sub_role_tickets"], 
+            "tier3_sub_role_id": self.settings["tier3_sub_role_tickets"],
+        }
+        role_dict = dict(sorted(role_dict.items(), key=operator.itemgetter(1)))
+        chances_value = "@everyone 1 entry\n"
+        for role_name in role_dict:
+            role_id = self.settings[role_name]
+            if not role_id:
+                continue
+
+            role = self.bot.filters.get_role([role_id], None, {})[0] if role_id else None
+            if not role:
+                continue
+            entries = role_dict[role_name]
+            chances_value += f"{role.mention} {entries} entr{'ies' if entries > 1 else 'y'}\n"
+        embed.add_field(
+            name=("Chances to win!"),
+            value=chances_value[:-1],
+            inline=False,
+        )
+        
+        await self.bot.say(channel=channel, embed=embed)
+
     async def giveaway_join(self, bot, author, channel, message, args):
         with DBManager.create_session_scope() as db_session:
             current_giveaway = Giveaway._get_current_giveaway(db_session)
@@ -134,6 +172,7 @@ class GiveawayModule(BaseModule):
             "tier2_sub_role_id": self.settings["tier2_sub_role_tickets"], 
             "tier3_sub_role_id": self.settings["tier3_sub_role_tickets"],
         }
+        role_dict = dict(sorted(role_dict.items(), key=operator.itemgetter(1)))
 
         tickets = 1
         for role_name in role_dict:
@@ -141,7 +180,7 @@ class GiveawayModule(BaseModule):
             if not role_id:
                 continue
 
-            role = list(self.bot.filters.get_role([role_id], None, {}))[0] if role_id else None
+            role = self.bot.filters.get_role([role_id], None, {})[0] if role_id else None
             if not role:
                 continue
 
@@ -190,25 +229,40 @@ class GiveawayModule(BaseModule):
             if not current_giveaway:
                 await self.bot.say(channel=channel, message="There is no giveaway running.")
                 return False
+
+            if not current_giveaway.locked:
+                current_giveaway._lock_state(db_session, True)
+                db_session.commit()
             pool = []
             for entry in current_giveaway.entries:
-                for _ in range(entry.tickets):
+                member = self.bot.filters.get_member([int(entry.user_id)], None, {})[0]
+                for _ in range(max(entry.tickets, self.get_highest_ticket_count(member))):
                     pool.append(entry)
 
-            winning_user = None
-            winning_entry = None
-            while not winning_user:
+            winning_users = []
+            while len(winning_users) < count:
+                if len(pool) == 0:
+                    break
                 winning_entry = random.choice(pool)
-                winning_user = list(self.bot.filters.get_member([int(winning_entry.user_id)], None, {}))[0]
+                winning_user = self.bot.filters.get_member([int(winning_entry.user_id)], None, {})[0]
+                if winning_user and winning_user not in winning_users:
+                    winning_users.append(winning_user)
+                    winning_entry._remove(db_session)
+                    pool = list(filter(lambda x: x != winning_entry, pool))
+
+            if len(winning_users) == 0:
+                await self.bot.say(channel=channel, message="The giveaway ended but nobody entered!", ignore_escape=True)
+                return True
 
             await self.bot.say(channel=channel, message="Shuffling giveaway list...", ignore_escape=True)
             await asyncio.sleep(5)
             await self.bot.say(channel=channel, message="*Shuffling intensifies...*", ignore_escape=True)
             await asyncio.sleep(5)
-            await self.bot.say(channel=channel, message="**And the winner is...**", ignore_escape=True)
+            await self.bot.say(channel=channel, message=f"**And the winner{'s are' if count > 1 else ' is'}...**", ignore_escape=True)
             await asyncio.sleep(5)
-            await self.bot.say(channel=channel, message=f"Congatulations {winning_user.mention} you won **{current_giveaway.giveaway_item}**!!!", ignore_escape=True)
-            current_giveaway._disable(db_session)
+            for winning_user in winning_users:
+                await self.bot.say(channel=channel, message=f"Congratulations {winning_user.mention} you won **{current_giveaway.giveaway_item}**!!!", ignore_escape=True)
+
         return True
 
     
@@ -243,16 +297,36 @@ class GiveawayModule(BaseModule):
         return True 
 
     def load_commands(self, **options):
-        self.commands["giveaway"] = Command.raw_command(
-            self.giveaway_join,
+        self.commands["giveaway"] = Command.multiaction_command(
             delay_all=0,
             delay_user=0,
-            channels=json.dumps(self.settings["valid_channels"].split(" ")),
+            default="join",
             can_execute_with_whisper=False,
-            description="Joins the current giveaway",
+            command="giveaway",
+            commands={
+                "join": Command.raw_command(
+                    self.giveaway_join,
+                    command="giveaway join",
+                    delay_all=0,
+                    delay_user=0,
+                    channels=json.dumps(self.settings["valid_channels"].split(" ")),
+                    can_execute_with_whisper=False,
+                    description="Joins the current giveaway",
+                ),
+                "info": Command.raw_command(
+                    self.giveaway_info,
+                    command="giveaway info",
+                    delay_all=0,
+                    delay_user=0,
+                    channels=json.dumps(self.settings["valid_channels"].split(" ")),
+                    can_execute_with_whisper=False,
+                    description="Info about the current giveaway",
+                )
+            },
         )
         self.commands["startgiveaway"] = Command.raw_command(
             self.giveaway_start,
+            command="startgiveaway",
             delay_all=0,
             delay_user=0,
             level=self.settings["level"],
@@ -262,6 +336,7 @@ class GiveawayModule(BaseModule):
         )
         self.commands["wipegiveaway"] = Command.raw_command(
             self.giveaway_wipe,
+            command="wipegiveaway",
             delay_all=0,
             delay_user=0,
             level=self.settings["level"],
@@ -271,15 +346,17 @@ class GiveawayModule(BaseModule):
         )
         self.commands["giveawaywinner"] = Command.raw_command(
             self.giveaway_winner,
+            command="giveawaywinner",
             delay_all=0,
             delay_user=0,
             level=self.settings["level"],
             channels=json.dumps(self.settings["valid_channels"].split(" ")),
             can_execute_with_whisper=False,
-            description="Chooses a winner for the current giveaway",
+            description="Chooses a winner(s) for the current giveaway",
         )
         self.commands["lockgiveaway"] = Command.raw_command(
             self.giveaway_lock,
+            command="lockgiveaway",
             delay_all=0,
             delay_user=0,
             level=self.settings["level"],
@@ -289,6 +366,7 @@ class GiveawayModule(BaseModule):
         )
         self.commands["unlockgiveaway"] = Command.raw_command(
             self.giveaway_unlock,
+            command="unlockgiveaway",
             delay_all=0,
             delay_user=0,
             level=self.settings["level"],

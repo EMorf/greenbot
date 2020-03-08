@@ -647,6 +647,7 @@ class LinkCheckerModule(BaseModule):
             command="add",
             commands={
                 "link": Command.multiaction_command(
+                    command="add link",
                     level=500,
                     delay_all=0,
                     delay_user=0,
@@ -654,6 +655,7 @@ class LinkCheckerModule(BaseModule):
                     commands={
                         "blacklist": Command.raw_command(
                             self.add_link_blacklist,
+                            command="add link blacklist",
                             level=500,
                             delay_all=0,
                             delay_user=0,
@@ -677,6 +679,7 @@ class LinkCheckerModule(BaseModule):
                         ),
                         "whitelist": Command.raw_command(
                             self.add_link_whitelist,
+                            command="add link whitelist",
                             level=500,
                             delay_all=0,
                             delay_user=0,
@@ -704,6 +707,7 @@ class LinkCheckerModule(BaseModule):
             command="remove",
             commands={
                 "link": Command.multiaction_command(
+                    command="remove link",
                     level=500,
                     delay_all=0,
                     delay_user=0,
@@ -711,6 +715,7 @@ class LinkCheckerModule(BaseModule):
                     commands={
                         "blacklist": Command.raw_command(
                             self.remove_link_blacklist,
+                            command="remove link blacklist",
                             level=500,
                             delay_all=0,
                             delay_user=0,
@@ -727,6 +732,7 @@ class LinkCheckerModule(BaseModule):
                         ),
                         "whitelist": Command.raw_command(
                             self.remove_link_whitelist,
+                            command="remove link whitelist",
                             level=500,
                             delay_all=0,
                             delay_user=0,

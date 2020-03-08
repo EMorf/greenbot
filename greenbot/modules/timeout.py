@@ -78,7 +78,7 @@ class TimeoutModule(BaseModule):
             )
             return False
 
-        member = list(self.bot.filters.get_member_value([command_args[0]], None, {}))[0]
+        member = self.bot.filters.get_member([command_args[0]], None, {})[0]
         if not member:
             await self.bot.say(
                 channel=channel, message=f"Cant find member, {command_args[0]}"
@@ -106,9 +106,11 @@ class TimeoutModule(BaseModule):
                 else " ".join(command_args[2:])
             )
             success, resp = await self.bot.timeout_manager.timeout_user(
-                db_session, member, author, utils.now() + timedelta, ban_reason
+                db_session, member, author, (utils.now() + timedelta) if timedelta else None, ban_reason
             )
+            duration =  f"timedout for {utils.seconds_to_resp(timedelta.total_seconds())}" if timedelta else "permanently muted"
             if success:
+                await self.bot.say(channel=channel, message=f"Member {member.mention} has been {duration}")
                 return True
 
             await self.bot.say(channel=channel, message=resp)
@@ -122,7 +124,7 @@ class TimeoutModule(BaseModule):
             )
             return False
 
-        member = list(self.bot.filters.get_member_value([command_args[0]], None, {}))[0]
+        member = self.bot.filters.get_member([command_args[0]], None, {})[0]
         if not member:
             await self.bot.say(
                 channel=channel, message=f"Cant find member, {command_args[0]}"
@@ -136,6 +138,7 @@ class TimeoutModule(BaseModule):
                 db_session, member, author, unban_reason
             )
             if success:
+                await self.bot.say(channel=channel, message=f"Member {member.mention} has been untimedout")
                 return True
 
             self.bot.say(channel=channel, message=resp)
@@ -143,7 +146,7 @@ class TimeoutModule(BaseModule):
 
     async def query_timeouts(self, bot, author, channel, message, args):
         command_args = message.split(" ") if message else []
-        member = list(self.bot.filters.get_member_value([command_args[0]], None, {}))[0]
+        member = self.bot.filters.get_member([command_args[0]], None, {})[0]
         if not member:
             await self.bot.say(
                 channel=channel, message=f"Cant find member, {command_args[0]}"
@@ -187,11 +190,9 @@ class TimeoutModule(BaseModule):
                         inline=False,
                     )
                 if timeout.issued_by_id:
-                    issued_by = list(
-                        self.bot.filters.get_member(
+                    issued_by = self.bot.filters.get_member(
                             [int(timeout.issued_by_id)], None, {}
-                        )
-                    )[0]
+                        )[0]
                     embed.add_field(
                         name="Banned by",
                         value=issued_by.mention
@@ -210,11 +211,9 @@ class TimeoutModule(BaseModule):
                         inline=False,
                     )
                 if timeout.active and timeout.unbanned_by_id:
-                    unbanned_by = list(
-                        self.bot.filters.get_member(
+                    unbanned_by = self.bot.filters.get_member(
                             [int(timeout.unbanned_by_id)], None, {}
-                        )
-                    )[0]
+                        )[0]
                     embed.add_field(
                         name="Unban By",
                         value=unbanned_by.mention
@@ -226,7 +225,7 @@ class TimeoutModule(BaseModule):
 
     async def is_timedout(self, bot, author, channel, message, args):
         command_args = message.split(" ") if message else []
-        member = list(self.bot.filters.get_member_value([command_args[0]], None, {}))[0]
+        member = self.bot.filters.get_member([command_args[0]], None, {})[0]
         if not member:
             await self.bot.say(
                 channel=channel, message=f"Cant find member, {command_args[0]}"
@@ -282,6 +281,7 @@ class TimeoutModule(BaseModule):
     def load_commands(self, **options):
         self.commands["timeout"] = Command.raw_command(
             self.timeout_user,
+            command="timeout",
             delay_all=0,
             delay_user=0,
             level=int(self.settings["level_for_command"]),
@@ -290,6 +290,7 @@ class TimeoutModule(BaseModule):
         )
         self.commands["untimeout"] = Command.raw_command(
             self.untimeout_user,
+            command="untimeout",
             delay_all=0,
             delay_user=0,
             level=int(self.settings["level_for_command"]),
@@ -298,6 +299,7 @@ class TimeoutModule(BaseModule):
         )
         self.commands["timeouts"] = Command.raw_command(
             self.query_timeouts,
+            command="timeouts",
             delay_all=0,
             delay_user=0,
             level=int(self.settings["level_for_command"]),
@@ -306,6 +308,7 @@ class TimeoutModule(BaseModule):
         )
         self.commands["istimedout"] = Command.raw_command(
             self.is_timedout,
+            command="istimedout",
             delay_all=0,
             delay_user=0,
             level=int(self.settings["level_for_command"]),

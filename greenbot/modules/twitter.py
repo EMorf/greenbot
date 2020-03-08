@@ -70,7 +70,7 @@ class Twitter(BaseModule):
                     return
             username = tweet.author.screen_name
             tweet_url = f"https://twitter.com/{username}/status/{tweet.id}"
-            out_channel = list(self.bot.filters.get_channel([int(self.settings["output_channel"])], None, {}))[0]
+            out_channel = self.bot.filters.get_channel([int(self.settings["output_channel"])], None, {})[0]
             message = self.settings["output_format"].format(
                 username=username, tweet_url=tweet_url
             )

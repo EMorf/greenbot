@@ -87,53 +87,50 @@ class ActivityTracker(BaseModule):
 
     async def process_messages(self):
         with DBManager.create_session_scope() as db_session:
-            regular_role = list(
-                self.bot.filters.get_role([self.settings["regular_role_id"]], None, {})
-            )[0]
-            sub_role = list(
-                self.bot.filters.get_role([self.settings["sub_role_id"]], None, {})
-            )[0]
+            regular_role = self.bot.filters.get_role([self.settings["regular_role_id"]], None, {})[0]
+            sub_role = self.bot.filters.get_role([self.settings["sub_role_id"]], None, {})[0]
+            counts_by_week = Message._get_week_count_by_user(db_session)
             for member in regular_role.members:
-                count = Message._get_week_count_user(db_session, str(member.id))
+                count = counts_by_week.get(str(member.id), 0)
                 if (
                     count < self.settings["min_msgs_per_week"]
                     or sub_role not in member.roles
                 ):
-                    await self.bot.remove_role(member, regular_role)
-            db_session.commit()
-            messages = Message._get_last_hour(db_session)
+                    await self.bot.remove_role(member, regular_role, "They failed to meet the requirements to keep the role")
             channels_to_listen_in = (
                 self.settings["channels_to_listen_in"].split(" ")
                 if len(self.settings["channels_to_listen_in"]) != 0
-                else []
+                else None
             )
+            messages = Message._get_last_hour(db_session, channels_to_listen_in)
+            counts_by_day = Message._get_day_count_by_user(db_session)
             for message in messages:
-                if (
-                    message.channel_id not in channels_to_listen_in
-                    and len(channels_to_listen_in) != 0
-                ):
-                    continue
-                count = Message._get_day_count_user(db_session, message.user_id)
+                count = counts_by_day.get(message.user_id, 0)
                 if message.user_id != str(self.bot.bot_id):
                     if count < self.settings["daily_max_msgs"] - 1:
                         message.user.points += self.settings["hourly_credit"]
                     elif count == self.settings["daily_max_msgs"] - 1:
                         message.user.points += self.settings["daily_limit"]
                 message.credited = True
-                db_session.commit()
+                counts_by_day[message.user_id] = count + 1
+
             for user in User._get_users_with_points(
                 db_session, self.settings["min_regular_points"]
             ):
-                member = list(self.bot.filters.get_member([user.discord_id], None, {}))[
+                member = self.bot.filters.get_member([user.discord_id], None, {})[
                     0
                 ]
+                if not member:
+                    continue
+
+                count = counts_by_week.get(str(member.id), 0)
                 if (
-                    not member
-                    or sub_role not in member.roles
-                    or regular_role in member.roles
+                    sub_role not in member.roles
+                    or (regular_role in member.roles
+                    or count < self.settings["min_msgs_per_week"])
                 ):
                     continue
-                await self.bot.add_role(member, regular_role)
+                await self.bot.add_role(member, regular_role, "They met the requirements to get the role")
 
     def enable(self, bot):
         if not bot:
