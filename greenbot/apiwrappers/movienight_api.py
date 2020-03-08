@@ -50,7 +50,7 @@ class MovieNightAPI:
 
     @property
     def host_version(self):
-        return f"{self.wsc_host}{self.wsc_version}"
+        return f"{self.wsc_host}/{self.wsc_version}"
 
     @property
     def key(self):
