@@ -195,9 +195,13 @@ class CommandManager(UserDict):
         return command, True, ""
 
     def edit_command(self, command_to_edit, **options):
+        if "group" in options:
+            self.remove_command_aliases(command_to_edit)
         command_to_edit.set(**options)
         command_to_edit.data.set(**options)
         DBManager.session_add_expunge(command_to_edit)
+        if "group" in options:
+            self.add_db_command_aliases(command)
         self.commit()
 
     def remove_command_aliases(self, command):

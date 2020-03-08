@@ -124,6 +124,9 @@ class Dispatch:
             if "channels" in options:
                 options["channels"] = json.dumps(options["channels"])
 
+            if "group" in options:
+                
+
             bot.commands.edit_command(command, **options)
             await bot.private_message(author, f"Updated the command (ID: {command.id})")
 
