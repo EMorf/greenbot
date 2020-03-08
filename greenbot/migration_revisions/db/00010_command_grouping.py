@@ -29,5 +29,5 @@ def up(cursor, bot):
         """ALTER TABLE "command" DROP COLUMN parent_command;"""
     )
     cursor.execute(
-        """ALTER TABLE "command" ADD COLUMN group TEXT;"""
+        """ALTER TABLE command ADD COLUMN "group" TEXT;"""
     )
