@@ -269,7 +269,7 @@ class Command(Base):
             self.extra_args.update(options["extra_args"])
             self.extra_extra_args = json.dumps(options["extra_args"])
         self._command = options.get("command", self._command)
-        self._group = options.get("group", self._group)
+        self._group = options.get("command_group", self._group)
         self.description = options.get("description", self.description)
         self.delay_all = options.get("delay_all", self.delay_all)
         if self.delay_all < 0:
