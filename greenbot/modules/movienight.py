@@ -127,6 +127,7 @@ class MovieNight(BaseModule):
         return True
 
     async def moviestart_ull(self, bot, author, channel, message, args):
+        await self.bot.private_message(user=author, message="Starting movienight ull, this usually takes less than a minute...")
         server, stream_key = await self.bot.movienight_api.create_ull_target()
 
         embed = discord.Embed(

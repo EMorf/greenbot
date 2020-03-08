@@ -170,7 +170,7 @@ class MovieNightAPI:
         return False
 
     async def stream_check(self):
-        log.info("Running stream check")
+        log.debug("Running stream check")
 
         # check for ULL stream
         # -----------------------------------------
