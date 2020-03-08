@@ -246,5 +246,8 @@ class Functions:
                 return None, None
             
             author = extra["author"]
-            await member.edit(nick=args[1], reason=f"Nickname changed by {author.mention}")
+            try:
+                await member.edit(nick=args[1], reason=f"Nickname changed by {author.mention}")
+            except:
+                return "Failed to change nickname", None
         return "Nickname Changed", None
