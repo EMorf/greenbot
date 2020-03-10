@@ -193,6 +193,8 @@ You have to then edit the file, at the very least you will have to insert the co
 
 The example configuration sets your website up over HTTPS, for which you need a certificate (`ssl_certificate` and `ssl_certificate_key`). There are many possible ways to get a certificate, which is why we can't offer a definitive guide that will work for everybody's setup. However, if you need help for this step, you can [find a guide here](./certbot-with-cloudflare/README.md) if you have set up your domain with **CloudFlare DNS**.
 
+A quick and easy solution is to generate a  self-signed certificate with the command `sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout selfsigned.key -out selfsigned.crt`. This is recommended if you don't plan on hosting the bot on a website, and just want to experiment on your own.
+
 Once you're done with your changes, test that the configuration has no errors:
 
 ```bash
